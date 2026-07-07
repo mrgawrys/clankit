@@ -1,0 +1,15 @@
+{
+  "name": "clankit",
+  "description": "mrgawrys' personal Claude Code marketplace — portable general-purpose skills",
+  "owner": {
+    "name": "Michal Gawrys"
+  },
+  "plugins": [
+    {
+      "name": "mrgawrys",
+      "description": "Portable everyday skills: autopilot, screenshot, writing-clearly-and-concisely",
+      "source": "./plugins/mrgawrys",
+      "category": "workflow"
+    }
+  ]
+}

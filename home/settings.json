@@ -1,0 +1,53 @@
+{
+  "cleanupPeriodDays": 10000,
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_NO_FLICKER": "1"
+  },
+  "includeCoAuthoredBy": false,
+  "statusLine": {
+    "type": "command",
+    "command": "ccstatusline",
+    "padding": 0
+  },
+  "enabledPlugins": {
+    "context7@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "explanatory-output-style@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true,
+    "notion@claude-plugins-official": true,
+    "figma@claude-plugins-official": true
+  },
+  "spinnerVerbs": {
+    "mode": "append",
+    "verbs": [
+      "Slopping",
+      "Slopifying",
+      "Clankering",
+      "Wubbalubbadubdubing",
+      "Hallucinating",
+      "Gaslighting",
+      "Clankifying",
+      "Sloptimizing",
+      "Vibe-coding",
+      "Bonking",
+      "Schwiftying",
+      "Squanching",
+      "Interdimensional-cabling",
+      "Actioning-the-action-items",
+      "Bamboozling",
+      "Get-schwifty-ing",
+      "Tokenmaxing",
+      "Slopmaxing",
+      "Overthinking",
+      "Yapping",
+      "Sigma-grinding"
+    ]
+  },
+  "effortLevel": "high",
+  "theme": "dark",
+  "voiceEnabled": true
+}
