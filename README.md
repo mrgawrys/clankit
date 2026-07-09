@@ -6,8 +6,9 @@ global `~/.claude` config needed to bootstrap a fresh machine.
 
 Two layers:
 
-- **`plugins/`** — a personal Claude Code plugin marketplace. The `mrgawrys`
-  plugin bundles general-purpose skills.
+- **`plugins/`** — a personal Claude Code plugin marketplace with two plugins:
+  `clankit-dev` (dev/work skills) and `clankit-life` (personal-life skills),
+  installable independently per machine.
 - **`home/`** — the dotfiles layer: global `CLAUDE.md` and a `settings.json`
   bootstrap template. Installed by `install.sh` as symlinks, so this repo stays
   the source of truth.
@@ -23,16 +24,26 @@ Then inside Claude Code:
 
 ```
 /plugin marketplace add path/to/clankit
-/plugin install mrgawrys@clankit
+/plugin install clankit-dev@clankit
+/plugin install clankit-life@clankit   # optional — personal-life skills
 ```
 
-## What's in the mrgawrys plugin
+## What's in the plugins
+
+### clankit-dev — dev/work skills
 
 | Skill | Purpose |
 |-------|---------|
 | `autopilot` | Small feature end-to-end in a git worktree → draft PR, unsupervised |
 | `screenshot` | Capture web pages via Playwright MCP, interactively driven |
 | `writing-clearly-and-concisely` | Strunk-style prose rules for anything humans read — adapted from [obra/the-elements-of-style](https://github.com/obra/the-elements-of-style) (public domain) |
+
+### clankit-life — personal-life skills
+
+| Skill | Purpose |
+|-------|---------|
+| `learn` | Adaptive learning companion with spaced repetition; notes + review queues under `.learn/` by default, paths overridable via project CLAUDE.md |
+| `writing-companion` | Listening-first journaling companion; surfaces connected notes using whatever search tools the project declares |
 
 ## Two accounts on one machine
 
@@ -43,7 +54,8 @@ independent config store with its own login:
 mkdir -p ~/.claude-personal
 CLAUDE_CONFIG_DIR=$HOME/.claude-personal ./install.sh
 CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude plugin marketplace add path/to/clankit
-CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude plugin install mrgawrys@clankit
+CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude plugin install clankit-dev@clankit
+CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude plugin install clankit-life@clankit
 ```
 
 Copy `home/claude-accounts.fish` to `~/.config/fish/conf.d/` to switch stores
