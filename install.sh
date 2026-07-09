@@ -35,5 +35,5 @@ cat <<EOF
 
 Done. Next, inside Claude Code:
   /plugin marketplace add $KIT_DIR
-  /plugin install mrgawrys@clankit
+  /plugin install clankit-dev@clankit
 EOF

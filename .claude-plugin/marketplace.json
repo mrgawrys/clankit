@@ -6,9 +6,9 @@
   },
   "plugins": [
     {
-      "name": "mrgawrys",
-      "description": "Portable everyday skills: autopilot, screenshot, writing-clearly-and-concisely",
-      "source": "./plugins/mrgawrys",
+      "name": "clankit-dev",
+      "description": "Dev/work skills: autopilot, screenshot, writing-clearly-and-concisely",
+      "source": "./plugins/clankit-dev",
       "category": "workflow"
     }
   ]
