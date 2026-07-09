@@ -10,6 +10,12 @@
       "description": "Dev/work skills: autopilot, screenshot, writing-clearly-and-concisely",
       "source": "./plugins/clankit-dev",
       "category": "workflow"
+    },
+    {
+      "name": "clankit-life",
+      "description": "Personal-life skills: learn, writing-companion",
+      "source": "./plugins/clankit-life",
+      "category": "productivity"
     }
   ]
 }
