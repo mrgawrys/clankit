@@ -42,26 +42,33 @@ query {
 
 # Bodies truncated to 400 chars: enough to judge "is something still
 # actionable?" without flooding the context on chatty PRs.
+# issueCount lets the consumer detect truncation past the 50-PR page.
+# select(.url) and the // [] guards make a stray non-PR search node
+# degrade to "skipped" instead of failing the whole fetch (null[] is a
+# hard error in jq).
 gh api graphql -f query="$QUERY" --jq '
-  .data.search.nodes | map({
-    repo: .repository.nameWithOwner,
-    number,
-    title,
-    url,
-    isDraft,
-    mergeable,
-    reviewDecision,
-    updatedAt,
-    ci: (.commits.nodes[0].commit.statusCheckRollup.state // "NONE"),
-    unresolvedThreads: ([.reviewThreads.nodes[] | select(.isResolved | not)] | length),
-    comments: [.comments.nodes[] | {
-      author: (.author.login // "ghost"),
-      body: .body[:400],
-      createdAt
-    }],
-    reviews: [.latestReviews.nodes[] | {
-      author: (.author.login // "ghost"),
-      state,
-      body: .body[:400]
-    }]
-  })'
+  {
+    issueCount: .data.search.issueCount,
+    prs: (.data.search.nodes | map(select(.url != null) | {
+      repo: .repository.nameWithOwner,
+      number,
+      title,
+      url,
+      isDraft,
+      mergeable,
+      reviewDecision,
+      updatedAt,
+      ci: (.commits.nodes[0].commit.statusCheckRollup.state // "NONE"),
+      unresolvedThreads: ([(.reviewThreads.nodes // [])[] | select(.isResolved | not)] | length),
+      comments: [(.comments.nodes // [])[] | {
+        author: (.author.login // "ghost"),
+        body: .body[:400],
+        createdAt
+      }],
+      reviews: [(.latestReviews.nodes // [])[] | {
+        author: (.author.login // "ghost"),
+        state,
+        body: .body[:400]
+      }]
+    }))
+  }'
