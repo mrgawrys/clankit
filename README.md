@@ -35,6 +35,7 @@ Then inside Claude Code:
 | Skill | Purpose |
 |-------|---------|
 | `autopilot` | Small feature end-to-end in a git worktree → draft PR, unsupervised |
+| `my-prs` | All open PRs you authored with real status (CI, reviews, conflicts, recent comments) → what-to-tackle-first recommendation |
 | `screenshot` | Capture web pages via Playwright MCP, interactively driven |
 | `writing-clearly-and-concisely` | Strunk-style prose rules for anything humans read — adapted from [obra/the-elements-of-style](https://github.com/obra/the-elements-of-style) (public domain) |
 

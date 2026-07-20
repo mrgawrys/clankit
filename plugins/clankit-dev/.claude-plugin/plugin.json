@@ -1,6 +1,6 @@
 {
   "name": "clankit-dev",
-  "description": "Dev/work skills: autopilot (small features end-to-end in a worktree), screenshot (Playwright-driven page capture), writing-clearly-and-concisely (Strunk prose rules)",
+  "description": "Dev/work skills: autopilot (small features end-to-end in a worktree), my-prs (open-PR status overview and what to tackle first), screenshot (Playwright-driven page capture), writing-clearly-and-concisely (Strunk prose rules)",
   "author": {
     "name": "Michal Gawrys"
   }
