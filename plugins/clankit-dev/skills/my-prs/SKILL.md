@@ -80,6 +80,6 @@ blocked-on-you fix, or merging what's genuinely ready.
 
 - Bodies are truncated to 400 chars. If a truncated comment is the
   deciding factor, fetch it in full: `gh pr view <url> --comments`.
-- The script fetches at most 50 PRs and 50 review threads per PR. If
+- The script fetches at most 50 PRs, and per PR at most 50 review threads and the latest 10 reviewers' reviews. If
   `issueCount` is larger than the number of `prs` entries, tell the user
   the list is truncated.

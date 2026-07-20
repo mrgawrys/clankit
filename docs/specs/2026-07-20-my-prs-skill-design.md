@@ -20,7 +20,8 @@ plugins/clankit-dev/skills/my-prs/
 
 ## The script — `scripts/fetch-prs.sh`
 
-- Single `gh api graphql` search query: `is:pr is:open author:@me`, first 50
+- Single `gh api graphql` search query: `is:pr is:open author:@me
+  archived:false`, first 50
   PRs. Always fetches **all** authored PRs — scoping is presentational, never
   an API concern.
 - Per PR it returns: repository (`nameWithOwner`), number, title, URL,
@@ -44,8 +45,9 @@ plugins/clankit-dev/skills/my-prs/
    then a one-line summary of the rest ("+ N more in other repos"). Otherwise
    (no repo, no remote, or no matching PRs — e.g. a notes or organizational
    repo) show everything.
-3. **Table:** PR, repo, draft?, CI, review state, unresolved threads,
-   conflicts, last updated.
+3. **Table:** PR, repo, CI, review state (drafts shown as "draft", with
+   the decision appended if one exists), unresolved threads, conflicts,
+   last updated.
 4. **Grouping + recommendation:**
    - **Blocked on you** — failing CI, changes requested, merge conflicts, or
      approved-with-unresolved-threads ("approved, but 3 unresolved
