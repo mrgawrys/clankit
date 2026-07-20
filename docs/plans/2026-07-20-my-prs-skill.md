@@ -27,7 +27,7 @@
 
 **Interfaces:**
 - Consumes: nothing (only requires an authenticated `gh`).
-- Produces: on stdout, a JSON array of PR objects with keys `repo` (string, `owner/name`), `number` (int), `title`, `url`, `isDraft` (bool), `mergeable` (`MERGEABLE`|`CONFLICTING`|`UNKNOWN`), `reviewDecision` (`APPROVED`|`CHANGES_REQUESTED`|`REVIEW_REQUIRED`|null), `ci` (`SUCCESS`|`FAILURE`|`ERROR`|`PENDING`|`EXPECTED`|`NONE`), `unresolvedThreads` (int), `updatedAt` (ISO 8601), `comments` (array of `{author, body, createdAt}`, last 5, bodies truncated to 400 chars), `reviews` (array of `{author, state, body}`, latest review per reviewer, bodies truncated to 400 chars). Exit 1 with a one-line stderr message when `gh` is unauthenticated. Task 2's SKILL.md documents exactly these keys.
+- Produces: on stdout, a JSON object `{issueCount, prs}` where `issueCount` (int) is the total number of matching PRs on GitHub (used to detect truncation past the 50-PR page) and `prs` is an array of PR objects with keys `repo` (string, `owner/name`), `number` (int), `title`, `url`, `isDraft` (bool), `mergeable` (`MERGEABLE`|`CONFLICTING`|`UNKNOWN`), `reviewDecision` (`APPROVED`|`CHANGES_REQUESTED`|`REVIEW_REQUIRED`|null), `ci` (`SUCCESS`|`FAILURE`|`ERROR`|`PENDING`|`EXPECTED`|`NONE`), `unresolvedThreads` (int), `updatedAt` (ISO 8601), `comments` (array of `{author, body, createdAt}`, last 5, bodies truncated to 400 chars), `reviews` (array of `{author, state, body}`, latest review per reviewer, bodies truncated to 400 chars). Exit 1 with a one-line stderr message when `gh` is unauthenticated. Task 2's SKILL.md documents exactly these keys.
 
 - [ ] **Step 1: Write the script**
 
@@ -78,29 +78,36 @@ query {
 
 # Bodies truncated to 400 chars: enough to judge "is something still
 # actionable?" without flooding the context on chatty PRs.
+# issueCount lets the consumer detect truncation past the 50-PR page.
+# select(.url) and the // [] guards make a stray non-PR search node
+# degrade to "skipped" instead of failing the whole fetch (null[] is a
+# hard error in jq).
 gh api graphql -f query="$QUERY" --jq '
-  .data.search.nodes | map({
-    repo: .repository.nameWithOwner,
-    number,
-    title,
-    url,
-    isDraft,
-    mergeable,
-    reviewDecision,
-    updatedAt,
-    ci: (.commits.nodes[0].commit.statusCheckRollup.state // "NONE"),
-    unresolvedThreads: ([.reviewThreads.nodes[] | select(.isResolved | not)] | length),
-    comments: [.comments.nodes[] | {
-      author: (.author.login // "ghost"),
-      body: .body[:400],
-      createdAt
-    }],
-    reviews: [.latestReviews.nodes[] | {
-      author: (.author.login // "ghost"),
-      state,
-      body: .body[:400]
-    }]
-  })'
+  {
+    issueCount: .data.search.issueCount,
+    prs: (.data.search.nodes | map(select(.url != null) | {
+      repo: .repository.nameWithOwner,
+      number,
+      title,
+      url,
+      isDraft,
+      mergeable,
+      reviewDecision,
+      updatedAt,
+      ci: (.commits.nodes[0].commit.statusCheckRollup.state // "NONE"),
+      unresolvedThreads: ([(.reviewThreads.nodes // [])[] | select(.isResolved | not)] | length),
+      comments: [(.comments.nodes // [])[] | {
+        author: (.author.login // "ghost"),
+        body: .body[:400],
+        createdAt
+      }],
+      reviews: [(.latestReviews.nodes // [])[] | {
+        author: (.author.login // "ghost"),
+        state,
+        body: .body[:400]
+      }]
+    }))
+  }'
 ```
 
 - [ ] **Step 2: Make it executable**
@@ -110,20 +117,22 @@ Run: `chmod +x plugins/clankit-dev/skills/my-prs/scripts/fetch-prs.sh`
 - [ ] **Step 3: Run it live and verify the output shape**
 
 Run: `plugins/clankit-dev/skills/my-prs/scripts/fetch-prs.sh > /tmp/prs.json; echo "exit=$?"`
-Expected: `exit=0` and `/tmp/prs.json` contains a JSON array.
+Expected: `exit=0` and `/tmp/prs.json` contains a JSON object with `issueCount` and `prs`.
 
-Verify the keys with:
+Verify the shape with:
 
 ```bash
 python3 -c "
 import json
-prs = json.load(open('/tmp/prs.json'))
-assert isinstance(prs, list), 'not a list'
+data = json.load(open('/tmp/prs.json'))
+assert isinstance(data.get('issueCount'), int), 'missing issueCount'
+prs = data['prs']
+assert isinstance(prs, list), 'prs not a list'
 required = {'repo','number','title','url','isDraft','mergeable','reviewDecision','ci','unresolvedThreads','updatedAt','comments','reviews'}
 for pr in prs:
     missing = required - pr.keys()
     assert not missing, f'missing keys: {missing}'
-print(f'OK: {len(prs)} PRs, all keys present')
+print(f'OK: issueCount={data[\"issueCount\"]}, {len(prs)} PRs, all keys present')
 "
 ```
 
@@ -175,7 +184,8 @@ Run the bundled script from this skill's base directory:
 
     scripts/fetch-prs.sh
 
-It prints a JSON array, one object per PR:
+It prints a JSON object: `issueCount` (total matching PRs on GitHub) and
+`prs`, an array with one object per PR:
 
 | Key | Meaning |
 |-----|---------|
@@ -231,8 +241,9 @@ blocked-on-you fix, or merging what's genuinely ready.
 
 - Bodies are truncated to 400 chars. If a truncated comment is the
   deciding factor, fetch it in full: `gh pr view <url> --comments`.
-- The script fetches at most 50 PRs and 50 review threads per PR; mention
-  it if `issueCount` suggests truncation (rare).
+- The script fetches at most 50 PRs and 50 review threads per PR. If
+  `issueCount` is larger than the number of `prs` entries, tell the user
+  the list is truncated.
 ```
 
 - [ ] **Step 2: Verify frontmatter matches the plugin convention**
@@ -310,9 +321,9 @@ Expected: one path ending in `skills/my-prs/SKILL.md`.
 
 - [ ] **Step 3: End-to-end smoke test**
 
-Run the installed copy of the script (the path found in Step 2, `scripts/fetch-prs.sh` next to it) and confirm it returns the same JSON array as Task 1 Step 3.
+Run the installed copy of the script (the path found in Step 2, `scripts/fetch-prs.sh` next to it) and confirm it returns the same JSON shape as Task 1 Step 3.
 
-Expected: valid JSON array, exit 0.
+Expected: valid `{issueCount, prs}` JSON object, exit 0.
 
 ---
 
