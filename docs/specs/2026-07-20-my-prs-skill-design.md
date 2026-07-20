@@ -37,6 +37,23 @@ plugins/clankit-dev/skills/my-prs/
 - Uses whatever `gh` identity resolves in the cwd, so any per-directory
   account configuration is inherited for free.
 
+## Caching
+
+Fetches are cached so a second session (any agent, any repo) within a short
+window reuses the data instead of refetching:
+
+- Cache file: `${XDG_CACHE_HOME:-$HOME/.cache}/my-prs/prs.json` — user-level,
+  shared across sessions and repos.
+- TTL 15 minutes: if the cache file is younger, the script prints it and
+  exits without touching the network. `--refresh` forces a live fetch.
+- The JSON gains a `fetchedAt` timestamp (top-level, ISO 8601 UTC) so the
+  consumer can report data age.
+- Writes are atomic (temp file + `mv`) so a failed fetch never corrupts the
+  cache; on fetch failure the old cache file is left intact.
+- SKILL.md guidance: state the data age when serving cached results, and
+  run `--refresh` before acting on a specific PR or when the user asks for
+  fresh status.
+
 ## The SKILL.md flow
 
 1. Run the script.

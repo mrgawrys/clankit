@@ -334,6 +334,214 @@ Expected: valid `{issueCount, prs}` JSON object, exit 0.
 
 ---
 
+### Task 5: Cache layer (15-minute reuse across sessions)
+
+**Files:**
+- Modify: `plugins/clankit-dev/skills/my-prs/scripts/fetch-prs.sh` (full replacement below — supersedes Task 1's version)
+- Modify: `plugins/clankit-dev/skills/my-prs/SKILL.md` (three edits below)
+
+**Interfaces:**
+- Consumes: Task 1's script and Task 2's SKILL.md as shipped.
+- Produces: same JSON contract plus a top-level `fetchedAt` (ISO 8601 UTC string). New script flag `--refresh` (forces live fetch). Cache file `${XDG_CACHE_HOME:-$HOME/.cache}/my-prs/prs.json`, TTL 900 s.
+
+- [ ] **Step 1: Replace the script**
+
+Replace the full content of `plugins/clankit-dev/skills/my-prs/scripts/fetch-prs.sh` with:
+
+```bash
+#!/usr/bin/env bash
+# Fetch all open PRs authored by the current gh user, with status and
+# recent discussion, as one JSON object on stdout.
+#
+# One GraphQL search call — no per-PR requests. Uses gh's embedded --jq,
+# so the only dependency is an authenticated gh.
+#
+# Results are cached for 15 minutes so other sessions reuse them instead
+# of refetching; --refresh forces a live fetch.
+set -euo pipefail
+
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/my-prs"
+CACHE_FILE="$CACHE_DIR/prs.json"
+TTL_SECONDS=900
+
+if [[ "${1:-}" != "--refresh" && -f "$CACHE_FILE" ]]; then
+  # stat -f is BSD/macOS, stat -c is GNU/Linux
+  mtime=$(stat -f %m "$CACHE_FILE" 2>/dev/null || stat -c %Y "$CACHE_FILE")
+  if (( $(date +%s) - mtime < TTL_SECONDS )); then
+    cat "$CACHE_FILE"
+    exit 0
+  fi
+fi
+
+if ! gh auth status >/dev/null 2>&1; then
+  echo "error: gh is not authenticated — run 'gh auth login'" >&2
+  exit 1
+fi
+
+QUERY='
+query {
+  search(query: "is:pr is:open author:@me archived:false", type: ISSUE, first: 50) {
+    issueCount
+    nodes {
+      ... on PullRequest {
+        repository { nameWithOwner }
+        number
+        title
+        url
+        isDraft
+        mergeable
+        reviewDecision
+        updatedAt
+        commits(last: 1) {
+          nodes { commit { statusCheckRollup { state } } }
+        }
+        reviewThreads(first: 50) { nodes { isResolved } }
+        comments(last: 5) {
+          nodes { author { login } body createdAt }
+        }
+        latestReviews(first: 10) {
+          nodes { author { login } state body }
+        }
+      }
+    }
+  }
+}'
+
+mkdir -p "$CACHE_DIR"
+tmp=$(mktemp "$CACHE_DIR/prs.XXXXXX")
+trap 'rm -f "$tmp"' EXIT
+
+# Bodies truncated to 400 chars: enough to judge "is something still
+# actionable?" without flooding the context on chatty PRs.
+# issueCount lets the consumer detect truncation past the 50-PR page.
+# select(.url) and the // [] guards make a stray non-PR search node
+# degrade to "skipped" instead of failing the whole fetch (null[] is a
+# hard error in jq).
+gh api graphql -f query="$QUERY" --jq '
+  {
+    fetchedAt: (now | todate),
+    issueCount: .data.search.issueCount,
+    prs: (.data.search.nodes | map(select(.url != null) | {
+      repo: .repository.nameWithOwner,
+      number,
+      title,
+      url,
+      isDraft,
+      mergeable,
+      reviewDecision,
+      updatedAt,
+      ci: (.commits.nodes[0].commit.statusCheckRollup.state // "NONE"),
+      unresolvedThreads: ([(.reviewThreads.nodes // [])[] | select(.isResolved | not)] | length),
+      comments: [(.comments.nodes // [])[] | {
+        author: (.author.login // "ghost"),
+        body: .body[:400],
+        createdAt
+      }],
+      reviews: [(.latestReviews.nodes // [])[] | {
+        author: (.author.login // "ghost"),
+        state,
+        body: .body[:400]
+      }]
+    }))
+  }' > "$tmp"
+
+mv "$tmp" "$CACHE_FILE"
+trap - EXIT
+cat "$CACHE_FILE"
+```
+
+Note: the atomic temp-file + `mv` means a failed fetch leaves any previous cache intact, and `fetchedAt` uses gh's embedded jq (`now | todate` — gojq builtins). If `now`/`todate` errors against the installed gh, STOP and report BLOCKED — do not improvise a different timestamp mechanism.
+
+- [ ] **Step 2: Update SKILL.md (three edits)**
+
+In `plugins/clankit-dev/skills/my-prs/SKILL.md`:
+
+Edit A — replace:
+
+```markdown
+It prints a JSON object: `issueCount` (total matching PRs on GitHub) and
+`prs`, an array with one object per PR:
+```
+
+with:
+
+```markdown
+Results are cached for 15 minutes (any session shares the cache), so
+repeat calls are instant. Pass `--refresh` to force a live fetch.
+
+It prints a JSON object: `fetchedAt` (when the data was fetched, ISO 8601
+UTC), `issueCount` (total matching PRs on GitHub) and `prs`, an array with
+one object per PR:
+```
+
+Edit B — replace:
+
+```markdown
+If the script exits non-zero, show the user its stderr (usually "run
+`gh auth login`") and stop.
+```
+
+with:
+
+```markdown
+If the script exits non-zero, show the user its stderr (usually "run
+`gh auth login`") and stop.
+
+If `fetchedAt` is older than a couple of minutes, say the data age when
+presenting ("status as of 12 min ago"). Re-run with `--refresh` before
+acting on a specific PR (merging, fixing CI) or when the user asks for
+fresh status.
+```
+
+Edit C — in `## Notes`, add as a new last bullet:
+
+```markdown
+- Cache file: `${XDG_CACHE_HOME:-$HOME/.cache}/my-prs/prs.json`. Deleting
+  it is always safe.
+```
+
+- [ ] **Step 3: Verify caching behavior live**
+
+```bash
+export XDG_CACHE_HOME=$(mktemp -d)
+S=plugins/clankit-dev/skills/my-prs/scripts/fetch-prs.sh
+$S > /tmp/prs1.json && python3 -c "
+import json
+d = json.load(open('/tmp/prs1.json'))
+assert isinstance(d.get('fetchedAt'), str) and d['fetchedAt'].endswith('Z'), 'bad fetchedAt'
+assert isinstance(d.get('issueCount'), int) and isinstance(d.get('prs'), list)
+print('OK live fetch:', d['fetchedAt'])"
+$S > /tmp/prs2.json && cmp /tmp/prs1.json /tmp/prs2.json && echo "OK cache hit (identical)"
+$S --refresh > /tmp/prs3.json && python3 -c "
+import json
+a = json.load(open('/tmp/prs1.json')); b = json.load(open('/tmp/prs3.json'))
+assert a['fetchedAt'] != b['fetchedAt'], 'refresh did not refetch'
+print('OK --refresh refetched:', b['fetchedAt'])"
+touch -t 202601010000 "$XDG_CACHE_HOME/my-prs/prs.json"
+$S > /tmp/prs4.json && python3 -c "
+import json
+b = json.load(open('/tmp/prs3.json')); c = json.load(open('/tmp/prs4.json'))
+assert b['fetchedAt'] != c['fetchedAt'], 'stale cache was served'
+print('OK TTL expiry refetched:', c['fetchedAt'])"
+unset XDG_CACHE_HOME
+```
+
+Expected: all four OK lines.
+
+- [ ] **Step 4: Verify the unauthenticated failure path still works (cache must not mask it)**
+
+Run: `XDG_CACHE_HOME=$(mktemp -d) GH_TOKEN=" " GH_CONFIG_DIR=/tmp/empty-gh-config plugins/clankit-dev/skills/my-prs/scripts/fetch-prs.sh; echo "exit=$?"`
+Expected: stderr line `error: gh is not authenticated — run 'gh auth login'` and `exit=1` (empty cache dir → no cache to serve).
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add plugins/clankit-dev/skills/my-prs/scripts/fetch-prs.sh plugins/clankit-dev/skills/my-prs/SKILL.md
+git commit -m "clankit-dev: my-prs — cache results 15 min across sessions, --refresh flag"
+```
+
+---
+
 ## Self-Review
 
 - **Spec coverage:** single GraphQL call ✓ (Task 1), all status fields + comments/reviews ✓ (Task 1), auth failure message ✓ (Task 1 Step 4), presentational scoping ✓ (SKILL.md §2), table ✓ (§3), judgment-based grouping with "approved but fix X" ✓ (§4), truncation escape hatch ✓ (Notes), README/plugin.json/refresh ✓ (Tasks 3–4).
