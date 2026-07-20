@@ -204,6 +204,8 @@ If the script exits non-zero, show the user its stderr (usually "run
 
 ## 2. Scope
 
+If `prs` is empty, tell the user they have no open PRs and stop.
+
 If the cwd is inside a git repo with a GitHub remote **and** some fetched
 PRs belong to that repo: present that repo's PRs in full, then summarize
 the rest in one line ("+ N more in other repos — ask to see them").
@@ -215,8 +217,11 @@ One compact table, most recently updated first:
 
 | PR | Repo | CI | Review | Threads | Conflicts | Updated |
 
-- CI: pass / **fail** / pending / — (none)
-- Review: approved / changes requested / awaiting / draft
+- CI: pass (`SUCCESS`) / **fail** (`FAILURE`, `ERROR`) / pending
+  (`PENDING`, `EXPECTED`) / — (`NONE`)
+- Review: "draft" whenever `isDraft`, with the decision appended if one
+  exists ("draft (approved)"); otherwise approved / changes requested /
+  awaiting
 - Conflicts: yes when `mergeable == "CONFLICTING"`; "unknown" when
   `UNKNOWN` (GitHub hasn't computed it yet — say so, don't guess)
 - Updated: relative ("2d ago")
@@ -224,7 +229,9 @@ One compact table, most recently updated first:
 ## 4. Judge and group
 
 Flags alone don't decide readiness — read each PR's `comments` and
-`reviews` bodies before grouping:
+`reviews` bodies before grouping. `comments` includes the PR author's own
+replies: an ask is outstanding only if someone else raised it and nothing
+after it resolves it.
 
 - **Blocked on you** — failing CI, changes requested, conflicts,
   unresolved threads, a draft to finish, or any comment/review that still
