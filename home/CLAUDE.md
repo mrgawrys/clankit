@@ -96,6 +96,11 @@ which of these three modes I want:
   4. If a later step reveals an earlier one was wrong, flag it and stop before
      compounding — don't keep dispatching on a broken foundation.
 
+**Doc locations:** when a skill (e.g. superpowers brainstorming/writing-plans)
+defaults to `docs/superpowers/specs/` or `docs/superpowers/plans/`, drop the
+`superpowers` segment — write specs to `docs/specs/`, plans to `docs/plans/`,
+and other docs to `docs/<category>/`.
+
 ## Suggest Reusable Extraction
 
 When work produces something useful beyond its original context — a script,
