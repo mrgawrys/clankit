@@ -14,8 +14,10 @@ CACHE_FILE="$CACHE_DIR/prs.json"
 TTL_SECONDS=900
 
 if [[ "${1:-}" != "--refresh" && -f "$CACHE_FILE" ]]; then
-  # stat -f is BSD/macOS, stat -c is GNU/Linux
-  mtime=$(stat -f %m "$CACHE_FILE" 2>/dev/null || stat -c %Y "$CACHE_FILE")
+  # GNU stat first: BSD stat rejects -c cleanly at option parsing, but the
+  # reverse order leaks GNU stat's filesystem-status output to stdout and
+  # crashes the TTL arithmetic on Linux.
+  mtime=$(stat -c %Y "$CACHE_FILE" 2>/dev/null || stat -f %m "$CACHE_FILE")
   if (( $(date +%s) - mtime < TTL_SECONDS )); then
     cat "$CACHE_FILE"
     exit 0
