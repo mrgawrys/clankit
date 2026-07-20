@@ -36,7 +36,7 @@ Create `plugins/clankit-dev/skills/my-prs/scripts/fetch-prs.sh`:
 ```bash
 #!/usr/bin/env bash
 # Fetch all open PRs authored by the current gh user, with status and
-# recent discussion, as one JSON array on stdout.
+# recent discussion, as one JSON object on stdout.
 #
 # One GraphQL search call — no per-PR requests. Uses gh's embedded --jq,
 # so the only dependency is an authenticated gh.
