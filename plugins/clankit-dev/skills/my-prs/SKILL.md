@@ -16,8 +16,12 @@ Run the bundled script from this skill's base directory:
 
     scripts/fetch-prs.sh
 
-It prints a JSON object: `issueCount` (total matching PRs on GitHub) and
-`prs`, an array with one object per PR:
+Results are cached for 15 minutes (any session shares the cache), so
+repeat calls are instant. Pass `--refresh` to force a live fetch.
+
+It prints a JSON object: `fetchedAt` (when the data was fetched, ISO 8601
+UTC), `issueCount` (total matching PRs on GitHub) and `prs`, an array with
+one object per PR:
 
 | Key | Meaning |
 |-----|---------|
@@ -33,6 +37,11 @@ It prints a JSON object: `issueCount` (total matching PRs on GitHub) and
 
 If the script exits non-zero, show the user its stderr (usually "run
 `gh auth login`") and stop.
+
+If `fetchedAt` is older than a couple of minutes, say the data age when
+presenting ("status as of 12 min ago"). Re-run with `--refresh` before
+acting on a specific PR (merging, fixing CI) or when the user asks for
+fresh status.
 
 ## 2. Scope
 
@@ -83,3 +92,5 @@ blocked-on-you fix, or merging what's genuinely ready.
 - The script fetches at most 50 PRs, and per PR at most 50 review threads and the latest 10 reviewers' reviews. If
   `issueCount` is larger than the number of `prs` entries, tell the user
   the list is truncated.
+- Cache file: `${XDG_CACHE_HOME:-$HOME/.cache}/my-prs/prs.json`. Deleting
+  it is always safe.

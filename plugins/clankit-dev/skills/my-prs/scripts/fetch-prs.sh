@@ -4,7 +4,23 @@
 #
 # One GraphQL search call — no per-PR requests. Uses gh's embedded --jq,
 # so the only dependency is an authenticated gh.
+#
+# Results are cached for 15 minutes so other sessions reuse them instead
+# of refetching; --refresh forces a live fetch.
 set -euo pipefail
+
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/my-prs"
+CACHE_FILE="$CACHE_DIR/prs.json"
+TTL_SECONDS=900
+
+if [[ "${1:-}" != "--refresh" && -f "$CACHE_FILE" ]]; then
+  # stat -f is BSD/macOS, stat -c is GNU/Linux
+  mtime=$(stat -f %m "$CACHE_FILE" 2>/dev/null || stat -c %Y "$CACHE_FILE")
+  if (( $(date +%s) - mtime < TTL_SECONDS )); then
+    cat "$CACHE_FILE"
+    exit 0
+  fi
+fi
 
 if ! gh auth status >/dev/null 2>&1; then
   echo "error: gh is not authenticated — run 'gh auth login'" >&2
@@ -40,6 +56,10 @@ query {
   }
 }'
 
+mkdir -p "$CACHE_DIR"
+tmp=$(mktemp "$CACHE_DIR/prs.XXXXXX")
+trap 'rm -f "$tmp"' EXIT
+
 # Bodies truncated to 400 chars: enough to judge "is something still
 # actionable?" without flooding the context on chatty PRs.
 # issueCount lets the consumer detect truncation past the 50-PR page.
@@ -48,6 +68,7 @@ query {
 # hard error in jq).
 gh api graphql -f query="$QUERY" --jq '
   {
+    fetchedAt: (now | todate),
     issueCount: .data.search.issueCount,
     prs: (.data.search.nodes | map(select(.url != null) | {
       repo: .repository.nameWithOwner,
@@ -71,4 +92,8 @@ gh api graphql -f query="$QUERY" --jq '
         body: .body[:400]
       }]
     }))
-  }'
+  }' > "$tmp"
+
+mv "$tmp" "$CACHE_FILE"
+trap - EXIT
+cat "$CACHE_FILE"
