@@ -40,14 +40,16 @@ deserve labels, how to write summaries.
 
 ### 3. Render
 
-Two files side by side in a scratch dir: a copy of the renderer, and the model
-as a `code-map-model.js` sidecar — the model JSON prefixed with
-`window.CODE_MAP_MODEL = `. The renderer loads the sidecar via `<script src>`,
-which works from `file://` with no server and no injection step.
+Three files side by side in a scratch dir: a copy of the renderer, the ELK
+layout engine it loads, and the model as a `code-map-model.js` sidecar — the
+model JSON prefixed with `window.CODE_MAP_MODEL = `. The renderer loads both
+via `<script src>`, which works from `file://` with no server and no injection
+step.
 
 ```bash
 # substitute <skill-dir> with this skill's base directory
 cp "<skill-dir>/assets/renderer.html" "$DIR/map.html"
+cp "<skill-dir>/assets/elk.bundled.js" "$DIR/elk.bundled.js"
 printf 'window.CODE_MAP_MODEL = ' > "$DIR/code-map-model.js"
 cat model.json >> "$DIR/code-map-model.js"
 open "$DIR/map.html"          # xdg-open on Linux
@@ -62,7 +64,8 @@ project — unless the user asks to keep the map; then give them both files.
 
 One line in the terminal: what was mapped and what was left out. Point out the
 navigation basics once (click a module to expand, `⤢` to focus, click a
-function for details) — the page carries the rest.
+function for details, drag cards to rearrange, `⟲ Tidy` to re-run the layout) —
+the page carries the rest.
 
 ## Testing the renderer
 
