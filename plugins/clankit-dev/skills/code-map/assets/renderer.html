@@ -44,6 +44,7 @@
   #titleBlock { min-width: 0; }
   #mapTitle { font-size: 16px; font-weight: 650; margin: 0; }
   #mapSubtitle { color: var(--muted); font-size: 12px; }
+  #mapQuestion { color: var(--muted); font-size: 12px; font-style: italic; }
   #legend { margin-left: auto; display: flex; gap: 14px; font-size: 12px; color: var(--muted); flex: none; align-items: center; }
   .lg { display: inline-flex; align-items: center; gap: 6px; }
   .sw { display: inline-block; width: 22px; height: 0; border-top: 2px solid; }
@@ -228,6 +229,7 @@
   <div id="titleBlock">
     <h1 id="mapTitle"></h1>
     <div id="mapSubtitle"></div>
+    <div id="mapQuestion"></div>
   </div>
   <div id="legend">
     <span class="lg"><i class="sw sw-calls"></i>calls</span>
@@ -317,15 +319,20 @@
   var PADX = 64, PADY = 30;
   var routes = {};           // edge index -> ELK route points (stage coords)
 
-  document.title = (meta.title || 'code map') + ' · ELK spike';
+  document.title = (meta.title || 'code map') + ' · code map';
   $('#mapTitle').textContent = meta.title || 'code map';
-  $('#mapSubtitle').textContent = (meta.subtitle || '') + ' · ELK routing experiment';
-  $('#stamp').textContent = 'drag cards · expand/collapse re-layouts · Tidy resets';
+  $('#mapSubtitle').textContent = meta.subtitle || '';
+  $('#mapQuestion').textContent = meta.question ? 'Q: ' + meta.question : '';
+  $('#stamp').textContent =
+    [meta.generated, meta.source].filter(Boolean).join(' · ');
   if (meta.curation) {
     var c = meta.curation, parts = [];
     if (c.note) parts.push(c.note);
     if (c.omitted && c.omitted.length) parts.push('omitted: ' + c.omitted.join(', '));
+    if (c.reason) parts.push('(' + c.reason + ')');
     $('#curation').textContent = parts.join(' · ');
+  } else {
+    $('#curation').textContent = 'Full scope — nothing was cut.';
   }
 
   // ---- cards -----------------------------------------------------------
@@ -356,17 +363,19 @@
     card.dataset.ep = m.id;
 
     var hasFns = fnsOf(m).length > 0;
+    var expandable = hasFns || !!m.description;
     var head = document.createElement('div');
     head.className = 'mod-head';
     head.innerHTML =
-      (!opts.alwaysOpen && hasFns
+      (!opts.alwaysOpen && expandable
         ? '<span class="chev' + (expanded ? ' open' : '') + '">▸</span>' : '') +
       (m.kind ? '<span class="kind">' + esc(m.kind) + '</span>' : '') +
       '<span class="mname">' + esc(m.name || m.id) + '</span>' +
       (opts.alwaysOpen ? ''
         : '<button class="focus-btn" data-tip="Focus: just this module, its callers &amp; callees">⤢</button>');
     if (!opts.alwaysOpen) {
-      if (hasFns) {
+      if (expandable) {
+        head.title = expanded ? 'Collapse' : (hasFns ? 'Expand functions' : 'Expand description');
         head.addEventListener('click', function () {
           if (suppressClick) return;
           state.open.has(m.id) ? state.open.delete(m.id) : state.open.add(m.id);
@@ -382,10 +391,12 @@
     }
     card.appendChild(head);
 
-    if (m.summary) {
+    // description subsumes the one-liner, so it replaces rather than stacks
+    var blurb = (expanded && m.description) || m.summary;
+    if (blurb) {
       var sum = document.createElement('div');
       sum.className = 'mod-sum';
-      sum.textContent = m.summary;
+      sum.textContent = blurb;
       card.appendChild(sum);
     }
     if (expanded) fnsOf(m).forEach(function (f) { card.appendChild(fnRow(m, f)); });
@@ -947,9 +958,17 @@
   window.addEventListener('resize', function () {
     requestAnimationFrame(state.focus ? drawFocusEdges : drawEdges);
   });
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () {
+      requestAnimationFrame(state.focus ? drawFocusEdges : drawEdges);
+    });
+  }
 
   buildCards();
   layout(true);
+  if (!location.hash && frame.focus && byId[frame.focus]) {
+    try { history.replaceState(null, '', '#focus=' + frame.focus); } catch (e) {}
+  }
   if (location.hash) applyHash();
 })();
 </script>
