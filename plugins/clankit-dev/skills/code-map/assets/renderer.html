@@ -96,6 +96,19 @@
     background: none; border: 1px solid transparent; border-radius: 6px; padding: 3px 6px;
   }
   .focus-btn:hover { color: var(--sel); border-color: var(--border); }
+  .chev { color: var(--muted); font-size: 10px; flex: none; transition: transform .15s; }
+  .chev.open { transform: rotate(90deg); }
+  .mod-head:hover .mname { color: var(--sel); }
+  [data-tip] { position: relative; }
+  [data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute; top: calc(100% + 6px); right: -4px;
+    font: 11px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--card); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 3px 8px; white-space: nowrap;
+    box-shadow: var(--shadow); z-index: 40; pointer-events: none;
+  }
   .mod-sum { padding: 6px 10px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); }
   .fn {
     display: flex; align-items: center; gap: 6px;
@@ -217,7 +230,7 @@
 </main>
 
 <aside id="panel" hidden>
-  <div class="p-head"><span id="p-title"></span><button id="p-focus" title="Focus this module">⤢</button><button id="p-close" title="Close">&times;</button></div>
+  <div class="p-head"><span id="p-title"></span><button id="p-focus" data-tip="Open in focus view">⤢</button><button id="p-close" title="Close">&times;</button></div>
   <div id="p-body"></div>
 </aside>
 
@@ -324,17 +337,26 @@
     card.className = 'mod' + (expanded ? '' : ' closed');
     card.dataset.ep = m.id;
 
+    var hasFns = fnsOf(m).length > 0;
     var head = document.createElement('div');
     head.className = 'mod-head';
     head.innerHTML =
+      (!opts.alwaysOpen && hasFns
+        ? '<span class="chev' + (expanded ? ' open' : '') + '">▸</span>' : '') +
       (m.kind ? '<span class="kind">' + esc(m.kind) + '</span>' : '') +
       '<span class="mname">' + esc(m.name || m.id) + '</span>' +
-      (opts.alwaysOpen ? '' : '<button class="focus-btn" title="Focus this module">⤢</button>');
+      (opts.alwaysOpen ? ''
+        : '<button class="focus-btn" data-tip="Focus: just this module, its callers &amp; callees">⤢</button>');
     if (!opts.alwaysOpen) {
-      head.addEventListener('click', function () {
-        state.open.has(m.id) ? state.open.delete(m.id) : state.open.add(m.id);
-        renderAll();
-      });
+      if (hasFns) {
+        head.title = expanded ? 'Collapse' : 'Expand functions';
+        head.addEventListener('click', function () {
+          state.open.has(m.id) ? state.open.delete(m.id) : state.open.add(m.id);
+          renderAll();
+        });
+      } else {
+        head.style.cursor = 'default';
+      }
       $('.focus-btn', head).addEventListener('click', function (ev) {
         ev.stopPropagation();
         setFocus(m.id);
