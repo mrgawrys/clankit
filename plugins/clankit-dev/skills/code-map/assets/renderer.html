@@ -64,11 +64,10 @@
 
   main { flex: 1; min-height: 0; position: relative; }
   .view { position: relative; height: 100%; overflow: auto; }
-  /* .zoomer carries the scaled size so scrollbars follow the zoom; a CSS
-     transform alone leaves layout — and therefore scroll extent — untouched. */
-  .zoomer { position: relative; }
+  /* The canvas is an unbounded plane: the stage is translated and scaled, not
+     scrolled, so panning never hits an edge the way scrollLeft >= 0 would. */
+  #canvas { overflow: hidden; cursor: grab; }
   .stage { position: relative; transform-origin: 0 0; }
-  #canvas { cursor: grab; }
   #canvas.panning { cursor: grabbing; }
   #canvas.panning .mod { pointer-events: none; }
 
@@ -257,7 +256,7 @@
 
 <main>
   <section id="canvas" class="view">
-    <div class="zoomer"><div class="stage"><svg class="edges"></svg></div></div>
+    <div class="stage"><svg class="edges"></svg></div>
   </section>
   <section id="focus" class="view" hidden>
     <div class="focus-grid"></div>
@@ -330,17 +329,18 @@
   var suppressClick = false; // a drag just ended; swallow the click it produced
 
   var stage = $('.stage'), svg = $('svg.edges', stage), tip = $('#edgeTip');
-  var zoomer = $('.zoomer');
   var canvasEl = $('#canvas'), focusEl = $('#focus'), backBtn = $('#backBtn');
   var elk = new ELK();
   var PADX = 64, PADY = 30;
   var routes = {};           // edge index -> ELK route points (stage coords)
 
-  // Canvas zoom. The stage is CSS-scaled, so every screen-pixel measurement
-  // taken against it must be divided by `zoom` to get back to stage coords.
+  // Canvas viewport: the stage is translated and scaled. Panning is unbounded
+  // — you can push the map off any edge, as on an infinite whiteboard. Every
+  // screen-pixel measurement taken against the stage must be divided by
+  // `zoom` to get back to stage coords.
   var ZMIN = 0.25, ZMAX = 2, ZFLOOR = 0.55;
   var ZLADDER = [0.25, 0.35, 0.5, 0.65, 0.8, 1, 1.25, 1.5, 2];
-  var zoom = 1;
+  var zoom = 1, panX = 0, panY = 0;
   var autoFitDone = false;   // first paint fits; Tidy must not re-fit
 
   document.title = (meta.title || 'code map') + ' · code map';
@@ -632,21 +632,21 @@
 
   function fitStage() {
     var c = contentSize();
-    // keep the stage at least a viewportful so background stays grabbable
-    var w = Math.max(c.w, canvasEl.clientWidth / zoom);
-    var h = Math.max(c.h, canvasEl.clientHeight / zoom);
-    stage.style.width = w + 'px';
-    stage.style.height = h + 'px';
-    zoomer.style.width = (w * zoom) + 'px';
-    zoomer.style.height = (h * zoom) + 'px';
+    stage.style.width = c.w + 'px';
+    stage.style.height = c.h + 'px';
   }
 
-  // ---- zoom ------------------------------------------------------------
+  // ---- viewport --------------------------------------------------------
 
-  function applyZoom() {
-    stage.style.transform = zoom === 1 ? '' : 'scale(' + zoom + ')';
+  function applyView() {
+    stage.style.transform =
+      'translate(' + panX + 'px,' + panY + 'px) scale(' + zoom + ')';
     $('#zoomPct').textContent = Math.round(zoom * 100) + '%';
-    fitStage();
+  }
+
+  function panBy(dx, dy) {
+    panX += dx; panY += dy;
+    applyView();
   }
 
   // Zooms about a screen point so whatever sits under the cursor stays put.
@@ -657,12 +657,10 @@
     var ox = clientX == null ? r.width / 2 : clientX - r.left;
     var oy = clientY == null ? r.height / 2 : clientY - r.top;
     var k = z / zoom;
-    var sl = (canvasEl.scrollLeft + ox) * k - ox;
-    var st = (canvasEl.scrollTop + oy) * k - oy;
+    panX = ox - (ox - panX) * k;
+    panY = oy - (oy - panY) * k;
     zoom = z;
-    applyZoom();
-    canvasEl.scrollLeft = sl;
-    canvasEl.scrollTop = st;
+    applyView();
     requestAnimationFrame(drawEdges);
   }
 
@@ -680,11 +678,26 @@
   function fitToWindow(floor) {
     var c = contentSize();
     if (!c.w || !c.h || !canvasEl.clientWidth) return;
-    var z = Math.min(1, canvasEl.clientWidth / c.w, canvasEl.clientHeight / c.h);
+    var vw = canvasEl.clientWidth, vh = canvasEl.clientHeight;
+    var z = Math.min(1, vw / c.w, vh / c.h);
     zoom = Math.max(ZMIN, floor == null ? z : Math.max(floor, z));
-    applyZoom();
-    canvasEl.scrollLeft = 0;
-    canvasEl.scrollTop = 0;
+    // centre what fits; start near the top-left corner of what doesn't
+    panX = c.w * zoom <= vw ? (vw - c.w * zoom) / 2 : 24;
+    panY = c.h * zoom <= vh ? (vh - c.h * zoom) / 2 : 24;
+    applyView();
+    requestAnimationFrame(drawEdges);
+  }
+
+  // Nudge an element into view without recentring the whole map.
+  function panIntoView(el) {
+    var r = el.getBoundingClientRect(), c = canvasEl.getBoundingClientRect();
+    var m = 40, dx = 0, dy = 0;
+    if (r.left < c.left + m) dx = c.left + m - r.left;
+    else if (r.right > c.right - m) dx = Math.max(c.right - m - r.right, c.left + m - r.left);
+    if (r.top < c.top + m) dy = c.top + m - r.top;
+    else if (r.bottom > c.bottom - m) dy = Math.max(c.bottom - m - r.bottom, c.top + m - r.top);
+    if (!dx && !dy) return;
+    panBy(dx, dy);
     requestAnimationFrame(drawEdges);
   }
 
@@ -1010,10 +1023,10 @@
     }
     renderPanel();
     mark();
-    // scroll once any relayout has settled
+    // pan once any relayout has settled
     setTimeout(function () {
       var el = $('[data-ep="' + CSS.escape(ep) + '"]', stage);
-      if (el) el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+      if (el) panIntoView(el);
     }, needsLayout ? 320 : 0);
   }
 
@@ -1037,22 +1050,26 @@
   $('#zoomFit').addEventListener('click', function () { fitToWindow(ZFLOOR); });
 
   // Trackpad pinch arrives as a wheel event with ctrlKey; Cmd+scroll is the
-  // mouse equivalent. Plain scroll is left alone so it keeps panning.
+  // mouse equivalent. Plain scroll pans — the canvas has no scrollbars now,
+  // so it has to move the plane itself.
   canvasEl.addEventListener('wheel', function (ev) {
-    if (!ev.ctrlKey && !ev.metaKey) return;
     ev.preventDefault();
-    var dy = Math.max(-50, Math.min(50, ev.deltaY));
-    setZoom(zoom * Math.exp(-dy * 0.01), ev.clientX, ev.clientY);
+    if (ev.ctrlKey || ev.metaKey) {
+      var dy = Math.max(-50, Math.min(50, ev.deltaY));
+      setZoom(zoom * Math.exp(-dy * 0.01), ev.clientX, ev.clientY);
+      return;
+    }
+    panBy(-ev.deltaX, -ev.deltaY);
+    requestAnimationFrame(drawEdges);
   }, { passive: false });
 
   // ---- pan: drag empty background --------------------------------------
 
   canvasEl.addEventListener('pointerdown', function (ev) {
     if (ev.button !== 0) return;
-    if (ev.target !== stage && ev.target !== zoomer &&
-        ev.target !== canvasEl && ev.target !== svg) return;
+    if (ev.target !== stage && ev.target !== canvasEl && ev.target !== svg) return;
     var sx = ev.clientX, sy = ev.clientY;
-    var sl = canvasEl.scrollLeft, st = canvasEl.scrollTop;
+    var px = panX, py = panY;
     var panning = false;
 
     function onMove(mev) {
@@ -1063,8 +1080,8 @@
         try { canvasEl.setPointerCapture(ev.pointerId); } catch (e) {}
       }
       if (!panning) return;
-      canvasEl.scrollLeft = sl - dx;
-      canvasEl.scrollTop = st - dy;
+      panX = px + dx; panY = py + dy;   // the plane follows the cursor
+      applyView();
     }
     function onUp() {
       canvasEl.removeEventListener('pointermove', onMove);
@@ -1093,8 +1110,7 @@
   // clicking empty canvas background deselects
   $('#canvas').addEventListener('click', function (ev) {
     if (suppressClick) return;
-    if (ev.target === stage || ev.target === zoomer ||
-        ev.target.id === 'canvas' || ev.target === svg) {
+    if (ev.target === stage || ev.target.id === 'canvas' || ev.target === svg) {
       state.sel = null; renderPanel(); mark();
     }
   });

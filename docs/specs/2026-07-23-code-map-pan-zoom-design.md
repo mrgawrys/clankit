@@ -18,26 +18,27 @@ learn the shape they were promised.
 Pan by dragging empty background. Zoom by pinch, by modifier-scroll, and by
 toolbar buttons. Fit the map on first paint when it overflows.
 
-Pan rides the browser's own scrolling. `#canvas` already sets
-`overflow: auto`, and `fitStage()` already sizes `.stage` explicitly, so
-panning is `scrollLeft`/`scrollTop` arithmetic. No second coordinate system
-appears, and `scrollIntoView`, the deselect-on-empty-click handler, and the
-edge geometry keep working.
+The canvas is an unbounded plane. The stage is translated and scaled; the
+browser's scrolling is not involved.
+
+> **Revised during implementation.** The first build panned by writing
+> `scrollLeft`/`scrollTop`, reusing the existing `overflow: auto`. That
+> reaches a wall: `scrollLeft` cannot go below zero, so the map could not be
+> pushed rightwards past its own origin. A reader who drags right on first
+> sight — the natural first gesture — gets nothing. Scroll bounds are the
+> wrong substrate for a canvas, so panning became a transform instead.
 
 ## Structure
 
-One new wrapper element:
-
 ```
-#canvas (overflow: auto — unchanged)
-└─ .zoomer      NEW — width/height = natural size × zoom
-   └─ .stage    transform: scale(z); transform-origin: 0 0
-      ├─ svg.edges   scales with the stage
-      └─ .mod cards
+#canvas (overflow: hidden — no scrollbars)
+└─ .stage    transform: translate(x, y) scale(z); transform-origin: 0 0
+   ├─ svg.edges   scales with the stage
+   └─ .mod cards
 ```
 
-A CSS transform does not change layout, so the scroll extent would ignore the
-zoom. `.zoomer` carries the scaled dimensions and restores correct scrollbars.
+`panX`/`panY`/`zoom` are the whole viewport state. Panning adds to the
+translation and is bounded by nothing.
 
 ## Changes to existing code
 
@@ -45,7 +46,7 @@ zoom. `.zoomer` carries the scaled dimensions and restores correct scrollbars.
 |---|---|
 | `rectOf` | Divide the rect delta by `zoom`. |
 | Card drag | Divide pointer deltas by `zoom`. |
-| `fitStage` | Size `.zoomer` to natural size × zoom. |
+| `navTo` | `scrollIntoView` has no scroller left; `panIntoView` nudges the plane instead. |
 | Empty-background click | Reuse the `suppressClick` flag so a pan does not deselect. |
 
 `rectOf` derives stage coordinates by subtracting the stage's bounding rect
@@ -69,7 +70,8 @@ background and keep their own drag.
 
 **Zoom.** Trackpad pinch and Cmd/Ctrl+scroll both arrive as a `wheel` event
 carrying `ctrlKey` or `metaKey`; `preventDefault` suppresses browser page
-zoom. Plain scroll still pans, so no existing gesture changes meaning.
+zoom. Plain scroll still pans, but now moves the plane directly, since the
+canvas has no scrollbars to do it.
 
 Zoom holds the point under the cursor:
 
