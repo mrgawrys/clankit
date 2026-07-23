@@ -40,26 +40,23 @@ deserve labels, how to write summaries.
 
 ### 3. Render
 
-Copy `assets/renderer.html` from this skill's base directory, inject the model
-over the `__CODE_MAP_MODEL__` placeholder, and open the result. Write the model
-to a scratch file (e.g. `model.json`), then:
+Two files side by side in a scratch dir: a copy of the renderer, and the model
+as a `code-map-model.js` sidecar — the model JSON prefixed with
+`window.CODE_MAP_MODEL = `. The renderer loads the sidecar via `<script src>`,
+which works from `file://` with no server and no injection step.
 
 ```bash
 # substitute <skill-dir> with this skill's base directory
-python3 - "<skill-dir>/assets/renderer.html" model.json map.html <<'EOF'
-import json, sys, pathlib
-tpl, model_path, out = sys.argv[1:4]
-model = pathlib.Path(model_path).read_text()
-json.loads(model)  # fail fast on invalid JSON
-model = model.replace("</", "<\\/")  # keep </script> in strings inert
-html = pathlib.Path(tpl).read_text().replace("__CODE_MAP_MODEL__", model, 1)
-pathlib.Path(out).write_text(html)
-EOF
+cp "<skill-dir>/assets/renderer.html" "$DIR/map.html"
+printf 'window.CODE_MAP_MODEL = ' > "$DIR/code-map-model.js"
+cat model.json >> "$DIR/code-map-model.js"
+open "$DIR/map.html"          # xdg-open on Linux
 ```
 
-Then open `map.html` in the browser (`open` on macOS, `xdg-open` on Linux).
-Put both files in a temp/scratch location, not the user's project — unless the
-user asks to keep the map.
+(Or write `code-map-model.js` directly with the file-write tool — any valid
+JSON is a valid JS expression.) On re-runs, rewrite only the sidecar and tell
+the user to refresh the tab. Use a temp/scratch location, not the user's
+project — unless the user asks to keep the map; then give them both files.
 
 ### 4. Hand off
 
@@ -70,6 +67,6 @@ function for details) — the page carries the rest.
 ## Testing the renderer
 
 Only when changing `assets/renderer.html` itself: render the bundled fixture
-(`assets/fixture-model.json`) with the command above, screenshot it headless,
-and eyeball for collisions and overflow. Extraction quality is judged by
+(`assets/fixture-model.json` as the sidecar, via the commands above),
+screenshot it headless, and eyeball for collisions and overflow. Extraction quality is judged by
 running the skill on a real plan or PR and reading the JSON against the source.

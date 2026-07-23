@@ -63,8 +63,10 @@ how X is organized", "show me this PR/plan as a diagram".
 2. **Extract.** Produce the JSON model. Small scope: inline. Large scope:
    dispatch one read-only subagent whose sole deliverable is the model, so the
    main conversation never ingests the file dumps.
-3. **Render.** Copy `renderer.html` to a temp/scratch location, inject the
-   model inline (single file, works from `file://`), open in the browser.
+3. **Render.** Copy `renderer.html` to a temp/scratch location and write the
+   model beside it as a `code-map-model.js` sidecar (`window.CODE_MAP_MODEL =
+   {...}`, loaded via `<script src>` — works from `file://`, no injection
+   step). Open in the browser; re-runs rewrite the sidecar + refresh.
 4. **Hand off.** One line in the terminal: what was mapped, what was left out.
 
 ## The JSON model (stable contract)
@@ -121,8 +123,10 @@ Validated with three side-by-side prototypes on a real backend design plan
   center, callers as clickable stubs left, callees right. Chaining stub clicks
   walks the graph like a call chain.
 - **Ways back** (all preserve canvas expansion state): browser Back (focus
-  jumps are history entries, `?focus=<id>` deep links), a prominent
-  `← Canvas` button, Esc, and clicking empty background.
+  jumps are history entries, `#focus=<id>` deep links), a prominent
+  `← Canvas` button, and Esc. (Background click was dropped — too easy to hit
+  accidentally. Query-string deep links became hash links: `pushState` query
+  rewrites throw SecurityError on `file://`.)
 - **Ground floor:** clicking any function shows signature, summary, called-by,
   and calls in a side panel.
 - Light/dark follow the OS. Edge labels appear on hover. The footer shows the

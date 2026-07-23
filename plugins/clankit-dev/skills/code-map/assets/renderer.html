@@ -65,7 +65,7 @@
   .mk-fires { fill: var(--edge-fires); }
   .mk-data  { fill: var(--edge-data); }
 
-  .layers { padding: 26px 32px 90px; }
+  .layers { padding: 26px 64px 90px; }
   .layer { margin-bottom: 30px; }
   .layer-label {
     font-size: 11px; font-weight: 650; letter-spacing: .08em;
@@ -148,10 +148,12 @@
     font-weight: 650; position: sticky; top: 0; background: var(--card-head);
     border-radius: 12px 12px 0 0;
   }
-  #p-close {
-    margin-left: auto; cursor: pointer; border: none; background: none;
+  #p-close, #p-focus {
+    cursor: pointer; border: none; background: none;
     color: var(--muted); font-size: 16px; line-height: 1; padding: 2px 6px;
   }
+  #p-focus { margin-left: auto; font-size: 14px; }
+  #p-close:hover, #p-focus:hover { color: var(--sel); }
   #p-body { padding: 12px 14px; font-size: 13px; }
   #p-body .p-mod { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
   #p-body code {
@@ -187,7 +189,7 @@
 </style>
 </head>
 <body>
-<script type="application/json" id="code-map-model">__CODE_MAP_MODEL__</script>
+<script src="./code-map-model.js"></script>
 
 <header>
   <button id="backBtn" hidden>&larr; Canvas</button>
@@ -215,7 +217,7 @@
 </main>
 
 <aside id="panel" hidden>
-  <div class="p-head"><span id="p-title"></span><button id="p-close" title="Close">&times;</button></div>
+  <div class="p-head"><span id="p-title"></span><button id="p-focus" title="Focus this module">⤢</button><button id="p-close" title="Close">&times;</button></div>
   <div id="p-body"></div>
 </aside>
 
@@ -241,13 +243,11 @@
     document.body.innerHTML = '<div id="fatal">code-map: ' + esc(msg) + '</div>';
   }
 
-  var model;
-  try {
-    model = JSON.parse($('#code-map-model').textContent);
-  } catch (e) {
-    return fatal('no model injected, or the model is not valid JSON. Fill the model placeholder as described in SKILL.md.');
+  var model = window.CODE_MAP_MODEL;
+  if (!model) {
+    return fatal('missing model — this page expects code-map-model.js next to it, defining window.CODE_MAP_MODEL (see SKILL.md).');
   }
-  if (!model || !Array.isArray(model.modules)) return fatal('model has no modules array.');
+  if (!Array.isArray(model.modules)) return fatal('model has no modules array.');
 
   var meta = model.meta || {};
   var groups = model.groups || [];
@@ -460,36 +460,106 @@
              w: r.width, h: r.height };
   }
 
-  function edgePath(r1, r2, jig, sameMod) {
-    var x1, y1, x2, y2, c1x, c1y, c2x, c2y, d;
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  function roundedPath(pts, rad) {
+    var d = 'M ' + pts[0].x + ' ' + pts[0].y;
+    for (var i = 1; i < pts.length - 1; i++) {
+      var p = pts[i], prev = pts[i - 1], next = pts[i + 1];
+      var l1 = Math.hypot(p.x - prev.x, p.y - prev.y) || 1;
+      var l2 = Math.hypot(next.x - p.x, next.y - p.y) || 1;
+      var r = Math.min(rad, l1 / 2, l2 / 2);
+      d += ' L ' + (p.x - (p.x - prev.x) / l1 * r) + ' ' + (p.y - (p.y - prev.y) / l1 * r) +
+           ' Q ' + p.x + ' ' + p.y + ' ' +
+           (p.x + (next.x - p.x) / l2 * r) + ' ' + (p.y + (next.y - p.y) / l2 * r);
+    }
+    var last = pts[pts.length - 1];
+    return d + ' L ' + last.x + ' ' + last.y;
+  }
+
+  // Anchor on the left/right edge of a rect, with outward normal.
+  function sideAnchor(r, toRight, yJig) {
+    return toRight
+      ? { x: r.x + r.w, y: r.y + r.h / 2 + (yJig || 0), nx: 1, ny: 0 }
+      : { x: r.x,       y: r.y + r.h / 2 + (yJig || 0), nx: -1, ny: 0 };
+  }
+
+  function route(a, b, view, boxes, i, sameMod) {
+    var r1 = rectOf(a, view), r2 = rectOf(b, view);
+    var card1 = a.closest('.mod, .stub') || a;
+    var card2 = b.closest('.mod, .stub') || b;
+    var jig = (i % 5 - 2) * 5, yJig = (i % 3 - 1) * 4;
+
     if (sameMod) {
-      // internal edge: loop out the left side of the card
-      x1 = r1.x; y1 = r1.y + r1.h / 2;
-      x2 = r2.x; y2 = r2.y + r2.h / 2;
-      d = 34 + Math.abs(jig) * 2;
-      return 'M ' + x1 + ' ' + y1 + ' C ' + (x1 - d) + ' ' + y1 + ', ' +
-             (x2 - d) + ' ' + y2 + ', ' + x2 + ' ' + y2;
+      // internal edge: loop out the left side, clamped to the canvas padding
+      var d0 = Math.max(12, Math.min(40, r1.x - 8));
+      var y1i = r1.y + r1.h / 2, y2i = r2.y + r2.h / 2;
+      return 'M ' + r1.x + ' ' + y1i + ' C ' + (r1.x - d0) + ' ' + y1i + ', ' +
+             (r2.x - d0) + ' ' + y2i + ', ' + r2.x + ' ' + y2i;
     }
-    if (r2.y >= r1.y + r1.h - 2) {          // target below: bottom -> top
-      x1 = r1.x + r1.w / 2 + jig; y1 = r1.y + r1.h;
-      x2 = r2.x + r2.w / 2 + jig; y2 = r2.y;
-      d = Math.max(26, (y2 - y1) / 2);
-      c1x = x1; c1y = y1 + d; c2x = x2; c2y = y2 - d;
-    } else if (r2.y + r2.h <= r1.y + 2) {   // target above: top -> bottom
-      x1 = r1.x + r1.w / 2 + jig; y1 = r1.y;
-      x2 = r2.x + r2.w / 2 + jig; y2 = r2.y + r2.h;
-      d = Math.max(26, (y1 - y2) / 2);
-      c1x = x1; c1y = y1 - d; c2x = x2; c2y = y2 + d;
-    } else {                                 // same band: side to side
-      var ltr = r2.x + r2.w / 2 >= r1.x + r1.w / 2;
-      x1 = ltr ? r1.x + r1.w : r1.x; y1 = r1.y + r1.h / 2 + jig;
-      x2 = ltr ? r2.x : r2.x + r2.w; y2 = r2.y + r2.h / 2 + jig;
-      d = Math.max(26, Math.abs(x2 - x1) / 2);
-      c1x = x1 + (ltr ? d : -d); c1y = y1;
-      c2x = x2 + (ltr ? -d : d); c2y = y2;
+
+    var isFn1 = a.classList.contains('fn'), isFn2 = b.classList.contains('fn');
+    var c1x = r1.x + r1.w / 2, c2x = r2.x + r2.w / 2;
+    var down = r2.y >= r1.y + r1.h - 4;
+    var up = r2.y + r2.h <= r1.y + 4;
+    var p1, p2;
+
+    if (down || up) {
+      // fn rows attach at their side edge (never through the card body);
+      // card anchors sit on top/bottom, biased toward the other endpoint
+      p1 = isFn1 ? sideAnchor(r1, c2x >= c1x, yJig) : null;
+      p2 = isFn2 ? sideAnchor(r2, c1x >= c2x, yJig) : null;
+      if (!p1) {
+        p1 = { x: clamp((p2 ? p2.x : c2x + jig), r1.x + 18, r1.x + r1.w - 18),
+               y: down ? r1.y + r1.h : r1.y, nx: 0, ny: down ? 1 : -1 };
+      }
+      if (!p2) {
+        p2 = { x: clamp((isFn1 ? p1.x : c1x + jig), r2.x + 18, r2.x + r2.w - 18),
+               y: down ? r2.y : r2.y + r2.h, nx: 0, ny: down ? -1 : 1 };
+      }
+    } else {
+      var ltr = c2x >= c1x;
+      p1 = sideAnchor(r1, ltr, jig);
+      p2 = sideAnchor(r2, !ltr, jig);
     }
-    return 'M ' + x1 + ' ' + y1 + ' C ' + c1x + ' ' + c1y + ', ' +
-           c2x + ' ' + c2y + ', ' + x2 + ' ' + y2;
+
+    // does the corridor between the endpoints cross another card?
+    var obs = [];
+    var minX = Math.min(p1.x, p2.x) - 6, maxX = Math.max(p1.x, p2.x) + 6;
+    var minY = Math.min(p1.y, p2.y) + 6, maxY = Math.max(p1.y, p2.y) - 6;
+    if (maxY - minY > 12) {
+      boxes.forEach(function (bx) {
+        if (bx.el === card1 || bx.el === card2) return;
+        var r = bx.r;
+        if (r.x < maxX && r.x + r.w > minX && r.y < maxY && r.y + r.h > minY) obs.push(r);
+      });
+    }
+
+    if (!obs.length) {
+      var dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+      var k = Math.min(80, Math.max(28, dist / 3));
+      return 'M ' + p1.x + ' ' + p1.y +
+        ' C ' + (p1.x + p1.nx * k) + ' ' + (p1.y + p1.ny * k) + ', ' +
+                (p2.x + p2.nx * k) + ' ' + (p2.y + p2.ny * k) + ', ' +
+                p2.x + ' ' + p2.y;
+    }
+
+    // blocked: detour through a vertical lane beside everything in the way
+    var all = obs.concat([r1, r2]);
+    var laneR = Math.max.apply(null, all.map(function (r) { return r.x + r.w; })) + 28 + (i % 4) * 7;
+    var laneL = Math.min.apply(null, all.map(function (r) { return r.x; })) - 28 - (i % 4) * 7;
+    var useR = laneL < 8 ||
+      (Math.abs(laneR - c1x) + Math.abs(laneR - c2x)) <=
+      (Math.abs(c1x - laneL) + Math.abs(c2x - laneL));
+    var laneX = useR ? laneR : laneL;
+    p1 = sideAnchor(r1, useR, yJig);
+    p2 = sideAnchor(r2, useR, yJig);
+    return roundedPath([
+      { x: p1.x, y: p1.y },
+      { x: laneX, y: p1.y },
+      { x: laneX, y: p2.y },
+      { x: p2.x, y: p2.y }
+    ], 14);
   }
 
   var SVGNS = 'http://www.w3.org/2000/svg';
@@ -505,11 +575,14 @@
       ? edges.filter(function (e) { return e.fromMod === state.focus || e.toMod === state.focus; })
       : edges;
 
+    var boxes = Array.prototype.map.call(
+      view.querySelectorAll('.mod, .stub'),
+      function (el) { return { el: el, r: rectOf(el, view) }; });
+
     list.forEach(function (e, i) {
       var a = anchorEl(e, 'from', view), b = anchorEl(e, 'to', view);
       if (!a || !b || a === b) return;
-      var d = edgePath(rectOf(a, view), rectOf(b, view), (i % 7 - 3) * 4,
-                       e.fromMod === e.toMod);
+      var d = route(a, b, view, boxes, i, e.fromMod === e.toMod);
 
       var vis = document.createElementNS(SVGNS, 'path');
       vis.setAttribute('d', d);
@@ -578,6 +651,7 @@
     Array.prototype.forEach.call(panel.querySelectorAll('.p-link'), function (btn) {
       btn.addEventListener('click', function () { navTo(btn.dataset.ep); });
     });
+    $('#p-focus').hidden = state.focus === p[0]; // already focused there
     panel.hidden = false;
   }
 
@@ -648,16 +722,16 @@
   $('#p-close').addEventListener('click', function () {
     state.sel = null; renderPanel(); mark();
   });
+  $('#p-focus').addEventListener('click', function () {
+    if (state.sel) setFocus(state.sel.split('.')[0]);
+  });
   window.addEventListener('keydown', function (ev) {
     if (ev.key !== 'Escape') return;
     if (state.sel) { state.sel = null; renderPanel(); mark(); }
     else exitFocus();
   });
-  // clicking empty background: in focus it goes back to canvas, in canvas it deselects
-  focusEl.addEventListener('click', function (ev) {
-    if (ev.target === focusEl || ev.target.classList.contains('focus-grid') ||
-        ev.target.classList.contains('stub-col')) exitFocus();
-  });
+  // clicking empty canvas background deselects (focus view exits only via
+  // Esc, the Canvas button, or browser Back — background there is too easy to hit)
   canvasEl.addEventListener('click', function (ev) {
     if (ev.target === canvasEl || ev.target.classList.contains('layers') ||
         ev.target.classList.contains('layer-row')) {
