@@ -21,6 +21,12 @@ person skimming the file later.
 This overrides "match the surrounding comment density" — if nearby comments are
 bloated, write good ones anyway; don't reproduce the bloat.
 
+## Runnable Scripts (paste-safe by default)
+
+Scripts I'll paste somewhere must run nothing on paste — I invoke deliberately.
+Elixir: a module with the call in a trailing comment. Shell/other: definitions
+only, call commented out. Skip only if I ask for a runnable one-liner.
+
 ## PR Comment Style
 
 When writing comments on someone else's PR:
