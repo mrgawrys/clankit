@@ -51,16 +51,26 @@
   .sw-calls { border-color: var(--edge-calls); border-top-style: solid; }
   .sw-fires { border-color: var(--edge-fires); border-top-style: dashed; }
   .sw-data  { border-color: var(--edge-data);  border-top-style: dotted; }
-  #tidyBtn {
+  #tidyBtn, #zoomctl button {
     font: inherit; color: var(--text); background: var(--card-head);
     border: 1px solid var(--border); border-radius: 8px;
     padding: 6px 12px; cursor: pointer;
   }
-  #tidyBtn:hover { border-color: var(--sel); color: var(--sel); }
+  #tidyBtn:hover, #zoomctl button:hover { border-color: var(--sel); color: var(--sel); }
+  #zoomctl { display: flex; gap: 4px; align-items: center; }
+  #zoomctl[hidden] { display: none; }   /* display:flex would beat [hidden] */
+  #zoomctl button { padding: 6px 9px; }
+  #zoomPct { min-width: 54px; font-variant-numeric: tabular-nums; }
 
   main { flex: 1; min-height: 0; position: relative; }
   .view { position: relative; height: 100%; overflow: auto; }
-  .stage { position: relative; min-width: 100%; min-height: 100%; }
+  /* .zoomer carries the scaled size so scrollbars follow the zoom; a CSS
+     transform alone leaves layout — and therefore scroll extent — untouched. */
+  .zoomer { position: relative; }
+  .stage { position: relative; transform-origin: 0 0; }
+  #canvas { cursor: grab; }
+  #canvas.panning { cursor: grabbing; }
+  #canvas.panning .mod { pointer-events: none; }
 
   svg.edges { position: absolute; top: 0; left: 0; pointer-events: none; }
   svg.edges path { transition: opacity .18s; }
@@ -235,13 +245,19 @@
     <span class="lg"><i class="sw sw-calls"></i>calls</span>
     <span class="lg"><i class="sw sw-fires"></i>fires &middot; async</span>
     <span class="lg"><i class="sw sw-data"></i>data</span>
+    <div id="zoomctl">
+      <button id="zoomOut" title="Zoom out (&#8984;&minus;)">&minus;</button>
+      <button id="zoomPct" title="Reset to 100%">100%</button>
+      <button id="zoomIn" title="Zoom in (&#8984;+)">+</button>
+      <button id="zoomFit" title="Fit the map to the window (&#8984;0)">&#9974;</button>
+    </div>
     <button id="tidyBtn" title="Re-run automatic layout (discards manual moves)">&#10227; Tidy</button>
   </div>
 </header>
 
 <main>
   <section id="canvas" class="view">
-    <div class="stage"><svg class="edges"></svg></div>
+    <div class="zoomer"><div class="stage"><svg class="edges"></svg></div></div>
   </section>
   <section id="focus" class="view" hidden>
     <div class="focus-grid"></div>
@@ -314,10 +330,18 @@
   var suppressClick = false; // a drag just ended; swallow the click it produced
 
   var stage = $('.stage'), svg = $('svg.edges', stage), tip = $('#edgeTip');
+  var zoomer = $('.zoomer');
   var canvasEl = $('#canvas'), focusEl = $('#focus'), backBtn = $('#backBtn');
   var elk = new ELK();
   var PADX = 64, PADY = 30;
   var routes = {};           // edge index -> ELK route points (stage coords)
+
+  // Canvas zoom. The stage is CSS-scaled, so every screen-pixel measurement
+  // taken against it must be divided by `zoom` to get back to stage coords.
+  var ZMIN = 0.25, ZMAX = 2, ZFLOOR = 0.55;
+  var ZLADDER = [0.25, 0.35, 0.5, 0.65, 0.8, 1, 1.25, 1.5, 2];
+  var zoom = 1;
+  var autoFitDone = false;   // first paint fits; Tidy must not re-fit
 
   document.title = (meta.title || 'code map') + ' · code map';
   $('#mapTitle').textContent = meta.title || 'code map';
@@ -442,8 +466,9 @@
           try { card.setPointerCapture(ev.pointerId); } catch (e) {}
         }
         if (!dragging) return;
-        card.style.left = Math.max(6, baseL + dx) + 'px';
-        card.style.top = Math.max(6, baseT + dy) + 'px';
+        // pointer deltas are screen pixels; the card lives in stage coords
+        card.style.left = Math.max(6, baseL + dx / zoom) + 'px';
+        card.style.top = Math.max(6, baseT + dy / zoom) + 'px';
         moved.add(id);
         requestAnimationFrame(drawEdges);
       }
@@ -579,6 +604,7 @@
       // pass re-reads geometry in case transitions or fonts lagged the first
       var settle = function () {
         fitStage();
+        if (!autoFitDone) { autoFitDone = true; fitToWindow(ZFLOOR); }
         placeLayerLabels();
         drawEdges();
         svg.classList.remove('dim');
@@ -593,15 +619,73 @@
     });
   }
 
-  function fitStage() {
+  // Extent of the laid-out cards, in stage coords.
+  function contentSize() {
     var w = 0, h = 0;
     Object.keys(cardEls).forEach(function (id) {
       var el = cardEls[id];
       w = Math.max(w, el.offsetLeft + el.offsetWidth);
       h = Math.max(h, el.offsetTop + el.offsetHeight);
     });
-    stage.style.width = (w + PADX) + 'px';
-    stage.style.height = (h + 80) + 'px';
+    return { w: w + PADX, h: h + 80 };
+  }
+
+  function fitStage() {
+    var c = contentSize();
+    // keep the stage at least a viewportful so background stays grabbable
+    var w = Math.max(c.w, canvasEl.clientWidth / zoom);
+    var h = Math.max(c.h, canvasEl.clientHeight / zoom);
+    stage.style.width = w + 'px';
+    stage.style.height = h + 'px';
+    zoomer.style.width = (w * zoom) + 'px';
+    zoomer.style.height = (h * zoom) + 'px';
+  }
+
+  // ---- zoom ------------------------------------------------------------
+
+  function applyZoom() {
+    stage.style.transform = zoom === 1 ? '' : 'scale(' + zoom + ')';
+    $('#zoomPct').textContent = Math.round(zoom * 100) + '%';
+    fitStage();
+  }
+
+  // Zooms about a screen point so whatever sits under the cursor stays put.
+  function setZoom(z, clientX, clientY) {
+    z = Math.max(ZMIN, Math.min(ZMAX, z));
+    if (Math.abs(z - zoom) < 0.0005) return;
+    var r = canvasEl.getBoundingClientRect();
+    var ox = clientX == null ? r.width / 2 : clientX - r.left;
+    var oy = clientY == null ? r.height / 2 : clientY - r.top;
+    var k = z / zoom;
+    var sl = (canvasEl.scrollLeft + ox) * k - ox;
+    var st = (canvasEl.scrollTop + oy) * k - oy;
+    zoom = z;
+    applyZoom();
+    canvasEl.scrollLeft = sl;
+    canvasEl.scrollTop = st;
+    requestAnimationFrame(drawEdges);
+  }
+
+  function stepZoom(dir) {
+    var z = zoom, i;
+    if (dir > 0) {
+      for (i = 0; i < ZLADDER.length; i++) if (ZLADDER[i] > zoom + 0.001) { z = ZLADDER[i]; break; }
+    } else {
+      for (i = ZLADDER.length - 1; i >= 0; i--) if (ZLADDER[i] < zoom - 0.001) { z = ZLADDER[i]; break; }
+    }
+    setZoom(z, null, null);
+  }
+
+  // floor keeps an auto-fit legible; the buttons still reach ZMIN by hand
+  function fitToWindow(floor) {
+    var c = contentSize();
+    if (!c.w || !c.h || !canvasEl.clientWidth) return;
+    var z = Math.min(1, canvasEl.clientWidth / c.w, canvasEl.clientHeight / c.h);
+    zoom = Math.max(ZMIN, floor == null ? z : Math.max(floor, z));
+    applyZoom();
+    canvasEl.scrollLeft = 0;
+    canvasEl.scrollTop = 0;
+    requestAnimationFrame(drawEdges);
   }
 
   function placeLayerLabels() {
@@ -654,8 +738,11 @@
       el = $('[data-ep="' + CSS.escape(mod + '.' + fn) + '"]', cardEls[mod]);
     }
     el = el || cardEls[mod];
+    // both rects report scaled pixels under the stage transform — unscale them,
+    // or every edge drifts off its card as soon as zoom leaves 1
     var r = el.getBoundingClientRect(), s = stage.getBoundingClientRect();
-    return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height };
+    return { x: (r.left - s.left) / zoom, y: (r.top - s.top) / zoom,
+             w: r.width / zoom, h: r.height / zoom };
   }
 
   function sideAnchor(r, toRight) {
@@ -850,6 +937,7 @@
     canvasEl.hidden = !!state.focus;
     focusEl.hidden = !state.focus;
     backBtn.hidden = !state.focus;
+    $('#zoomctl').hidden = !!state.focus;  // the focus view stays at 1:1
     if (state.focus) {
       buildFocus(state.focus);
       requestAnimationFrame(drawFocusEdges);
@@ -942,7 +1030,62 @@
     if (state.sel) setFocus(state.sel.split('.')[0]);
   });
   backBtn.addEventListener('click', exitFocus);
+
+  $('#zoomIn').addEventListener('click', function () { stepZoom(1); });
+  $('#zoomOut').addEventListener('click', function () { stepZoom(-1); });
+  $('#zoomPct').addEventListener('click', function () { setZoom(1, null, null); });
+  $('#zoomFit').addEventListener('click', function () { fitToWindow(ZFLOOR); });
+
+  // Trackpad pinch arrives as a wheel event with ctrlKey; Cmd+scroll is the
+  // mouse equivalent. Plain scroll is left alone so it keeps panning.
+  canvasEl.addEventListener('wheel', function (ev) {
+    if (!ev.ctrlKey && !ev.metaKey) return;
+    ev.preventDefault();
+    var dy = Math.max(-50, Math.min(50, ev.deltaY));
+    setZoom(zoom * Math.exp(-dy * 0.01), ev.clientX, ev.clientY);
+  }, { passive: false });
+
+  // ---- pan: drag empty background --------------------------------------
+
+  canvasEl.addEventListener('pointerdown', function (ev) {
+    if (ev.button !== 0) return;
+    if (ev.target !== stage && ev.target !== zoomer &&
+        ev.target !== canvasEl && ev.target !== svg) return;
+    var sx = ev.clientX, sy = ev.clientY;
+    var sl = canvasEl.scrollLeft, st = canvasEl.scrollTop;
+    var panning = false;
+
+    function onMove(mev) {
+      var dx = mev.clientX - sx, dy = mev.clientY - sy;
+      if (!panning && Math.hypot(dx, dy) > 4) {
+        panning = true;
+        canvasEl.classList.add('panning');
+        try { canvasEl.setPointerCapture(ev.pointerId); } catch (e) {}
+      }
+      if (!panning) return;
+      canvasEl.scrollLeft = sl - dx;
+      canvasEl.scrollTop = st - dy;
+    }
+    function onUp() {
+      canvasEl.removeEventListener('pointermove', onMove);
+      canvasEl.removeEventListener('pointerup', onUp);
+      canvasEl.removeEventListener('pointercancel', onUp);
+      if (!panning) return;
+      canvasEl.classList.remove('panning');
+      suppressClick = true;   // a pan must not also deselect
+      setTimeout(function () { suppressClick = false; }, 0);
+    }
+    canvasEl.addEventListener('pointermove', onMove);
+    canvasEl.addEventListener('pointerup', onUp);
+    canvasEl.addEventListener('pointercancel', onUp);
+  });
+
   window.addEventListener('keydown', function (ev) {
+    if ((ev.metaKey || ev.ctrlKey) && !state.focus) {
+      if (ev.key === '=' || ev.key === '+') { ev.preventDefault(); stepZoom(1); return; }
+      if (ev.key === '-' || ev.key === '_') { ev.preventDefault(); stepZoom(-1); return; }
+      if (ev.key === '0') { ev.preventDefault(); fitToWindow(ZFLOOR); return; }
+    }
     if (ev.key !== 'Escape') return;
     if (state.sel) { state.sel = null; renderPanel(); mark(); }
     else exitFocus();
@@ -950,12 +1093,14 @@
   // clicking empty canvas background deselects
   $('#canvas').addEventListener('click', function (ev) {
     if (suppressClick) return;
-    if (ev.target === stage || ev.target.id === 'canvas' || ev.target === svg) {
+    if (ev.target === stage || ev.target === zoomer ||
+        ev.target.id === 'canvas' || ev.target === svg) {
       state.sel = null; renderPanel(); mark();
     }
   });
   window.addEventListener('hashchange', applyHash);
   window.addEventListener('resize', function () {
+    if (!state.focus) fitStage();   // the stage tracks the viewport at this zoom
     requestAnimationFrame(state.focus ? drawFocusEdges : drawEdges);
   });
   if (document.fonts && document.fonts.ready) {

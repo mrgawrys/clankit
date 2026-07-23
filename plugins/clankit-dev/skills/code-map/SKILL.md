@@ -63,9 +63,10 @@ project — unless the user asks to keep the map; then give them both files.
 ### 4. Hand off
 
 One line in the terminal: what was mapped and what was left out. Point out the
-navigation basics once (click a module to expand, `⤢` to focus, click a
-function for details, drag cards to rearrange, `⟲ Tidy` to re-run the layout) —
-the page carries the rest.
+navigation basics once (drag empty space to pan, pinch or `⌘`+scroll to zoom,
+`⛶` to fit; click a module to expand, `⤢` to focus, click a function for
+details, drag cards to rearrange, `⟲ Tidy` to re-run the layout) — the page
+carries the rest.
 
 ## Testing the renderer
 
