@@ -1,8 +1,8 @@
-# code-map: optional module `description` field
+# visualize-code: optional module `description` field
 
 Date: 2026-07-23
 Status: approved
-Extends: `2026-07-23-code-map-design.md`
+Extends: `2026-07-23-visualize-code-design.md`
 
 ## Problem
 

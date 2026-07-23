@@ -54,17 +54,17 @@ what-tension-it-resolves in `summary` and the fuller story in `description`:
 invariants, transaction/concurrency notes, what downstream code assumes. Same
 "why, not what" altitude, just with room to breathe. The description replaces
 the summary when the module is expanded, so write it to stand alone. Most
-modules should not have one — an all-described map is the same noise as an
+modules should not have one — an all-described diagram is the same noise as an
 all-labeled edge set.
 
 ## Plans and PRs
 
 - **Plans:** extract the *proposed* structure as if it existed. Mark every
   added function `"new": true`. Existing modules the plan touches go on the
-  map too — the neighborhood, not just the delta.
-- **PRs:** same — map the neighborhood the diff lives in, with `NEW` chips on
-  added functions. Do not color by diff status; the map shows structure, not
-  change size.
+  diagram too — the neighborhood, not just the delta.
+- **PRs:** same — draw the neighborhood the diff lives in, with `NEW` chips on
+  added functions. Do not color by diff status; the diagram shows structure,
+  not change size.
 
 ## Curation
 

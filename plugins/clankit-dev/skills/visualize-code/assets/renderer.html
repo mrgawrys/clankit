@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>code map · ELK spike</title>
+<title>visualize-code · ELK spike</title>
 <style>
   :root {
     --bg: #f4f6f9; --card: #ffffff; --card-head: #f8fafc;
@@ -42,9 +42,9 @@
   }
   #backBtn:hover { border-color: var(--sel); color: var(--sel); }
   #titleBlock { min-width: 0; }
-  #mapTitle { font-size: 16px; font-weight: 650; margin: 0; }
-  #mapSubtitle { color: var(--muted); font-size: 12px; }
-  #mapQuestion { color: var(--muted); font-size: 12px; font-style: italic; }
+  #vizTitle { font-size: 16px; font-weight: 650; margin: 0; }
+  #vizSubtitle { color: var(--muted); font-size: 12px; }
+  #vizQuestion { color: var(--muted); font-size: 12px; font-style: italic; }
   #legend { margin-left: auto; display: flex; gap: 14px; font-size: 12px; color: var(--muted); flex: none; align-items: center; }
   .lg { display: inline-flex; align-items: center; gap: 6px; }
   .sw { display: inline-block; width: 22px; height: 0; border-top: 2px solid; }
@@ -230,15 +230,15 @@
 </style>
 </head>
 <body>
-<script src="./code-map-model.js"></script>
+<script src="./visualize-code-model.js"></script>
 <script src="./elk.bundled.js"></script>
 
 <header>
   <button id="backBtn" hidden>&larr; Canvas</button>
   <div id="titleBlock">
-    <h1 id="mapTitle"></h1>
-    <div id="mapSubtitle"></div>
-    <div id="mapQuestion"></div>
+    <h1 id="vizTitle"></h1>
+    <div id="vizSubtitle"></div>
+    <div id="vizQuestion"></div>
   </div>
   <div id="legend">
     <span class="lg"><i class="sw sw-calls"></i>calls</span>
@@ -248,7 +248,7 @@
       <button id="zoomOut" title="Zoom out (&#8984;&minus;)">&minus;</button>
       <button id="zoomPct" title="Reset to 100%">100%</button>
       <button id="zoomIn" title="Zoom in (&#8984;+)">+</button>
-      <button id="zoomFit" title="Fit the map to the window (&#8984;0)">&#9974;</button>
+      <button id="zoomFit" title="Fit the diagram to the window (&#8984;0)">&#9974;</button>
     </div>
     <button id="tidyBtn" title="Re-run automatic layout (discards manual moves)">&#10227; Tidy</button>
   </div>
@@ -288,11 +288,11 @@
   };
 
   function fatal(msg) {
-    document.body.innerHTML = '<div id="fatal">code-map: ' + esc(msg) + '</div>';
+    document.body.innerHTML = '<div id="fatal">visualize-code: ' + esc(msg) + '</div>';
   }
 
-  var model = window.CODE_MAP_MODEL;
-  if (!model) return fatal('missing model — expects code-map-model.js next to this file.');
+  var model = window.VISUALIZE_CODE_MODEL;
+  if (!model) return fatal('missing model — expects visualize-code-model.js next to this file.');
   if (typeof ELK !== 'function') return fatal('missing elk.bundled.js next to this file.');
   if (!Array.isArray(model.modules)) return fatal('model has no modules array.');
 
@@ -313,7 +313,7 @@
       (fp.length === 1 || fnIn(fm, fp[1])) &&
       (tp.length === 1 || fnIn(tm, tp[1])) &&
       ['calls', 'fires', 'data'].indexOf(e.type) >= 0;
-    if (!ok) { console.warn('code-map: skipping invalid edge', e); return; }
+    if (!ok) { console.warn('visualize-code: skipping invalid edge', e); return; }
     edges.push({ from: e.from, to: e.to, type: e.type, label: e.label || '',
                  fromMod: fp[0], toMod: tp[0],
                  fromFn: fp[1] || null, toFn: tp[1] || null });
@@ -335,7 +335,7 @@
   var routes = {};           // edge index -> ELK route points (stage coords)
 
   // Canvas viewport: the stage is translated and scaled. Panning is unbounded
-  // — you can push the map off any edge, as on an infinite whiteboard. Every
+  // — you can push the diagram off any edge, as on an infinite whiteboard. Every
   // screen-pixel measurement taken against the stage must be divided by
   // `zoom` to get back to stage coords.
   var ZMIN = 0.25, ZMAX = 2, ZFLOOR = 0.55;
@@ -343,10 +343,10 @@
   var zoom = 1, panX = 0, panY = 0;
   var autoFitDone = false;   // first paint fits; Tidy must not re-fit
 
-  document.title = (meta.title || 'code map') + ' · code map';
-  $('#mapTitle').textContent = meta.title || 'code map';
-  $('#mapSubtitle').textContent = meta.subtitle || '';
-  $('#mapQuestion').textContent = meta.question ? 'Q: ' + meta.question : '';
+  document.title = (meta.title || 'code visualization') + ' · visualize-code';
+  $('#vizTitle').textContent = meta.title || 'code visualization';
+  $('#vizSubtitle').textContent = meta.subtitle || '';
+  $('#vizQuestion').textContent = meta.question ? 'Q: ' + meta.question : '';
   $('#stamp').textContent =
     [meta.generated, meta.source].filter(Boolean).join(' · ');
   if (meta.curation) {
@@ -688,7 +688,7 @@
     requestAnimationFrame(drawEdges);
   }
 
-  // Nudge an element into view without recentring the whole map.
+  // Nudge an element into view without recentring the whole diagram.
   function panIntoView(el) {
     var r = el.getBoundingClientRect(), c = canvasEl.getBoundingClientRect();
     var m = 40, dx = 0, dy = 0;
@@ -873,7 +873,7 @@
     left.className = 'stub-col left';
     left.innerHTML = '<div class="col-label">called by</div>';
     if (callerIds.length) callerIds.forEach(function (cid) { left.appendChild(stub(byId[cid], 'l')); });
-    else left.insertAdjacentHTML('beforeend', '<div class="none">no callers in map</div>');
+    else left.insertAdjacentHTML('beforeend', '<div class="none">no callers in view</div>');
 
     var center = document.createElement('div');
     center.appendChild(moduleCard(m, { alwaysOpen: true }));
@@ -882,7 +882,7 @@
     right.className = 'stub-col right';
     right.innerHTML = '<div class="col-label">calls into</div>';
     if (calleeIds.length) calleeIds.forEach(function (cid) { right.appendChild(stub(byId[cid], 'r')); });
-    else right.insertAdjacentHTML('beforeend', '<div class="none">no callees in map</div>');
+    else right.insertAdjacentHTML('beforeend', '<div class="none">no callees in view</div>');
 
     grid.appendChild(left);
     grid.appendChild(center);
@@ -975,7 +975,7 @@
   }
 
   function edgeLinks(list, side) {
-    if (!list.length) return '<div class="none">none in map</div>';
+    if (!list.length) return '<div class="none">none in view</div>';
     return list.map(function (e) {
       var other = side === 'out' ? e.to : e.from;
       return '<button class="p-link" data-ep="' + esc(other) + '">' +

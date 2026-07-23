@@ -1,8 +1,8 @@
-# code-map — Design
+# visualize-code — Design
 
 **Status:** Implemented (built directly from this spec, no separate plan)
 **Date:** 2026-07-23
-**Home:** `plugins/clankit-dev/skills/code-map/`
+**Home:** `plugins/clankit-dev/skills/visualize-code/`
 
 ## What it is
 
@@ -43,7 +43,7 @@ Nothing is hosted; code never leaves the machine.
 ## Skill shape
 
 ```
-code-map/
+visualize-code/
 ├── SKILL.md              # triggers, workflow, curation rules
 ├── references/
 │   ├── model-schema.md   # the JSON contract (below), with budget guidance
@@ -64,7 +64,7 @@ how X is organized", "show me this PR/plan as a diagram".
    dispatch one read-only subagent whose sole deliverable is the model, so the
    main conversation never ingests the file dumps.
 3. **Render.** Copy `renderer.html` to a temp/scratch location and write the
-   model beside it as a `code-map-model.js` sidecar (`window.CODE_MAP_MODEL =
+   model beside it as a `visualize-code-model.js` sidecar (`window.VISUALIZE_CODE_MODEL =
    {...}`, loaded via `<script src>` — works from `file://`, no injection
    step). Open in the browser; re-runs rewrite the sidecar + refresh.
 4. **Hand off.** One line in the terminal: what was mapped, what was left out.

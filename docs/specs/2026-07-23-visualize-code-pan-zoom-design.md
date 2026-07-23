@@ -1,8 +1,8 @@
-# code-map: canvas pan and zoom
+# visualize-code: canvas pan and zoom
 
 Date: 2026-07-23
 Status: approved
-Extends: `2026-07-23-code-map-design.md`
+Extends: `2026-07-23-visualize-code-design.md`
 
 ## Problem
 

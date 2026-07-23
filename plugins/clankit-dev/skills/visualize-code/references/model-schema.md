@@ -1,4 +1,4 @@
-# code-map model schema (version 1)
+# visualize-code model schema (version 1)
 
 The JSON contract between extraction and the renderer. Extraction produces
 this; `assets/renderer.html` consumes it. Neither knows anything else about
@@ -12,8 +12,8 @@ the other.
   "meta": {
     "title": "Shipments",                           // required — page heading
     "subtitle": "acme-app · PR #123",               // repo · source, shown under title
-    "question": "How does a shipment get created?", // the user question this map answers
-    "generated": "2026-07-23",                      // date the map was extracted
+    "question": "How does a shipment get created?", // the user question this answers
+    "generated": "2026-07-23",                      // date the model was extracted
     "source": "PR #123",                            // PR # | plan path | commit | subsystem name
     "curation": {                                   // omit entirely if nothing was cut
       "note": "Mapped the shipment-creation path only",
@@ -81,12 +81,12 @@ the other.
   `meta.question` by itself: expand the 2–4 modules on the critical path,
   leave the rest collapsed. Don't expand everything.
 - **Disclose every cut.** If scope was trimmed, `meta.curation` is mandatory —
-  the renderer prints it in the footer so the map never silently pretends to
-  be complete.
+  the renderer prints it in the footer so the output never silently pretends
+  to be complete.
 
 ## Budget
 
-The map is a curated sketch, not an inventory. Stay within:
+The output is a curated sketch, not an inventory. Stay within:
 
 - **≤ ~15 modules.** More means the scope is wrong — cut and disclose.
 - **≤ ~5 functions per module** shown; pick the interface, not the file
@@ -95,8 +95,8 @@ The map is a curated sketch, not an inventory. Stay within:
 - **`description` is the exception, not the rule.** ≤ ~4 sentences, only
   where the one-liner genuinely can't carry the module. Most modules should
   not have one.
-- **Label only interesting edges** (see `extraction.md`); an all-labeled map
-  reads as noise.
+- **Label only interesting edges** (see `extraction.md`); an all-labeled
+  diagram reads as noise.
 
 ## Validity
 
