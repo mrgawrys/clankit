@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "meta": {
+    "title": "Shipment dispatch",
+    "subtitle": "example-app · fixture",
+    "question": "How does a shipment get created and dispatched?",
+    "generated": "2026-07-23",
+    "source": "bundled fixture for renderer testing",
+    "curation": {
+      "note": "Mapped the shipment-creation path only",
+      "omitted": ["admin UI", "returns flow"],
+      "reason": "not on the path the question asks about"
+    }
+  },
+  "groups": [
+    { "id": "web", "label": "Web layer" },
+    { "id": "actions", "label": "Actions" },
+    { "id": "domain", "label": "Domain" },
+    { "id": "workers", "label": "Workers" },
+    { "id": "data", "label": "Data" }
+  ],
+  "modules": [
+    {
+      "id": "router",
+      "group": "web",
+      "kind": "router",
+      "name": "Web.Router",
+      "summary": "Maps HTTP routes to controllers.",
+      "functions": [
+        { "id": "post_shipments", "name": "POST /orders/:id/shipments", "sig": "post \"/orders/:id/shipments\", ShipmentsController, :create", "summary": "Entry point for creating a shipment." }
+      ]
+    },
+    {
+      "id": "shipments_controller",
+      "group": "web",
+      "kind": "controller",
+      "name": "Web.ShipmentsController",
+      "summary": "Translates HTTP into the create-shipment action and renders the result.",
+      "functions": [
+        { "id": "create_2", "name": "create/2", "sig": "create(conn, params)", "summary": "Authorizes, then delegates to Actions.CreateShipment — no business logic here." }
+      ]
+    },
+    {
+      "id": "create_shipment",
+      "group": "actions",
+      "kind": "action",
+      "name": "Actions.CreateShipment",
+      "summary": "The single seam every shipment creation goes through, UI or API.",
+      "functions": [
+        { "id": "run_2", "name": "run/2", "sig": "run(order, opts)", "summary": "Validates, persists the shipment, and schedules label jobs in one transaction so concurrent submits can't double-book the carrier.", "new": true },
+        { "id": "validate_1", "name": "validate/1", "sig": "validate(opts)", "summary": "Rejects shipments for orders with no packable items." }
+      ]
+    },
+    {
+      "id": "manifest",
+      "group": "domain",
+      "kind": "context",
+      "name": "Manifest",
+      "summary": "Owns parcel planning: what goes in which box, and when it leaves.",
+      "functions": [
+        { "id": "preview_1", "name": "preview/1", "sig": "preview(order)", "summary": "Dry-run of the parcel split, used by the UI before committing." },
+        { "id": "plan_2", "name": "plan/2", "sig": "plan(shipment, parcels)", "summary": "Splits the shipment into parcels and enqueues a label job for each.", "new": true },
+        { "id": "cancel_1", "name": "cancel/1", "sig": "cancel(shipment)", "summary": "Stops parcels that haven't shipped; already-handed-off ones are left alone." }
+      ]
+    },
+    {
+      "id": "label_printer",
+      "group": "workers",
+      "kind": "worker",
+      "name": "Workers.LabelPrinter",
+      "summary": "Buys and prints one parcel's label; retried by the job queue on failure.",
+      "functions": [
+        { "id": "perform_1", "name": "perform/1", "sig": "perform(%{parcel_id: id})", "summary": "Loads the parcel, buys the label, records the outcome." }
+      ]
+    },
+    {
+      "id": "shipment_store",
+      "group": "data",
+      "kind": "schema",
+      "name": "Store.Shipments",
+      "summary": "Persistence for shipments and their parcels.",
+      "functions": [
+        { "id": "insert_1", "name": "insert/1", "sig": "insert(attrs)", "summary": "Writes the shipment row." },
+        { "id": "get_1", "name": "get/1", "sig": "get(id)", "summary": "Fetches a shipment with its parcels." }
+      ]
+    }
+  ],
+  "edges": [
+    { "from": "router.post_shipments", "to": "shipments_controller.create_2", "type": "calls" },
+    { "from": "shipments_controller.create_2", "to": "create_shipment.run_2", "type": "calls", "label": "single entry seam" },
+    { "from": "create_shipment.run_2", "to": "create_shipment.validate_1", "type": "calls" },
+    { "from": "create_shipment.run_2", "to": "shipment_store.insert_1", "type": "data", "label": "writes shipment row" },
+    { "from": "create_shipment.run_2", "to": "manifest.plan_2", "type": "calls", "label": "inside the shipment transaction" },
+    { "from": "manifest.plan_2", "to": "label_printer.perform_1", "type": "fires", "label": "one job per parcel" },
+    { "from": "manifest.preview_1", "to": "shipment_store.get_1", "type": "data", "label": "read-only preview" },
+    { "from": "label_printer.perform_1", "to": "shipment_store.get_1", "type": "data" }
+  ],
+  "initialFrame": {
+    "expanded": ["create_shipment", "manifest"],
+    "focus": null
+  }
+}
