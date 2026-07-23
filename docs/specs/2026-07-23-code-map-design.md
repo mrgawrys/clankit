@@ -1,6 +1,6 @@
 # code-map — Design
 
-**Status:** Approved design, pending implementation plan
+**Status:** Implemented (built directly from this spec, no separate plan)
 **Date:** 2026-07-23
 **Home:** `plugins/clankit-dev/skills/code-map/`
 
