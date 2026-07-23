@@ -46,6 +46,7 @@
       "kind": "action",
       "name": "Actions.CreateShipment",
       "summary": "The single seam every shipment creation goes through, UI or API.",
+      "description": "The single seam every shipment creation goes through, UI or API. Wraps validation, the shipment insert, and label scheduling in one transaction so concurrent submits can't double-book the carrier. Everything downstream assumes a shipment exists exactly once.",
       "functions": [
         { "id": "run_2", "name": "run/2", "sig": "run(order, opts)", "summary": "Validates, persists the shipment, and schedules label jobs in one transaction so concurrent submits can't double-book the carrier.", "new": true },
         { "id": "validate_1", "name": "validate/1", "sig": "validate(opts)", "summary": "Rejects shipments for orders with no packable items." }
@@ -69,6 +70,7 @@
       "kind": "worker",
       "name": "Workers.LabelPrinter",
       "summary": "Buys and prints one parcel's label; retried by the job queue on failure.",
+      "description": "Buys and prints one parcel's label. Idempotent on parcel id — the job queue retries on failure, so a job may run twice but the carrier is charged once. Records the outcome even when the purchase fails, so cancel/1 knows what's still pending.",
       "functions": [
         { "id": "perform_1", "name": "perform/1", "sig": "perform(%{parcel_id: id})", "summary": "Loads the parcel, buys the label, records the outcome." }
       ]

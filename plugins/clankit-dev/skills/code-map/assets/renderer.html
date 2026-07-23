@@ -338,18 +338,19 @@
     card.dataset.ep = m.id;
 
     var hasFns = fnsOf(m).length > 0;
+    var expandable = hasFns || !!m.description;
     var head = document.createElement('div');
     head.className = 'mod-head';
     head.innerHTML =
-      (!opts.alwaysOpen && hasFns
+      (!opts.alwaysOpen && expandable
         ? '<span class="chev' + (expanded ? ' open' : '') + '">▸</span>' : '') +
       (m.kind ? '<span class="kind">' + esc(m.kind) + '</span>' : '') +
       '<span class="mname">' + esc(m.name || m.id) + '</span>' +
       (opts.alwaysOpen ? ''
         : '<button class="focus-btn" data-tip="Focus: just this module, its callers &amp; callees">⤢</button>');
     if (!opts.alwaysOpen) {
-      if (hasFns) {
-        head.title = expanded ? 'Collapse' : 'Expand functions';
+      if (expandable) {
+        head.title = expanded ? 'Collapse' : (hasFns ? 'Expand functions' : 'Expand description');
         head.addEventListener('click', function () {
           state.open.has(m.id) ? state.open.delete(m.id) : state.open.add(m.id);
           renderAll();
@@ -364,10 +365,12 @@
     }
     card.appendChild(head);
 
-    if (m.summary) {
+    // description subsumes the one-liner, so it replaces rather than stacks
+    var blurb = (expanded && m.description) || m.summary;
+    if (blurb) {
       var sum = document.createElement('div');
       sum.className = 'mod-sum';
-      sum.textContent = m.summary;
+      sum.textContent = blurb;
       card.appendChild(sum);
     }
     if (expanded) fnsOf(m).forEach(function (f) { card.appendChild(fnRow(m, f)); });
