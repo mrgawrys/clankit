@@ -33,6 +33,7 @@ the other.
       "kind": "action",                             // free-form chip: context|action|schema|worker|...
       "name": "Actions.CreateShipment",             // display name
       "summary": "one sentence: why it exists",
+      "description": "optional, 2–4 sentences — replaces the summary when the module is expanded or focused; omit unless the module hides a real design story",
       "functions": [
         {
           "id": "run_2",                            // unique within the module
@@ -91,6 +92,9 @@ The map is a curated sketch, not an inventory. Stay within:
 - **≤ ~5 functions per module** shown; pick the interface, not the file
   listing. Private helpers only when the question is about them.
 - **One-line summaries** for modules; 1–2 sentences for functions.
+- **`description` is the exception, not the rule.** ≤ ~4 sentences, only
+  where the one-liner genuinely can't carry the module. Most modules should
+  not have one.
 - **Label only interesting edges** (see `extraction.md`); an all-labeled map
   reads as noise.
 

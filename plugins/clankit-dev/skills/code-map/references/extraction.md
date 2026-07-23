@@ -48,6 +48,15 @@ A summary earns its line by saying why the thing exists or what design tension
 it resolves — not by restating the code. "Serializes run creation so
 concurrent submits can't double-charge" beats "creates a run".
 
+When a module resolves a real design tension — a serialization point, a
+compatibility shim, a cache with an invalidation story — put the one-line
+what-tension-it-resolves in `summary` and the fuller story in `description`:
+invariants, transaction/concurrency notes, what downstream code assumes. Same
+"why, not what" altitude, just with room to breathe. The description replaces
+the summary when the module is expanded, so write it to stand alone. Most
+modules should not have one — an all-described map is the same noise as an
+all-labeled edge set.
+
 ## Plans and PRs
 
 - **Plans:** extract the *proposed* structure as if it existed. Mark every
