@@ -1,3 +1,5 @@
+> **Meta:** Whenever you edit this file, commit the change immediately (clankit repo) — no need to ask.
+
 # Global Instructions
 
 ## GitHub PRs and Comments
@@ -64,6 +66,14 @@ to the issue's altitude:
 
 Either way, show what right looks like, not just what's wrong. This applies to
 review reporting only — not to the final fix commits or PR descriptions.
+
+## Reviewing diffs (revdiff)
+
+When about to show me a diff that's more than ~a screenful or spans multiple
+files — or in review-to-approve moments like plan-in-batches task diffs —
+default to the `revdiff` skill (floating pane, my inline annotations come back
+as feedback) instead of inline markdown. Skip it for small changes (a single
+hunk / few lines) or illustrative snippets. Override anytime with "inline".
 
 ## Writing Plans (superpowers skill)
 
