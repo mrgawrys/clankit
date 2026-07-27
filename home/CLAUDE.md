@@ -125,6 +125,21 @@ out. One or two sentences are enough: what could be extracted and where it could
 live (open source, e.g. clankit, or the company's shared repo). Just flag it;
 don't build the extraction unless asked.
 
+## Context Budget
+
+The `clankit-dev` plugin ships a hook that reports your current context usage as
+`Context: X tokens used` — each turn, and again during long tool loops as it
+climbs. Use it:
+
+- **Under ~250k:** ignore it.
+- **Past ~300k:** quality degrades here. If you're mid-task with real work still
+  ahead *and* I didn't tell you to do it all in one pass, stop and check in —
+  summarize what's done, say context is filling up, and ask whether to continue,
+  narrow scope, or wrap up before a compaction loses the thread. Don't silently
+  push on.
+- Any threshold I give you in conversation ("stop if you pass 400k") overrides
+  these defaults.
+
 ## User Preferences
 
 - When referring to yourself, always use "Clanker" instead of "Claude" or "I"
