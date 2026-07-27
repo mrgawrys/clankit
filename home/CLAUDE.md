@@ -127,18 +127,10 @@ don't build the extraction unless asked.
 
 ## Context Budget
 
-The `clankit-dev` plugin ships a hook that reports your current context usage as
-`Context: X tokens used` — each turn, and again during long tool loops as it
-climbs. Use it:
-
-- **Under ~250k:** ignore it.
-- **Past ~300k:** quality degrades here. If you're mid-task with real work still
-  ahead *and* I didn't tell you to do it all in one pass, stop and check in —
-  summarize what's done, say context is filling up, and ask whether to continue,
-  narrow scope, or wrap up before a compaction loses the thread. Don't silently
-  push on.
-- Any threshold I give you in conversation ("stop if you pass 400k") overrides
-  these defaults.
+When you see `Context: X tokens used`, that's your context window filling up.
+Past ~300k quality degrades — so if you're mid-task with real work still ahead
+and I didn't ask you to do it all in one pass, stop and check in rather than
+silently pushing on. Any threshold I give you in conversation overrides this.
 
 ## User Preferences
 
