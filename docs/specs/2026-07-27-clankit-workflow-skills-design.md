@@ -209,7 +209,7 @@ code mandates, the Execution Handoff.
 
 | Skill | Change |
 |---|---|
-| `brainstorming` | Terminal becomes "consult the routing table." Spec writing moves from a fixed step to a routing outcome. Drop the vestigial `spec-document-reviewer-prompt.md` (the skill already reviews inline). Keep `visual-companion` |
+| `brainstorming` | Terminal becomes "consult the routing table." Spec writing moves from a fixed step to a routing outcome. Drop the vestigial `spec-document-reviewer-prompt.md` (the skill already reviews inline). Keep `visual-companion`. **Neutralize the domain**: the code-specific guidance ("cover architecture, components, data flow, error handling, testing"; "working in existing codebases"; design-for-isolation) becomes conditional on the work being software. What generalizes — one question at a time, two or three approaches, sections gated on approval, YAGNI — stays unconditional |
 | `writing-plans` | The reduced format above. Home of the testing-vs-verification rule, in "Done when" |
 | `executing-plans` | Absorbs the subagent loop; see below |
 | `systematic-debugging` | One-line rewire: its `test-driven-development` reference is dropped. Its `verification-before-completion` reference survives |
@@ -290,15 +290,37 @@ practice.** The annoyance is a better spec than a guess.
 divergence to the file most likely to be rewritten upstream. Revisit once the
 execution loop has run enough to trust.
 
+## Packaging
+
+Everything lands in `clankit-dev`. Splitting is deferred, not rejected.
+
+`brainstorming` is domain-independent by design and worth sharing with people
+who do not write software, which argues for its own installable unit — a
+non-developer should not receive a hook-injected preamble about repositories,
+subagents, and test suites in every session. Skills that never fire cost
+nothing; an injected bootstrap is paid unconditionally.
+
+That split is deferred because nobody else installs these yet, and moving a
+skill directory plus a marketplace entry is cheap. The patch that makes it
+possible is already in the design: brainstorming ending with a question rather
+than a fixed terminal is what lets it stand alone. With the flow installed, the
+question consults the routing table; without it, the question degrades to
+"should this be written down?" and stops.
+
+**The bootstrap names capabilities, not skills** — "hand it off and walk away,"
+not `autopilot`. A skill reference that crosses a plugin boundary dangles when
+that plugin is absent, and this keeps the split available later at no cost.
+
 ## Build order
 
 1. `bootstrap` and the hook — nothing routes without it
-2. `brainstorming`, patched — the entry the bootstrap points at
-3. `writing-plans`, patched — the reduced format
-4. `executing-plans` — absorbing the subagent loop; the largest piece
-5. Vendor the verbatim set; rewire `systematic-debugging`
+2. `brainstorming`, patched — the entry the bootstrap points at, including the
+   neutralization pass
+3. Vendor the verbatim set; rewire `systematic-debugging`
+4. `writing-plans`, patched — the reduced format
+5. `executing-plans` — absorbing the subagent loop; the largest piece
 6. Adjust `autopilot` to accept a design or plan as input
 7. `NOTICE`, `MAINTENANCE.md`
 
-Steps 1–3 are usable on their own: design, route, and write a plan, with
-execution still falling back to whatever is installed.
+Steps 1–2 are usable on their own, and 1–4 give design, routing, and a written
+plan with execution still falling back to whatever is installed.
