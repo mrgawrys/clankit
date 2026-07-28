@@ -5,9 +5,20 @@
 Some skills in `plugins/clankit-dev/skills/` are derived from the Superpowers
 plugin (https://github.com/obra/superpowers), used under the MIT License.
 
-Vendored, some with modifications:
+Vendored verbatim:
 
-- `brainstorming`
+- `dispatching-parallel-agents`
+- `receiving-code-review`
+- `verification-before-completion`
+
+Vendored with modifications:
+
+- `brainstorming` — terminal state, trigger, domain scoping, companion branding
+- `systematic-debugging` — skill references rewired; skill-development
+  artifacts (creation log, pressure tests) dropped
+- `writing-skills` — skill references rewired; other-harness paths removed
+- `writing-good-tests` — promoted from a reference document inside
+  `test-driven-development` to a skill of its own, with frontmatter added
 
 Original license:
 
