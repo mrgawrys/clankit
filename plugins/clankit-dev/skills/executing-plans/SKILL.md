@@ -144,11 +144,10 @@ Template: [implementer-prompt.md](implementer-prompt.md)
 
 ### 2. Handle the report
 
-**DONE:** Generate the review package (`scripts/review-package PLAN_FILE BASE HEAD`
-— it writes a diff file and prints `wrote <path>: ...`; BASE is the commit you
-recorded, never
-`HEAD~1`, which silently drops all but the last commit of a multi-commit task),
-then dispatch the task reviewer with that path.
+**DONE:** Generate the review package with `scripts/review-package PLAN_FILE BASE
+HEAD` — it writes a diff file and prints `wrote <path>: ...`. BASE is the commit
+you recorded, never `HEAD~1`, which silently drops all but the last commit of a
+multi-commit task. Dispatch the task reviewer with that path.
 
 **DONE_WITH_CONCERNS:** Read the concerns first. If they are about correctness or
 scope, address them before review. If they are observations, note them and proceed.
