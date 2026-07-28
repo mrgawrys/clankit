@@ -105,6 +105,7 @@ Lightweight spaced repetition layered onto `/learn`. Items are auto-captured dur
 | `question` | The recall prompt. |
 | `answer` | Terse memory-jog, not a full explanation — depth lives in the topic note. |
 | `created` | ISO date (YYYY-MM-DD) captured. |
+| `reviewed` | ISO date last graded (= `created` if never reviewed). Drives elapsed-time scheduling. |
 | `due` | ISO date next due. |
 | `interval` | Current interval in days. |
 | `streak` | Consecutive "got it" count. |
@@ -130,12 +131,28 @@ item:
 3. Reveal the saved answer **and assign a grade** — compare the user's answer to the saved one and state **got it** or **missed it** with a one-line reason (e.g. "you had the idea but missed the word 'transitive' — that's a miss"). Do **not** ask the user to confirm; grade it and move on.
 4. The grade stands unless the user overrides it. They can say "override" (or flip it) anytime; the final grade is always the user's if they speak up.
 
-**Scheduling:** interval ladder `1 → 3 → 7 → 16 → 35 → 90` days (stays at 90 thereafter).
+**Scheduling:** interval ladder `1 → 3 → 7 → 16 → 35 → 90 → 180 → 365` days (stays at 365 thereafter).
 
-- **Got it** → advance `interval` one rung, `streak += 1`, `due = today + new interval`.
-- **Missed it** → `interval = 1`, `streak = 0`, `due = tomorrow`.
+Schedule from the time the user **actually survived**, not from the stored interval:
 
-After grading every item, write the updated `due`/`interval`/`streak` values back to the table.
+```
+elapsed = today − reviewed          (fall back to due − interval if `reviewed` is missing)
+```
+
+- **Got it** → `interval` = the first ladder rung **strictly greater than** `elapsed`; `streak += 1`.
+- **Missed it** → `interval` = two rungs below the current one (floor `1`); `streak = 0`.
+- Either grade → `reviewed = today`, `due = today + interval`.
+
+Why elapsed rather than the ladder alone: a review is always late by some amount, and a
+correct answer after a long gap is evidence of *that* gap's retention. Crediting only one
+rung means a card 50 days overdue at `interval = 1` gets promoted to 3 days and comes
+straight back — so an absence permanently inflates the due pile with material the user
+demonstrably knows. Scheduling off `elapsed` drains the backlog instead of recycling it.
+Symmetrically, a miss on a long-overdue card is not a failed short interval, so it steps
+down gently instead of resetting to 1.
+
+After grading every item, write the updated `reviewed`/`due`/`interval`/`streak` values
+back to the table.
 
 **Recommend notes to re-read (always, after any review).** Once grading is written back — and before continuing — tally the session's results **by topic note** (the `topic` column maps to a note at `<notes root>/<Track>/<Category>/<Topic>.md`). Then recommend which topic notes the user should re-read, in priority order:
 
@@ -189,11 +206,11 @@ For each card:
 4. The grade stands unless the user overrides it. They can say "override" (or flip it)
    anytime; the final grade is always the user's if they speak up.
 
-**Scheduling** is identical to meanings review — interval ladder `1 → 3 → 7 → 16 → 35 → 90`:
-- **Got it** → advance `interval` one rung, `streak += 1`, `due = today + new interval`.
-- **Missed it** → `interval = 1`, `streak = 0`, `due = tomorrow`.
+**Scheduling** is identical to meanings review — same elapsed-time rule, same ladder
+`1 → 3 → 7 → 16 → 35 → 90 → 180 → 365`, same `reviewed` column. See
+[Phase 0a's Scheduling](#phase-0a-meanings-review-mandatory-first) for the rationale.
 
-After grading every card, write the updated `due`/`interval`/`streak` back to
+After grading every card, write the updated `reviewed`/`due`/`interval`/`streak` back to
 `glossary-queue.md`, then return to the Phase 0b menu.
 
 ## Phase 1: Load Context
@@ -296,7 +313,7 @@ The track name from the Hub MOC determines all paths:
 
 ### Append review items
 
-6. **Append captured items** — write out everything captured in Phase 3, by bucket. For every new row in either file: assign `id` = max existing id + 1 (1 if empty), `created` = today, `due` = tomorrow, `interval` = `1`, `streak` = `0`. Skip a file if its bucket was empty.
+6. **Append captured items** — write out everything captured in Phase 3, by bucket. For every new row in either file: assign `id` = max existing id + 1 (1 if empty), `created` = today, `reviewed` = today, `due` = tomorrow, `interval` = `1`, `streak` = `0`. Skip a file if its bucket was empty.
    - **Meanings → `<state dir>/review-queue.md`** — fill `track`, `topic`, `question`, `answer`.
    - **Glossary → two files:** first add the term to `<notes root>/Glossary.md` if absent (`term`, crisp `definition`, `[[source]]`, A–Z position); then add a scheduler row to `<state dir>/glossary-queue.md` with `term`, `source`, `direction` = `def→term`. The definition stays only in `Glossary.md`.
 
