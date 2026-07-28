@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "clankit-dev",
-      "description": "Dev/work skills: autopilot, screenshot, writing-clearly-and-concisely",
+      "description": "Design-to-build workflow (triage, routing, brainstorming, plans, delegated execution) plus dev skills: autopilot, my-prs, screenshot, visualize-code, writing-clearly-and-concisely",
       "source": "./plugins/clankit-dev",
       "category": "workflow"
     },

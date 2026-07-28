@@ -36,6 +36,13 @@ rule, say "clank, clank" before launching each subagent.
 ## Phases
 
 ### Phase 0 · Understand & set up (orchestrator)
+- **Check what you were handed.** Autopilot is a routing destination as well as a
+  standalone entry point, so the work may already be designed:
+  - **An approved design in this conversation** → that's your brief. Don't re-derive it.
+  - **A plan file** → read it. Its tasks become the build's structure, and its Global
+    Constraints bind every phase. Prefer `executing-plans` for a plan with more than a
+    few tasks — it reviews each one; autopilot reviews only at the end.
+  - **A bare ask** → proceed with the rest of this phase.
 - Read the ask. If a ticket ID/URL was given, fetch it to get the full brief (via whatever tracker integration is available).
 - Determine the **target repo**: use the sub-repo you're invoked in; otherwise infer it
   from the ask/ticket. If it's genuinely ambiguous, ask once — this is the only routine
@@ -48,6 +55,12 @@ rule, say "clank, clank" before launching each subagent.
 ### Phase 1 · Plan (orchestrator, lightweight)
 - Write a short build brief: what to change, which files/areas, the acceptance bar
   ("done when…"). A few bullets — not a formal plan document. No user gate.
+- **Skip this phase** if Phase 0 arrived with an approved design or a plan file. The
+  brief already exists; re-deriving it invents a second source of truth that can
+  disagree with the first.
+- The acceptance bar follows the work: code in a repo with tests earns tests; work
+  that's hard to test (UI, visual, external systems) earns a named verification run;
+  prose and config earn a behavior check and no tests.
 
 ### Phase 2 · Build  → subagent (Opus)
 - Dispatch one subagent with the brief and the worktree path. It implements the feature,

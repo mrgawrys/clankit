@@ -28,7 +28,7 @@ session="$(json_field '.session_id')"
 # Manual invocation: locate the newest transcript for the current directory.
 if [ -z "$transcript" ]; then
   slug="$(pwd | sed 's/[/.]/-/g')"
-  transcript="$(ls -t "$HOME/.claude/projects/$slug"/*.jsonl 2>/dev/null | head -1 || true)"
+  transcript="$(ls -t "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects/$slug"/*.jsonl 2>/dev/null | head -1 || true)"
 fi
 [ -n "$transcript" ] && [ -f "$transcript" ] || exit 0
 

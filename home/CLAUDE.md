@@ -8,6 +8,7 @@
 - Draft the message in the conversation, let the user read and approve it, then post.
 - This applies to: `gh pr edit`, `gh pr comment`, `gh pr review`, `gh issue comment`, and any equivalent API calls.
 - **Exception — creating draft PRs:** `gh pr create --draft` may be run without prior approval. Condition: your final message must clearly state that the PR was created and link it, so I always know. Draft-only — never `gh pr ready`, never merge, never comment without approval. (The Ralph Loop and `/autopilot` rely on this.)
+- **Exception — a repository that opts out.** This rule is here for repositories other people read. A repository whose own checked-in instructions (`CLAUDE.md` / `AGENTS.md`) explicitly lift it is lifted, for **my own** PRs and issues there. Without that line the rule holds — never infer the exception from a repository feeling personal or small. It never covers commenting or reviewing on somebody else's PR, wherever that PR lives.
 
 ## Code Comments
 
@@ -75,47 +76,23 @@ default to the `revdiff` skill (floating pane, my inline annotations come back
 as feedback) instead of inline markdown. Skip it for small changes (a single
 hunk / few lines) or illustrative snippets. Override anytime with "inline".
 
-## Writing Plans (superpowers skill)
+## Building in the Current Session
 
-When invoking the superpowers `writing-plans` skill, before writing the plan, ask
-which of these three modes I want:
+The routing table decides the artifact and the gates. When it lands on *build
+here, per-task gates, no plan file*, run it like this:
 
-- **All at once** — write the full plan as a document, the standard way the skill
-  describes. Best when the work is large, the shape is uncertain, or the plan will
-  be executed in a separate session / by someone else.
+1. Show me the **high-level task list** and get my approval on the shape before
+   writing any code.
+2. Then go **task by task**: present one task as a diff, pause for my approval,
+   and build it as soon as I approve. Don't batch approvals — build each step
+   before presenting the next.
+3. Keep a **lightweight running record** — a task checklist plus a one-line note
+   per task — so an interrupted session can resume. Not a plan document.
+4. If a later step reveals an earlier one was wrong, flag it and stop before
+   compounding.
 
-- **In batches** — build the plan document interactively, **saving incrementally
-  as we go**:
-  1. First show me the **high-level plan** (the overall structure / task list).
-     Once I approve it, **create the plan file** with the header + high-level
-     structure (file map / task table).
-  2. Then go **task by task**: present one task at a time in an easy-to-read
-     format, rendering any code/changes as **diffs** (shown as diffs, not prose).
-     Pause after each task so I can comment before moving to the next.
-  3. **As soon as I approve a task, append it to the plan file** — do NOT wait
-     until the end. Approved work must be persisted immediately so nothing is
-     lost if the session is interrupted. Then continue to the next task.
-  4. If I later revise an already-saved task, update it in the file in place.
-
-- **Build as we go** — skip the standalone plan document; plan and execute in the
-  same loop. Best when steps are reasonably independent/sequential and we're
-  building in the current session:
-  1. First show me the **high-level plan** (the overall structure / task list) and
-     get my approval on the shape before writing any code.
-  2. Then go **task by task**: present one task as a **diff**, pause for my
-     approval, and **as soon as I approve it, dispatch a subagent to implement it
-     immediately** (use the superpowers `subagent-driven-development` skill). Do
-     not batch up approvals — build each step before presenting the next.
-  3. Keep only a **lightweight running record**: a short task checklist that gets
-     ticked off, plus a one-line note of what each subagent did. This is so an
-     interrupted session can resume — it is NOT a full plan document.
-  4. If a later step reveals an earlier one was wrong, flag it and stop before
-     compounding — don't keep dispatching on a broken foundation.
-
-**Doc locations:** when a skill (e.g. superpowers brainstorming/writing-plans)
-defaults to `docs/superpowers/specs/` or `docs/superpowers/plans/`, drop the
-`superpowers` segment — write specs to `docs/specs/`, plans to `docs/plans/`,
-and other docs to `docs/<category>/`.
+**Doc locations:** specs to `docs/specs/`, plans to `docs/plans/`, other docs to
+`docs/<category>/`.
 
 ## Suggest Reusable Extraction
 
