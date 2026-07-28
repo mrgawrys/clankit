@@ -33,7 +33,9 @@ Subagent (general-purpose):
 
     Once you're clear on requirements:
     1. Implement exactly what the task specifies
-    2. Write tests (following TDD if task says to)
+    2. Meet the brief's "Done when" — tests where the work admits them (write
+       the test first and watch it fail), a named verification run where it
+       doesn't. Don't substitute one for the other
     3. Verify implementation works
     4. Commit your work
     5. Self-review (see below)
@@ -96,11 +98,12 @@ Subagent (general-purpose):
     - Did I only build what was requested?
     - Did I follow existing patterns in the codebase?
 
-    **Testing:**
-    - Do tests actually verify behavior (not just mock behavior)?
-    - Did I follow TDD if required?
-    - Are tests comprehensive?
-    - Is the test output pristine (no stray warnings or noise)?
+    **Acceptance — whichever the brief asked for:**
+    - Tests: do they verify behavior (not just mock behavior)? Did I write the
+      failing test first? Are they comprehensive? Is the output pristine?
+    - A verification run: did I actually run it and look, or am I asserting it
+      works? A test that only asserts a file contains a string is not a
+      substitute for looking.
 
     If you find issues during self-review, fix them now before reporting.
 
@@ -129,7 +132,8 @@ Subagent (general-purpose):
     report file):
     - **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
     - Commits created (short SHA + subject)
-    - One-line test summary (e.g. "14/14 passing, output pristine")
+    - One-line acceptance summary: test results ("14/14 passing, output
+      pristine") or the verification you ran and what you observed
     - Your concerns, if any
     - The report file path
 

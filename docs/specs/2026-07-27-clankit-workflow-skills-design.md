@@ -192,7 +192,9 @@ Each task carries what an implementer cannot derive, and nothing else.
 
 Kept from writing-plans: File Structure, Task Right-Sizing ("split only where a
 reviewer could meaningfully reject one task while approving its neighbor"),
-Global Constraints, the Interfaces block, and the type-consistency self-review.
+Global Constraints, and the type-consistency self-review. Its plan-level
+Interfaces block dissolves into the per-task `Signatures` field, which puts the
+names a task's neighbours use in front of the implementer who needs them.
 
 Dropped: Bite-Sized Task Granularity, per-step code blocks, the No-Placeholders
 code mandates, the Execution Handoff.

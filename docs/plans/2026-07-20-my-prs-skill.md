@@ -1,6 +1,7 @@
 # my-prs Skill Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **To execute this plan:** use the `executing-plans` skill. Steps use checkbox
+> (`- [ ]`) syntax for tracking.
 
 **Goal:** A user-invocable `my-prs` skill in clankit-dev that fetches all of the user's open GitHub PRs with real status in one call and recommends what to work on first.
 

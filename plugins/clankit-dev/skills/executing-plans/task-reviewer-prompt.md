@@ -61,7 +61,13 @@ Subagent (general-purpose):
     implementer grading their own work. Judge the code on its merits — a
     stated rationale never downgrades a finding's severity.
 
-    ## Tests
+    ## The acceptance bar
+
+    Judge against the bar the brief set, not against tests by default. Work
+    that can't be tested (UI, visual output, external systems, prose, config)
+    earns a named verification run instead; absent tests are a finding only
+    when the brief asked for them. A test that asserts a file contains a
+    string, standing in for a verification nobody ran, is a finding.
 
     The implementer already ran the tests and reported results with TDD
     evidence for exactly this code. Do not re-run the suite to confirm their
@@ -98,9 +104,11 @@ Subagent (general-purpose):
     - DRY without premature abstraction?
     - Edge cases handled?
 
-    **Tests:**
-    - Do the new and changed tests verify real behavior, not mocks?
-    - Are the task's edge cases covered?
+    **Acceptance:**
+    - If the brief asked for tests: do they verify real behavior, not mocks?
+      Are the task's edge cases covered?
+    - If it asked for a verification run: was it run and observed, or only
+      asserted?
 
     **Structure:**
     - Does each file have one clear responsibility with a well-defined interface?
