@@ -8,6 +8,7 @@
 - Draft the message in the conversation, let the user read and approve it, then post.
 - This applies to: `gh pr edit`, `gh pr comment`, `gh pr review`, `gh issue comment`, and any equivalent API calls.
 - **Exception — creating draft PRs:** `gh pr create --draft` may be run without prior approval. Condition: your final message must clearly state that the PR was created and link it, so I always know. Draft-only — never `gh pr ready`, never merge, never comment without approval. (The Ralph Loop and `/autopilot` rely on this.)
+- **Exception — a repository that opts out.** This rule is here for repositories other people read. A repository whose own checked-in instructions (`CLAUDE.md` / `AGENTS.md`) explicitly lift it is lifted, for **my own** PRs and issues there. Without that line the rule holds — never infer the exception from a repository feeling personal or small. It never covers commenting or reviewing on somebody else's PR, wherever that PR lives.
 
 ## Code Comments
 
