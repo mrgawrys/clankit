@@ -19,6 +19,11 @@ Vendored with modifications:
 - `writing-skills` — skill references rewired; other-harness paths removed
 - `writing-good-tests` — promoted from a reference document inside
   `test-driven-development` to a skill of its own, with frontmatter added
+- `writing-plans` — rewritten around a reduced task format
+- `executing-plans` — merged with `subagent-driven-development`; its prompt
+  templates and the `review-package` / workspace scripts are vendored with it
+
+See `MAINTENANCE.md` for what each modification changes and why.
 
 Original license:
 
