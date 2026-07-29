@@ -57,6 +57,17 @@ So: a menu with named answers, asked with a tool call, not a table to compute
 against. If a re-sync or a later edit turns the four modes back into inferred
 axes — artifact × gates — it will regress the same way.
 
+**The modes have names, not letters, and *plan first* is a prefix.** The letters
+A–D lived only in the bootstrap, and a session duly told its user "we're in Mode
+C" — vocabulary nobody outside that file could decode. The handles are now the
+option labels and nothing else speaks them. The same pass fixed what the letters
+had hidden: *plan first* answers which artifact gets written, not how the build
+is gated, so it ends by asking the second question — *All at once / In batches /
+Hand it off*. That question cannot become a fifth menu entry, because
+`AskUserQuestion` caps options at four, and it must not become an axis computed
+up front, for the reason in the paragraph above. Asking it late is what keeps it
+a menu.
+
 **Gates are questions, not announcements.** Added, because the failure above had
 a second half: every gate in that session came out as a statement with an
 objection window ("decisions I'm making — flag if you disagree", "shall I
@@ -123,7 +134,7 @@ circuit breaker, and the adjudication rules. Those encode real failures.
 
 ### `autopilot` (not vendored — ours, but it moved)
 
-**Mode D writes a plan and runs `executing-plans`.** It used to write a few-bullet
+**Autopilot writes a plan and runs `executing-plans`.** It used to write a few-bullet
 brief, build with one subagent, and review once at the end. That is a *lighter*
 path, and autopilot's premise is the opposite: run the workflow exactly as a human
 would, with the gates answered in advance rather than removed. Unattended work is
@@ -159,8 +170,8 @@ its `writing-good-tests.md` is kept), `finishing-a-development-branch`,
 
 Recorded in `docs/specs/2026-07-27-clankit-workflow-skills-design.md`:
 
-- **A `/vibe` skill** — a loop-shaped sibling to autopilot. Revisit when mode A
-  (build it all at once, no gates) feels heavy.
+- **A `/vibe` skill** — a loop-shaped sibling to autopilot. Revisit when *all at
+  once* (no gates, report at the end) feels heavy.
 - **Autopilot as a workflow.** Now that it is a fixed pipeline — plan, then
   `executing-plans` with gates off, then a draft PR — it is deterministic control
   flow over subagents, which is what the harness's workflow scripts are for.
