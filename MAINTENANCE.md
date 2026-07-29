@@ -124,10 +124,18 @@ correct only when the user asked for no gates.
 
 **No brief-extraction script.** A task in the reduced format is already a brief.
 
-**It accepts a spec, not only a plan.** *All at once* and *in batches* build straight from the
-spec with no plan file, so the skill derives the task list itself and shows it
-for approval before Task 1. The scripts needed no change — a spec is a file on
-disk, so `plan-workspace` keys off its basename exactly as it does for a plan.
+**It accepts a spec, not only a plan.** *All at once* and *in batches* build
+straight from the spec with no plan file, so the skill derives the task list
+itself and shows it for approval before Task 1. The scripts needed no change — a
+spec is a file on disk, so `plan-workspace` keys off its basename exactly as it
+does for a plan.
+
+**No hand-off answer in the gates question.** Reaching this skill already means
+the work gets built, so offering "stop before Task 1" asks it to undo its own
+invocation. It also has nothing to hand over on the spec path: the derived task
+list is deliberately never written to disk, so a session that stopped there
+would leave the next one re-deriving different tasks from the same spec. Handing
+work over is `writing-plans`' answer to give, because there a plan file exists.
 
 Ported close to verbatim, and worth keeping that way: the fix loop, the five-round
 circuit breaker, and the adjudication rules. Those encode real failures.

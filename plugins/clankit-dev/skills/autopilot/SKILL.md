@@ -6,14 +6,14 @@ user_invocable: true
 
 # Autopilot
 
-Take a self-contained feature from a one-line ask to a **draft PR**, with no human in
-the loop in between. The result handed back is one PR link (plus the worktree path)
-for you to check out at your leisure.
+Take a self-contained feature from a one-line ask to a **draft PR**, with no human
+in the loop in between. The result handed back is one PR link (plus the worktree
+path) for you to check out at your leisure.
 
-Autopilot's premise is: run the workflow exactly as a
-human would — the plan gets written, every task gets reviewed, findings get fixed —
-with nobody present to confirm any of it. It is not a lighter path. It is the same
-path with the gates answered in advance.
+Autopilot's premise is: run the workflow exactly as a human would — the plan gets
+written, every task gets reviewed, findings get fixed — with nobody present to
+confirm any of it. It is not a lighter path. It is the same path with the gates
+answered in advance.
 
 Use this when you trust the task enough not to sit over it. It is autonomous by
 design: **after invocation it does not stop to ask you anything** unless it genuinely
@@ -74,8 +74,10 @@ A "short build brief" cannot do any of these. Don't substitute one.
   conventions. All subsequent work happens in this worktree path.
 
 ### Phase 1 · Plan (orchestrator)
-- Use the `writing-plans` skill to produce a real plan file in the worktree. **No user
-  gate** — that's the one thing autopilot answers in advance.
+- Use the `writing-plans` skill to produce a real plan file in the worktree. **Tell the
+  subagent it is running under autopilot** — it cannot know otherwise, and that is what
+  exempts it from both questions: no gate on the plan, and no handoff question at the
+  end. Phase 2 answers the second one.
 - The acceptance bar follows the work: code in a repo with tests earns tests; work
   that's hard to test (UI, visual, external systems) earns a named verification run;
   prose and config earn a behavior check and no tests.

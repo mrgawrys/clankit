@@ -80,7 +80,8 @@ its own is either two tasks or none.
 # [Feature Name] Implementation Plan
 
 > **To execute this plan:** use the `executing-plans` skill. It reviews the plan,
-> then asks whether to run delegated (a subagent per task) or inline.
+> then asks how you want it built — all at once, or in batches with a diff per
+> task — and whether to run delegated (a subagent per task) or inline.
 
 **Goal:** [One sentence describing what this builds]
 
