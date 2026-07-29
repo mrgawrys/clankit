@@ -38,18 +38,19 @@ the deliverable. Skip the menu and suggest what could come next.
 
 **Plan first is a prefix, not a peer.** It answers what gets written, not how it
 gets built. Once the plan exists, ask the second question — *All at once / In
-batches / Hand it off* — and build from the plan. *Autopilot* answers both
-halves up front, so it asks nothing.
+batches / Hand it off* — and, unless they hand it off, build from the plan.
+*Autopilot* answers both halves up front, so it asks nothing.
 
 **Typing a skill answers that skill's question and no other.**
 `/writing-plans` means "I want a plan file": the artifact, not the gates.
 `/autopilot` is the one exception, because unattended answers both.
 
-**Say the action, not the name.** The four names are option labels in the menu,
-and that is the only place the user meets them. In prose, say what will happen —
-"I'll write the plan first, then ask how you want it built" — never "we're in
-plan-first mode". Nobody outside this file knows what that means, which goes for
-every skill `description:` too, since those show up in the skill list.
+**Say the action, not the name.** The four names are option labels — in the menu,
+and in the artifact headers that stand in for it. Nowhere else. In running prose,
+say what will happen — "I'll write the plan first, then ask how you want it
+built" — never "we're in plan-first mode". Nobody outside this file knows what
+that means, which goes for every skill `description:` too, since those show up in
+the skill list.
 
 ## Gates are questions
 

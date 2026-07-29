@@ -87,7 +87,7 @@ hunk / few lines) or illustrative snippets. Override anytime with "inline".
 
 Once a design is approved or a spec is opened, ask me which mode — always ask,
 never infer it from something I said earlier about where the work happens. The
-four modes live in the session bootstrap; three of them end in `executing-plans`.
+four modes live in the session bootstrap, and they all end in `executing-plans`.
 
 ***In batches* is my usual pick**, so get it right:
 
