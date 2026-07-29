@@ -1,17 +1,35 @@
 ---
 name: executing-plans
-description: "Use when you have a written implementation plan to execute. Runs delegated by default - a fresh subagent per task with a review and fix loop between tasks - or inline when the plan is short. Reviews the plan critically before starting and stops when blocked rather than guessing."
+description: "Use when a design is ready to build - either a written implementation plan, or an approved spec being built directly (routing modes A and B). Runs delegated by default - a fresh subagent per task with a review and fix loop between tasks - or inline when the work is short. Reviews the source critically before starting and stops when blocked rather than guessing."
 ---
 
 # Executing Plans
 
-Take a written plan and turn it into committed, reviewed work.
+Take an approved design and turn it into committed, reviewed work.
 
-**Announce at start:** "I'm using the executing-plans skill to implement this plan."
+**Announce at start:** "I'm using the executing-plans skill to implement this."
+
+## What you were handed
+
+This skill is the destination for routing modes A, B and C, so the source
+document differs:
+
+- **A plan file** (mode C, or a plan handed over) → it already carries tasks,
+  Global Constraints, and an acceptance bar per task. Use them as written.
+- **A spec** (modes A and B — built directly, no plan file) → it carries the
+  design, not a task breakdown. **Derive the task list first:** right-size the
+  tasks per the rules in `writing-plans`, give each one an acceptance bar
+  ("done when…"), and **show the list for approval before Task 1.** That
+  approved list is your task sequence, your todos, and your ledger entries —
+  it is not a document, and it does not get written to `docs/plans/`.
+- **Neither — just an ask** → you are in the wrong skill. Go design it first
+  with `brainstorming`.
+
+Everything below reads "the plan" to mean whichever of these you hold.
 
 ## Two modes
 
-After loading and reviewing the plan, ask which one — unless the routing table
+After loading and reviewing the plan, ask which one — unless the routing mode
 already settled it:
 
 ```
@@ -40,7 +58,9 @@ that lost their place have re-dispatched entire completed task sequences — the
 single most expensive failure observed. Track progress in a ledger file, not
 only in todos.
 
-- Run `scripts/plan-workspace PLAN_FILE`. It prints this plan's git-ignored
+- Run `scripts/plan-workspace PLAN_FILE`, passing the plan **or the spec** —
+  either way it is a file on disk and the workspace is named after it. It prints
+  this plan's git-ignored
   directory (`<repo-root>/.clankit/plans/<plan-basename>/`), home to every
   artifact for THIS plan: ledger, briefs, reports, review packages. Another
   plan's directory is never yours to read or write.
@@ -55,7 +75,9 @@ only in todos.
   your context no longer remembers creating them. After compaction, trust the
   ledger and `git log` over your own recollection.
 
-Read the plan once, note its Global Constraints, and create a todo per task.
+Read the plan once, note its Global Constraints, and create a todo per task. From
+a spec, the constraints are whatever it pinned down as decided — exact values,
+naming, response shapes — and they bind every task the same way.
 
 **Pre-flight scan.** Before dispatching Task 1, scan the plan for conflicts:
 tasks that contradict each other or the Global Constraints, and anything the
@@ -98,7 +120,9 @@ on multi-step work, costing more overall.
 
 ## Gates
 
-Independent of the mode. Confirm which applies before Task 1:
+Independent of the delegated/inline mode. The routing mode usually already
+settled this — **A and D mean none, B means per-task.** If you arrived without
+one, confirm which applies before Task 1:
 
 - **Per-task** — present each task's diff and wait for approval before moving on.
   Use a diff-review tool if one is available rather than pasting the diff.

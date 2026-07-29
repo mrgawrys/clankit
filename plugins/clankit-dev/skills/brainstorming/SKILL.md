@@ -15,19 +15,46 @@ Do NOT invoke any implementation skill, write any code, scaffold any project, or
 
 ## Anti-Pattern: "This Is Too Simple To Need A Design"
 
-Triage already decided this ask was worth designing — don't re-litigate it here. "Simple" is where unexamined assumptions cause the most wasted work. The design can be short, a few sentences for a small change, but you MUST present it and get approval.
+Triage already decided this ask was worth designing — don't re-litigate it here.
+**Every ask goes through every step below**, and the two excuses for skipping
+them are both wrong:
+
+- **"It's simple."** Simple is where unexamined assumptions cause the most
+  wasted work.
+- **"It's already well-specified."** A ticket, an issue, or a written brief
+  pins down *what* to build. It is not an answer to *how*, *at what cost*, *what
+  it breaks*, or *should we*. Those are what the questions and the alternatives
+  are for, and a precise ticket makes them easier to answer, not unnecessary.
+
+The design can be short — a few sentences for a small change — but you MUST
+present it and get approval.
 
 ## Checklist
 
-You MUST create a task for each of these items and complete them in order:
+You MUST track these as tasks in your task list and complete them in order. Do
+it at the start, before step 1 — an unfinished task is the only thing that makes
+a skipped step visible while there is still time to go back.
 
 1. **Explore project context** — check files, docs, recent commits
 2. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval its browser tab opens for you. If no visual question ever arises, never offer it. See the Visual Companion section below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Ask what's next** — consult the routing table in the session bootstrap. It decides whether the design gets written down at all, and what happens after
-7. **If a spec gets written** — self-review it, then ask the user to review it (see below)
+6. **Write the spec** — to `docs/specs/`, by default always. Self-review it, then ask the user to review it (see below)
+7. **Ask which mode** — one `AskUserQuestion` call, the four modes from the session bootstrap. Not a yes/no on a mode you already picked
+
+**Every gate here is a question you ask.** Steps 3, 4, 5 and 7 each end with the
+user answering something. The failure mode is converting one into an
+announcement with a window to object, which reads as decisive and skips the step:
+
+| Step | What the skipped version looks like |
+|---|---|
+| 3 · clarifying questions | "No clarifying questions needed — the ticket settles it." |
+| 4 · two or three approaches | "Decisions I'm making (flag if you disagree): …" |
+| 5 · design, section by section | the whole design in one block, ending "does this look right?" |
+| 7 · which mode | "Shall I proceed?" — a yes/no on the mode you already chose |
+
+If you have written one of these, the step did not happen. Go back and ask.
 
 ## Process Flow
 
@@ -38,28 +65,31 @@ digraph brainstorming {
     "Propose 2-3 approaches" [shape=box];
     "Present design sections" [shape=box];
     "User approves design?" [shape=diamond];
-    "Consult the routing table" [shape=diamond];
     "Write spec doc" [shape=box];
     "Spec self-review\n(fix inline)" [shape=box];
     "User reviews spec?" [shape=diamond];
-    "Route: plan, build, hand off, or stop" [shape=doublecircle];
+    "Anything to build?" [shape=diamond];
+    "Ask which mode\n(A / B / C / D)" [shape=doublecircle];
+    "Suggest next steps, stop" [shape=doublecircle];
 
     "Explore project context" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";
     "Propose 2-3 approaches" -> "Present design sections";
     "Present design sections" -> "User approves design?";
     "User approves design?" -> "Present design sections" [label="no, revise"];
-    "User approves design?" -> "Consult the routing table" [label="yes"];
-    "Consult the routing table" -> "Route: plan, build, hand off, or stop" [label="nothing to write"];
-    "Consult the routing table" -> "Write spec doc" [label="a later context reads this"];
+    "User approves design?" -> "Write spec doc" [label="yes"];
     "Write spec doc" -> "Spec self-review\n(fix inline)";
     "Spec self-review\n(fix inline)" -> "User reviews spec?";
     "User reviews spec?" -> "Write spec doc" [label="changes requested"];
-    "User reviews spec?" -> "Route: plan, build, hand off, or stop" [label="approved"];
+    "User reviews spec?" -> "Anything to build?" [label="approved"];
+    "Anything to build?" -> "Ask which mode\n(A / B / C / D)" [label="yes"];
+    "Anything to build?" -> "Suggest next steps, stop" [label="no — the spec was the deliverable"];
 }
 ```
 
-**The terminal state is a question, not a destination.** When the design is approved, consult the routing table in the session bootstrap. Do not assume a plan document is wanted — often the approved design in context is the whole handoff. Do NOT invoke an implementation skill before that question is answered.
+**The terminal state is a question you ask out loud.** The spec gets written, and then the user picks a mode. Reading the mode table is not the step — asking is. Do NOT invoke an implementation skill, and do not start building, before the user has answered.
+
+If the user already said where the work happens — a worktree, a branch, a repo — that is not an answer to this question. It settles *where*, not *which mode*, and not the gates.
 
 ## The Process
 
@@ -103,17 +133,32 @@ digraph brainstorming {
 
 ## After the Design
 
-**Documentation — only when the routing table calls for it:**
+**Write the spec — by default, always:**
 
-A spec earns its place when a later context has to read it: a fresh session, a
-subagent, a person who wasn't here. When the next step happens in this
-conversation, the approved design is already the handoff and a document just
-restates it.
+The spec is the durable record of what was decided and the input every mode
+consumes: modes A and B build from it, mode C turns it into a plan, mode D hands
+it to autopilot. Skip it only when the user says to.
 
 - Write the validated design (spec) to `docs/specs/YYYY-MM-DD-<topic>-design.md`
-  - (User preferences for spec location override this default)
+  - A design document goes in `docs/specs/` even when the repo keeps other
+    documents elsewhere. `docs/plans/` means "carries the executing-plans
+    header" — a spec filed there will be read as a plan and found to be missing
+    its tasks.
+  - (An explicit user preference for spec location overrides this default. A
+    convention you inferred from the repo does not.)
 - Use a writing-clearly-and-concisely skill if available
 - Commit the design document to git
+
+**Every spec opens with this header**, so a session that opens it later knows a
+choice is owed rather than assuming one:
+
+```markdown
+# [Topic] — Design
+
+> **To act on this design:** pick a mode — build it all at once, build it in
+> batches (per-task diffs), write an implementation plan (`writing-plans`), or
+> hand it to `autopilot`. Ask which; don't pick on the reader's behalf.
+```
 
 **Spec Self-Review:**
 After writing the spec document, look at it with fresh eyes:
@@ -132,9 +177,23 @@ After the spec review loop passes, ask the user to review the written spec befor
 
 Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
 
-**What happens next:**
+**Ask which mode:**
 
-Consult the routing table in the session bootstrap and ask. The routes are: write a plan, build here, hand it off unattended, or stop because the design was the deliverable. Recommend one and say why — you know how big the work is and who will execute it — but the choice is the user's.
+One `AskUserQuestion` call, four named answers, taken from the session bootstrap:
+
+| Mode | What it does |
+|---|---|
+| **A · Build it all at once** | `executing-plans` from the spec, no gates, report at the end |
+| **B · Build it in batches** | `executing-plans` inline, a diff per task, you approve each |
+| **C · Write the implementation plan** | `writing-plans` produces the plan; hand it off or execute it |
+| **D · Autopilot** | unattended — plans, builds, reviews itself, opens a draft PR |
+
+Recommend one and say why; you know how big the work is and who will execute it.
+The choice is the user's, and it is a choice — a tool call with four options, not
+a sentence ending in "shall I proceed?".
+
+If there is nothing to build — the design was an essay, a decision, a document —
+the spec is the deliverable. Skip the menu and suggest what could come next.
 
 ## Visual Companion
 

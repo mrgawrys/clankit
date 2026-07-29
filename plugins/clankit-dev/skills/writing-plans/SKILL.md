@@ -21,9 +21,13 @@ values the spec pinned down. Give them those. Leave the implementation to them.
 ## First: does this need a plan at all?
 
 A plan exists because the work crosses a context boundary — a fresh session
-after clearing, a subagent, someone who wasn't in the design conversation. If
-the next step happens in this conversation, the approved design is already the
-handoff. Consult the routing table before writing one.
+after clearing, a subagent, someone who wasn't in the design conversation. Two
+routing modes call for one: **C** (write the plan, then hand off or execute) and
+**D** (autopilot, which runs it unattended). Modes A and B build straight from
+the spec and want no plan file at all.
+
+So if you got here without the user picking C or D, stop and ask which mode —
+the plan is the artifact they may have been trying to avoid.
 
 **The plan is not the code.** An implementer handed the finished implementation
 is a transcriber, and writing it spent the orchestrator's context — the very
@@ -192,5 +196,6 @@ Fix issues inline. No need to re-review.
 ## Handoff
 
 The plan names `executing-plans` in its header, so the session that opens it
-knows where to start. Consult the routing table for what happens now: hand the
-plan over and stop, or execute it here.
+knows where to start. What happens now follows the mode that sent you here:
+**C** hands the plan over and stops, or executes it here; **D** hands it to
+`autopilot`, which runs it unattended.

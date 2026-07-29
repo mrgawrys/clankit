@@ -1,19 +1,23 @@
 ---
 name: autopilot
-description: Use when you want a small feature implemented end-to-end autonomously, without supervision — plans, builds, reviews, fixes, and opens a draft PR, all inside a git worktree so the main workspace is never touched. Use when the user says "/autopilot", "autopilot this", "ship this without me watching", "build this end to end", or hands over a small self-contained feature and steps away.
+description: Use when you want a feature implemented end-to-end autonomously, without supervision — writes the plan, builds and reviews it task by task, fixes what review finds, and opens a draft PR, all inside a git worktree so the main workspace is never touched. Routing mode D. Use when the user says "/autopilot", "autopilot this", "ship this without me watching", "build this end to end", or hands over a self-contained feature and steps away.
 user_invocable: true
 ---
 
 # Autopilot
 
-Take a small, self-contained feature from a one-line ask to a **draft PR**, with no
-human in the loop in between. The skill orchestrates a chain of subagents — plan →
-build → review → fix → ship — each working inside a single git worktree. The result
-handed back is one PR link (plus the worktree path) for you to check out at your leisure.
+Take a self-contained feature from a one-line ask to a **draft PR**, with no human in
+the loop in between. The result handed back is one PR link (plus the worktree path)
+for you to check out at your leisure.
 
-Use this when you trust the task to be small enough that you don't want to sit over it.
-It is autonomous by design: **after invocation it does not stop to ask you anything**
-unless it genuinely cannot proceed (see Aborting).
+Autopilot is **routing mode D**, and its premise is: run the workflow exactly as a
+human would — the plan gets written, every task gets reviewed, findings get fixed —
+with nobody present to confirm any of it. It is not a lighter path. It is the same
+path with the gates answered in advance.
+
+Use this when you trust the task enough not to sit over it. It is autonomous by
+design: **after invocation it does not stop to ask you anything** unless it genuinely
+cannot proceed (see Aborting).
 
 ## Core principle — orchestrate, don't restate
 
@@ -33,16 +37,33 @@ subagents, so YOU dispatch every phase as a separate `Agent` call, own the workt
 lifecycle, and pass each phase's output forward as the next phase's input. Per the global
 rule, say "clank, clank" before launching each subagent.
 
+## The plan file is not optional
+
+Autopilot always produces a written plan before it builds, and always executes it
+through `executing-plans`. Three reasons, all of which bite hardest precisely
+because nobody is watching:
+
+- **Traceability.** The PR is reviewed by someone who wasn't there. The plan is
+  what they check the diff against.
+- **Resumability.** An unattended run that dies halfway has no conversation to
+  recover from. The plan plus `executing-plans`' ledger is the whole recovery map.
+- **Review in between.** A per-task review catches a wrong turn at task 2 instead
+  of inheriting it through task 7. An end-only review on unattended work reviews a
+  compounded mistake.
+
+A "short build brief" cannot do any of these. Don't substitute one.
+
 ## Phases
 
 ### Phase 0 · Understand & set up (orchestrator)
 - **Check what you were handed.** Autopilot is a routing destination as well as a
   standalone entry point, so the work may already be designed:
-  - **An approved design in this conversation** → that's your brief. Don't re-derive it.
-  - **A plan file** → read it. Its tasks become the build's structure, and its Global
-    Constraints bind every phase. Prefer `executing-plans` for a plan with more than a
-    few tasks — it reviews each one; autopilot reviews only at the end.
-  - **A bare ask** → proceed with the rest of this phase.
+  - **A plan file** → you already have Phase 1's output. Skip to Phase 2.
+  - **An approved design or spec** → that is the input to Phase 1, not a substitute
+    for it. Don't re-derive the design; do turn it into a plan.
+  - **A bare ask** → proceed with the rest of this phase, then design it before
+    planning it. Unattended work on an undesigned ask is how autopilot ships the
+    wrong feature competently.
 - Read the ask. If a ticket ID/URL was given, fetch it to get the full brief (via whatever tracker integration is available).
 - Determine the **target repo**: use the sub-repo you're invoked in; otherwise infer it
   from the ask/ticket. If it's genuinely ambiguous, ask once — this is the only routine
@@ -52,54 +73,53 @@ rule, say "clank, clank" before launching each subagent.
 - Create a **git worktree** off the repo's main branch, following that repo's branch
   conventions. All subsequent work happens in this worktree path.
 
-### Phase 1 · Plan (orchestrator, lightweight)
-- Write a short build brief: what to change, which files/areas, the acceptance bar
-  ("done when…"). A few bullets — not a formal plan document. No user gate.
-- **Skip this phase** if Phase 0 arrived with an approved design or a plan file. The
-  brief already exists; re-deriving it invents a second source of truth that can
-  disagree with the first.
+### Phase 1 · Plan (orchestrator)
+- Use the `writing-plans` skill to produce a real plan file in the worktree. **No user
+  gate** — that's the one thing mode D answers in advance.
 - The acceptance bar follows the work: code in a repo with tests earns tests; work
   that's hard to test (UI, visual, external systems) earns a named verification run;
   prose and config earn a behavior check and no tests.
+- Skip only if Phase 0 handed you a plan file already.
 
-### Phase 2 · Build  → subagent (Opus)
-- Dispatch one subagent with the brief and the worktree path. It implements the feature,
-  commits incrementally per the repo's conventions, and runs whatever quick checks the
-  repo offers (build/tests/lint) **best-effort**.
-- It returns: a summary of what it changed, and the verification status it observed.
+### Phase 2 · Build and review (orchestrator, via `executing-plans`)
+- Run the plan through the `executing-plans` skill with **gates: none** and its
+  delegated mode. That gives you, without asking anyone: a subagent per task, a task
+  review after each, the fix loop with its five-round cap, the ledger, and the final
+  whole-branch review.
+- Do not re-implement any of that here. `executing-plans` owns the build loop; this
+  skill owns the envelope around it — worktree, plan, PR, and the decision that
+  nobody will be asked.
+- Carry its outcome forward: tasks completed, findings parked or deferred, and the
+  verification status it observed.
+- `executing-plans` ends by presenting integration options and waiting for a human.
+  **You are that human.** Take its report and go to Phase 3 — don't stall, and don't
+  ask the user.
 
-### Phase 3 · Review  → subagent (Opus)
-- Dispatch a reviewer in the worktree with **two lenses**:
-  1. **Correctness** — invoke the `code-review` skill on the worktree diff for bugs and
-     quality issues.
-  2. **Intent** — compare the diff against the Phase 1 brief: was what we asked for
-     actually built? Flag gaps and missed acceptance criteria.
-- It returns structured findings in both buckets (or "clean").
-
-### Phase 4 · Fix  → subagent (Sonnet)
-- If there are findings, dispatch a fix subagent in the worktree with the findings list.
-  It applies the fixes (both correctness and intent gaps), commits, and re-runs the quick
-  checks best-effort. **Single pass — no re-review loop.**
-- If review came back clean, skip this phase.
-
-### Phase 5 · Ship (orchestrator)
+### Phase 3 · Ship (orchestrator)
 - Push the branch and open a **draft** PR with `gh pr create --draft`.
-- PR body covers: what was built, the review summary, and the best-effort verification
-  status (note failures plainly — they do NOT block the PR).
+- PR body covers: what was built, the review summary, anything parked or deferred by
+  the fix loop, and the best-effort verification status (note failures plainly — they
+  do NOT block the PR). Link the plan file; it is what a reviewer checks the diff
+  against.
 - Report back to the user: the **PR link** and the **worktree path**. Stop.
 
 ## Model tiers
 
-Set per `Agent` call — tweak freely:
-- **Build, Review** → Opus (creative work and subtle-bug detection).
-- **Fix** → Sonnet (mechanical application of a known findings list).
+`executing-plans` owns tier selection for everything inside the build loop — follow its
+Model Selection section, which scales implementers and reviewers to the task rather
+than fixing a tier per phase. The one call this skill makes directly is Phase 1's
+planning, which is design work and takes the most capable model available.
 
 ## Verification policy
 
 Best-effort, never blocking. Subagents run whatever checks the repo exposes and report
-results; failures are recorded in the PR body, not treated as a stop condition. The
-*intent* lens in Phase 3 is the substitute for a human sanity-check that the right thing
-got built.
+results; failures are recorded in the PR body, not treated as a stop condition.
+
+What substitutes for a human sanity-check is the per-task review inside
+`executing-plans` — each task's diff is checked against its own acceptance bar by
+something that didn't write it. That is the whole reason autopilot plans before it
+builds: without an acceptance bar per task there is nothing for a reviewer to check
+intent against, only taste.
 
 ## Guardrails
 
@@ -114,7 +134,9 @@ got built.
 
 Stop and report instead of opening a PR when:
 - The target repo can't be resolved and the user isn't around to disambiguate.
-- The build subagent produced no usable changes, or could not implement the feature at all.
+- The build produced no usable changes, or could not implement the feature at all.
+- `executing-plans` reports BLOCKED on a load-bearing finding. Its breaker exists to
+  stop work building on a structural failure; shipping past it defeats the point.
 
 A draft PR with *failing tests* is a valid outcome (flag it). A draft PR with *nothing
 meaningful built* is not — report the failure instead.

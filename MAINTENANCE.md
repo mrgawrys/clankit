@@ -39,12 +39,36 @@ in a single release; a diff would not have applied, but the intent still would.
 
 ### `brainstorming`
 
-**The terminal state is a question, not a destination.** Upstream ends by invoking
-`writing-plans` unconditionally, and writes a spec file at a fixed step before
-that. Both are routing decisions made before the information needed to make them
-exists — you cannot know whether the work needs a written plan until you know how
-big it is and who will execute it. Ours consults the routing table instead, and
-the spec-review gate follows the spec rather than always firing.
+**The terminal state is a menu, not a destination — and not a derivation.**
+Upstream ends by invoking `writing-plans` unconditionally. That is a routing
+decision made before the information needed to make it exists: you cannot know
+whether the work needs a written *plan* until you know how big it is and who
+will execute it. Ours ends by asking which of four modes to run.
+
+The spec still gets written every time, as upstream does — that was never the
+problem. **The plan file was.** An earlier revision of this patch replaced the
+terminal with a routing *table* and made the spec conditional on it. Both were
+mistakes, and they failed the same way in practice: a table gets *consulted*,
+silently, and on the most common route its answer was "write nothing" — which is
+behaviourally identical to skipping the step. The observed result was a session
+that designed, announced its own route, and started building without ever asking.
+
+So: a menu with named answers, asked with a tool call, not a table to compute
+against. If a re-sync or a later edit turns the four modes back into inferred
+axes — artifact × gates — it will regress the same way.
+
+**Gates are questions, not announcements.** Added, because the failure above had
+a second half: every gate in that session came out as a statement with an
+objection window ("decisions I'm making — flag if you disagree", "shall I
+proceed?"). Prose alone did not hold this — the same model repeated it in the
+next session after agreeing with the correction — so the terminal is specified as
+an `AskUserQuestion` call, which either appears in a transcript or doesn't.
+
+**Specs carry the mode header, and land in `docs/specs/`.** Upstream never needed
+either: its spec was always followed by a plan, and the plan carried the "use
+this skill" pointer. Once a spec can be the only artifact, it has to say what to
+do with it, and it must not be filed in `docs/plans/`, where a reader expects
+tasks and an acceptance bar.
 
 **The trigger is narrowed and the domain is neutral.** Triage lives in the session
 bootstrap, so this skill does not need to fire on everything. Its code-specific
@@ -89,8 +113,27 @@ correct only when the user asked for no gates.
 
 **No brief-extraction script.** A task in the reduced format is already a brief.
 
+**It accepts a spec, not only a plan.** Modes A and B build straight from the
+spec with no plan file, so the skill derives the task list itself and shows it
+for approval before Task 1. The scripts needed no change — a spec is a file on
+disk, so `plan-workspace` keys off its basename exactly as it does for a plan.
+
 Ported close to verbatim, and worth keeping that way: the fix loop, the five-round
 circuit breaker, and the adjudication rules. Those encode real failures.
+
+### `autopilot` (not vendored — ours, but it moved)
+
+**Mode D writes a plan and runs `executing-plans`.** It used to write a few-bullet
+brief, build with one subagent, and review once at the end. That is a *lighter*
+path, and autopilot's premise is the opposite: run the workflow exactly as a human
+would, with the gates answered in advance rather than removed. Unattended work is
+where an end-only review is worst — a wrong turn at task 2 gets inherited through
+task 7 — and where a plan file matters most, because the PR reviewer wasn't there
+and a dead run has no conversation to resume from.
+
+So autopilot is now the envelope: worktree, plan, draft PR, and the standing
+decision that nobody will be asked. `executing-plans` owns the build loop, its
+reviews, its fix rounds, and its model tiers. Don't re-implement any of that here.
 
 ### `writing-skills`, `systematic-debugging`
 
@@ -116,8 +159,12 @@ its `writing-good-tests.md` is kept), `finishing-a-development-branch`,
 
 Recorded in `docs/specs/2026-07-27-clankit-workflow-skills-design.md`:
 
-- **A `/vibe` skill** — a loop-shaped sibling to autopilot. Revisit when the
-  routing table's "this session, no artifact, no gates" cell feels heavy.
+- **A `/vibe` skill** — a loop-shaped sibling to autopilot. Revisit when mode A
+  (build it all at once, no gates) feels heavy.
+- **Autopilot as a workflow.** Now that it is a fixed pipeline — plan, then
+  `executing-plans` with gates off, then a draft PR — it is deterministic control
+  flow over subagents, which is what the harness's workflow scripts are for.
+  Revisit once the current shape has run a few times.
 - **Replacing the ledger with the native task list** — worth doing, but it adds
   divergence to `executing-plans`, the file most likely to be rewritten upstream.
 - **Splitting `brainstorming` into its own plugin** — it is domain-independent and

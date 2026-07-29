@@ -78,21 +78,23 @@ hunk / few lines) or illustrative snippets. Override anytime with "inline".
 
 ## Building in the Current Session
 
-The routing table decides the artifact and the gates. When it lands on *build
-here, per-task gates, no plan file*, run it like this:
+Once a design is approved or a spec is opened, ask me which mode — always ask,
+never infer it from something I said earlier about where the work happens. The
+four modes live in the session bootstrap; `executing-plans` runs A, B and C.
 
-1. Show me the **high-level task list** and get my approval on the shape before
-   writing any code.
+**Mode B (build it in batches) is my usual pick**, so get it right:
+
+1. Show me the **task list** and get my approval on the shape before writing any
+   code.
 2. Then go **task by task**: present one task as a diff, pause for my approval,
    and build it as soon as I approve. Don't batch approvals — build each step
    before presenting the next.
-3. Keep a **lightweight running record** — a task checklist plus a one-line note
-   per task — so an interrupted session can resume. Not a plan document.
-4. If a later step reveals an earlier one was wrong, flag it and stop before
+3. If a later step reveals an earlier one was wrong, flag it and stop before
    compounding.
 
 **Doc locations:** specs to `docs/specs/`, plans to `docs/plans/`, other docs to
-`docs/<category>/`.
+`docs/<category>/`. A design document goes to `docs/specs/` even if a repo keeps
+other things elsewhere.
 
 ## Suggest Reusable Extraction
 

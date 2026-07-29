@@ -13,25 +13,41 @@ Route before you build.
 Sizing is not a design conversation. If the ask is small, say so and do the
 work; don't open a brainstorm to decide whether to brainstorm.
 
-## Routing — after a design is approved
+## Routing — when a design is approved, or a spec is opened
 
-Ask two questions. Infer the third.
+Two entrances, one junction: `brainstorming` just got a design approved, or the
+user opened a spec and asked to work on it. Both land here, and both get the
+same question.
 
-**1. Who does the work next, and where?** This decides what gets written down:
-an artifact earns its place only when the writer and the reader are different
-contexts.
+**Write the spec first.** By default, always. It is the durable record of what
+was decided and the input every mode below consumes. Skip it only when the user
+says to.
 
-| Next | Write |
-|---|---|
-| You, here, now | Nothing. The design is already in context |
-| You, in a fresh session after clearing | Spec — plus a plan when task order matters |
-| Subagents, unattended — hand it off and walk away | Nothing |
-| Nobody — the design *was* the deliverable | The doc, if it's worth keeping. Stop |
+**Then ask which mode.** One question, four named answers, asked with
+`AskUserQuestion`. Recommend one and say why — the choice is the user's.
 
-**2. Gates?** Independent of everything else. Per-task diff review, one
-approval up front, or none. Full rigor with zero gates is normal.
+| Mode | Plan file | Gates | Runs as |
+|---|---|---|---|
+| **A · Build it all at once** | no | none | `executing-plans` from the spec, gates: none |
+| **B · Build it in batches** | no | per-task diff | `executing-plans` inline, gates: per-task |
+| **C · Write the implementation plan** | yes | the plan carries them | `writing-plans`, then hand off or execute |
+| **D · Autopilot** | yes | simulated — it reviews its own work | `autopilot`, unattended, draft PR |
 
-**3. Rigor — infer it, never ask.**
+**Nothing to build** — an essay, a decision, a document — means the spec *is*
+the deliverable. Skip the menu and suggest what could come next.
+
+## Gates are questions
+
+A gate is a question you ask, not a decision you announce with a window to
+object. "Flag if you disagree", "shall I proceed?", "let me know if that's
+wrong" are the same move: you already chose, and offered a veto instead of a
+choice. If you catch yourself writing one, you skipped a step — go back and ask.
+
+An answer to one question does not close another. A preference about *where* the
+work happens — a worktree, a branch, a repo — says nothing about which mode, and
+nothing about gates.
+
+## Rigor — infer it, never ask
 
 - Code, in a repo with tests → tests, in the repo's idiom
 - Hard to verify by test (UI, visual, external systems) → a named verification run
@@ -46,5 +62,6 @@ run is what's wanted.
 Invoke a skill when one covers the task; announce it and follow it. CLAUDE.md
 and direct requests outrank skills; skills outrank your defaults.
 
-A plan file names the skill that runs it. When you open one, come back here —
-the routing questions apply again.
+Every artifact written for a later context — spec or plan — opens by naming the
+modes above, so the session that opens it knows a choice is owed. When you open
+one, come back here: the mode question applies again.

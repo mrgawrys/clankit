@@ -1,7 +1,7 @@
 # Clankit Workflow Skills — Design
 
 **Date:** 2026-07-27
-**Status:** Approved, not yet implemented
+**Status:** Implemented. Revised 2026-07-29 after first use — see *Revision* at the end.
 
 ## Goal
 
@@ -105,18 +105,20 @@ equals the patched files, and nothing else.
    ├─ trivial + unambiguous ────────► do it → verify → done.
    └─ real change
           │
-          ▼  brainstorming — conversation only, writes nothing
+          ▼  brainstorming — design conversation, then WRITE THE SPEC
           │
-          ▼  ROUTING TABLE (in the bootstrap; reachable from anywhere)
+          ▼  THE MODE MENU (in the bootstrap; reachable from anywhere)
+          │   also entered by: user opens a spec and says "work on this"
           │
-    ┌─────┴──────────┬────────────────────┐
-    ▼                ▼                    ▼
- write spec       spec in context     spec in context
- (+ plan)         → executing-plans   → autopilot
- → clear chat        delegated |         unattended
- → fresh session      inline
-    │
-    └──► fresh session reads plan → routing table again
+    ┌─────┴─────────┬─────────────────┬──────────────────┐
+    ▼               ▼                 ▼                  ▼
+  A · all at once  B · in batches   C · write plan    D · autopilot
+  executing-plans  executing-plans  writing-plans     plan, then
+  gates: none      gates: per-task  → hand off or     executing-plans
+                                      execute           gates: none
+                                        │                  │
+                                        └──► fresh session reads plan
+                                             → the menu again
 ```
 
 ### The bootstrap
@@ -126,7 +128,7 @@ This is the only file in the design with no ancestor. It carries:
 
 1. **The triage rule** — talk gets an answer, trivial work gets done, real
    changes get a design conversation.
-2. **The routing table** — artifact, gates, execution.
+2. **The mode menu** — spec first, then which of four modes builds it.
 3. **Skill invocation rules** — replacing superpowers' `using-superpowers`.
 
 Triage lives here rather than in a skill because the bootstrap is already
@@ -137,26 +139,34 @@ Budget: ~50 lines. superpowers compressed its own bootstrap because "its size
 is paid for constantly," and `writing-skills` sets 200 lines as the ceiling for
 frequently-loaded content.
 
-The routing table lives here too, because routing happens at two moments —
-after a design conversation, and when a fresh session opens a plan file. One
-copy, reachable from both.
+The mode menu lives here too, because routing happens at more than one moment —
+after a design conversation, when a fresh session opens a plan, and when the user
+opens a spec and asks to work on it. One copy, reachable from all of them.
 
-### The routing table
+### The mode menu
 
-Two questions asked, one property inferred.
+**The spec is written first, always by default.** It is the durable record of
+what was decided and the input every mode consumes. It was never the artifact
+worth avoiding — the plan file was.
 
-**Q1 — Where does it execute?** This determines the artifact, because the
-artifact only has to exist if the writer and the reader are different contexts.
+**Then one question, four named answers.** Asked with `AskUserQuestion`, not
+derived:
 
-| Execution | Artifact |
-|---|---|
-| Fresh session after clearing context | Spec, plus a plan when task sequencing matters |
-| This session | Approved design in context; nothing written |
-| Unattended (`autopilot`) | Approved design in context; nothing written |
+| Mode | Plan file | Gates | Runs as |
+|---|---|---|---|
+| **A · Build it all at once** | no | none | `executing-plans` from the spec |
+| **B · Build it in batches** | no | per-task diff (via `revdiff`) | `executing-plans` inline |
+| **C · Write the implementation plan** | yes | the plan carries them | `writing-plans`, then hand off or execute |
+| **D · Autopilot** | yes | simulated — reviews its own work | `autopilot`, unattended, draft PR |
 
-**Q2 — Gates?** Independent of everything else. Per-task diff review (via
-`revdiff`), a single approval up front, or none. Full test rigor with zero
-gates is a common and valid combination.
+Nothing to build — an essay, a decision, a document — means the spec is the
+deliverable: skip the menu, suggest next steps.
+
+A menu rather than a derivation, and this is the load-bearing property. Gates
+and artifact are *representable* as two orthogonal axes, but a model asked to
+compute a cell computes it silently, and the cell it lands on most often reads
+"write nothing" — which is indistinguishable from skipping the step. Four named
+answers cannot be satisfied by inference.
 
 **Inferred — rigor.** Never asked. Derived from the repo's conventions and the
 change's testability:
@@ -205,17 +215,17 @@ code mandates, the Execution Handoff.
 
 | Skill | Notes |
 |---|---|
-| `bootstrap` | Hook-injected. Triage, routing table, invocation rules. ~50 lines |
+| `bootstrap` | Hook-injected. Triage, the mode menu, gates-are-questions, invocation rules. ~70 lines |
 
 ### Patched — the entire maintenance surface
 
 | Skill | Change |
 |---|---|
-| `brainstorming` | Terminal becomes "consult the routing table." Spec writing moves from a fixed step to a routing outcome. Drop the vestigial `spec-document-reviewer-prompt.md` (the skill already reviews inline). Keep `visual-companion`. **Neutralize the domain**: the code-specific guidance ("cover architecture, components, data flow, error handling, testing"; "working in existing codebases"; design-for-isolation) becomes conditional on the work being software. What generalizes — one question at a time, two or three approaches, sections gated on approval, YAGNI — stays unconditional |
+| `brainstorming` | Terminal becomes an `AskUserQuestion` call presenting the four modes. Spec writing stays a fixed step, as upstream has it, and the spec gains a header naming the modes. Drop the vestigial `spec-document-reviewer-prompt.md` (the skill already reviews inline). Keep `visual-companion`. **Neutralize the domain**: the code-specific guidance ("cover architecture, components, data flow, error handling, testing"; "working in existing codebases"; design-for-isolation) becomes conditional on the work being software. What generalizes — one question at a time, two or three approaches, sections gated on approval, YAGNI — stays unconditional |
 | `writing-plans` | The reduced format above. Home of the testing-vs-verification rule, in "Done when" |
-| `executing-plans` | Absorbs the subagent loop; see below |
+| `executing-plans` | Absorbs the subagent loop; see below. Accepts a spec as well as a plan, since modes A and B build with no plan file |
 | `systematic-debugging` | One-line rewire: its `test-driven-development` reference is dropped. Its `verification-before-completion` reference survives |
-| `autopilot` | Becomes a routing destination. Phases 0–1 accept an approved design or a plan file instead of re-deriving one |
+| `autopilot` | Becomes routing mode D: writes a real plan, then runs it through `executing-plans` with gates off. The envelope — worktree, plan, draft PR — around a build loop it no longer reimplements |
 
 ### Vendored verbatim — re-copied wholesale on upgrade
 
@@ -233,7 +243,7 @@ reference files and alternate hook variants
 ## Execution
 
 `executing-plans` is the entry point a plan file names, and the destination the
-routing table offers for attended work. It reviews the plan critically first,
+menu offers for attended work (modes A, B and C). It reviews the plan critically first,
 stops when blocked rather than guessing, then runs in one of two modes:
 
 **Delegated (default)** — a fresh subagent per task, isolated context, review
@@ -284,7 +294,7 @@ and fix phases exist because nobody watched, and the draft PR exists because
 the work must survive absence. Trimming autopilot would not produce a vibe
 tool; it would produce an autopilot that ships unreviewed work.
 
-Deferred because the routing table already has a cell for it — this session, no
+Deferred because the menu already has a mode for it — mode A, this session, no
 artifact, no gates. **Revisit when that cell demonstrably feels heavy in
 practice.** The annoyance is a better spec than a guess.
 
@@ -306,7 +316,7 @@ That split is deferred because nobody else installs these yet, and moving a
 skill directory plus a marketplace entry is cheap. The patch that makes it
 possible is already in the design: brainstorming ending with a question rather
 than a fixed terminal is what lets it stand alone. With the flow installed, the
-question consults the routing table; without it, the question degrades to
+question presents the mode menu; without it, the question degrades to
 "should this be written down?" and stops.
 
 **The bootstrap names capabilities, not skills** — "hand it off and walk away,"
@@ -326,3 +336,41 @@ that plugin is absent, and this keeps the split available later at no cost.
 
 Steps 1–2 are usable on their own, and 1–4 give design, routing, and a written
 plan with execution still falling back to whatever is installed.
+
+## Revision — 2026-07-29
+
+The design shipped with a **routing table**: two questions asked (where does it
+execute, what gates) and one inferred (rigor), with the artifact derived from the
+first. First use showed that shape is wrong in a way worth recording, because the
+axes themselves were sound and the failure was in their form.
+
+**What happened.** A design conversation ran, skipped the clarifying questions and
+the two-or-three approaches, presented one design as a block, announced its own
+route ("shall I proceed?"), and started building. On a later run it wrote a spec
+into `docs/plans/` with no header; a fresh session opened that file and no skill
+fired at all.
+
+**Why.** Three causes, none of them "the model ignored the instructions":
+
+1. **A table gets consulted; a menu gets answered.** Reading the table is an
+   internal act with no output. On the most common row its answer was *"write
+   nothing"* — behaviourally identical to skipping the step entirely.
+2. **The welded question.** *"Who does the work next, and where?"* asks two things.
+   A user who says "we'll work in a worktree" has answered *where*, and the whole
+   question reads as closed — including the gates that rode along with it.
+3. **The spec became conditional.** The original complaint was that the *plan file*
+   was wasted work when the next step happens in the same session. That
+   generalized, wrongly, into writing nothing at all — so the one artifact that was
+   never in dispute stopped being written.
+
+**What changed.** The spec is unconditional again. The two axes become four named
+modes asked as a single `AskUserQuestion` call. Specs carry a header naming the
+modes, so opening one re-enters the menu. `executing-plans` accepts a spec, which
+is what makes modes A and B possible without a plan file. And `autopilot` stops
+being the light path: it writes a plan and runs `executing-plans` with gates off,
+because unattended work is where an end-only review and a missing plan hurt most.
+
+**The transferable lesson.** Prose could not fix this. The same model, told
+explicitly that it had converted a gate into an announcement, agreed — and did it
+again in the next session. A step that must be observable has to produce an
+artifact or a tool call, not an instruction to behave a certain way.
