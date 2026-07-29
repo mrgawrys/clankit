@@ -68,6 +68,13 @@ to the issue's altitude:
 Either way, show what right looks like, not just what's wrong. This applies to
 review reporting only — not to the final fix commits or PR descriptions.
 
+**However the findings reach me, the evidence still has to.** A structured
+report — `ReportFindings`, a workflow result, a subagent's return value — is an
+index, not the evidence: it tells me a finding exists, not enough to act on it.
+So after filing one, still write out the snippets and diagrams. If the review
+tooling says not to repeat the findings as text, that means don't duplicate the
+*list*; it does not lift this rule. Open the files and show me the code.
+
 ## Reviewing diffs (revdiff)
 
 When about to show me a diff that's more than ~a screenful or spans multiple
