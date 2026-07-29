@@ -22,12 +22,13 @@ values the spec pinned down. Give them those. Leave the implementation to them.
 
 A plan exists because the work crosses a context boundary — a fresh session
 after clearing, a subagent, someone who wasn't in the design conversation. Two
-routing modes call for one: **C** (write the plan, then hand off or execute) and
-**D** (autopilot, which runs it unattended). Modes A and B build straight from
-the spec and want no plan file at all.
+modes call for one: *plan first* (this skill, then a question about how the plan
+gets built) and *autopilot* (which runs the plan unattended). *All at once* and
+*in batches* build straight from the spec and want no plan file at all.
 
-So if you got here without the user picking C or D, stop and ask which mode —
-the plan is the artifact they may have been trying to avoid.
+Being invoked directly is itself an answer: `/writing-plans` says the user wants
+a plan file. Write it. What it does not say is how the build gets gated — that
+question comes at the end, and it is yours to ask.
 
 **The plan is not the code.** An implementer handed the finished implementation
 is a transcriber, and writing it spent the orchestrator's context — the very
@@ -196,6 +197,20 @@ Fix issues inline. No need to re-review.
 ## Handoff
 
 The plan names `executing-plans` in its header, so the session that opens it
-knows where to start. What happens now follows the mode that sent you here:
-**C** hands the plan over and stops, or executes it here; **D** hands it to
-`autopilot`, which runs it unattended.
+knows where to start.
+
+Under *autopilot* the plan goes straight to the build, unattended, and nobody is
+asked anything. Every other route arrived here having answered half the
+question — the plan file — so end by asking the other half, with one
+`AskUserQuestion` call:
+
+| Answer | What happens |
+|---|---|
+| **All at once** | `executing-plans` from the plan, no gates, report at the end |
+| **In batches** | `executing-plans` inline, a diff per task, you approve each |
+| **Hand it off** | stop here — the plan is the deliverable |
+
+Recommend one and say why; you know how big the work is and who will execute it.
+Do not assume the plan was written to be handed over. That is one of three
+answers, not the default, and picking it silently is how a session ends with the
+user waiting for a build that nobody started.
