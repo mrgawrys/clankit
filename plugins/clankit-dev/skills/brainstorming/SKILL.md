@@ -69,7 +69,7 @@ digraph brainstorming {
     "Spec self-review\n(fix inline)" [shape=box];
     "User reviews spec?" [shape=diamond];
     "Anything to build?" [shape=diamond];
-    "Ask which mode\n(A / B / C / D)" [shape=doublecircle];
+    "Ask which mode\n(four named answers)" [shape=doublecircle];
     "Suggest next steps, stop" [shape=doublecircle];
 
     "Explore project context" -> "Ask clarifying questions";
@@ -82,7 +82,7 @@ digraph brainstorming {
     "Spec self-review\n(fix inline)" -> "User reviews spec?";
     "User reviews spec?" -> "Write spec doc" [label="changes requested"];
     "User reviews spec?" -> "Anything to build?" [label="approved"];
-    "Anything to build?" -> "Ask which mode\n(A / B / C / D)" [label="yes"];
+    "Anything to build?" -> "Ask which mode\n(four named answers)" [label="yes"];
     "Anything to build?" -> "Suggest next steps, stop" [label="no — the spec was the deliverable"];
 }
 ```
@@ -136,8 +136,9 @@ If the user already said where the work happens — a worktree, a branch, a repo
 **Write the spec — by default, always:**
 
 The spec is the durable record of what was decided and the input every mode
-consumes: modes A and B build from it, mode C turns it into a plan, mode D hands
-it to autopilot. Skip it only when the user says to.
+consumes: *all at once* and *in batches* build from it, *plan first* turns it
+into a plan, *autopilot* takes it away and runs it. Skip it only when the user
+says to.
 
 - Write the validated design (spec) to `docs/specs/YYYY-MM-DD-<topic>-design.md`
   - A design document goes in `docs/specs/` even when the repo keeps other
@@ -155,9 +156,10 @@ choice is owed rather than assuming one:
 ```markdown
 # [Topic] — Design
 
-> **To act on this design:** pick a mode — build it all at once, build it in
-> batches (per-task diffs), write an implementation plan (`writing-plans`), or
-> hand it to `autopilot`. Ask which; don't pick on the reader's behalf.
+> **To act on this design:** pick a mode — *all at once*, *in batches*
+> (per-task diffs), *plan first* (`writing-plans`, then a second question about
+> how it gets built), or *autopilot*. Ask which; don't pick on the reader's
+> behalf.
 ```
 
 **Spec Self-Review:**
@@ -183,10 +185,13 @@ One `AskUserQuestion` call, four named answers, taken from the session bootstrap
 
 | Mode | What it does |
 |---|---|
-| **A · Build it all at once** | `executing-plans` from the spec, no gates, report at the end |
-| **B · Build it in batches** | `executing-plans` inline, a diff per task, you approve each |
-| **C · Write the implementation plan** | `writing-plans` produces the plan; hand it off or execute it |
-| **D · Autopilot** | unattended — plans, builds, reviews itself, opens a draft PR |
+| **All at once** | `executing-plans` from the spec, no gates, report at the end |
+| **In batches** | `executing-plans` inline, a diff per task, you approve each |
+| **Plan first** | `writing-plans` produces the plan, then asks how it gets built |
+| **Autopilot** | unattended — plans, builds, reviews itself, opens a draft PR |
+
+Those four names are the option labels. Everywhere else, say the action rather
+than the name: "I'll write the plan first, then ask how you want it built".
 
 Recommend one and say why; you know how big the work is and who will execute it.
 The choice is the user's, and it is a choice — a tool call with four options, not
