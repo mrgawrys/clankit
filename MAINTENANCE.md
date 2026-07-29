@@ -124,7 +124,7 @@ correct only when the user asked for no gates.
 
 **No brief-extraction script.** A task in the reduced format is already a brief.
 
-**It accepts a spec, not only a plan.** Modes A and B build straight from the
+**It accepts a spec, not only a plan.** *All at once* and *in batches* build straight from the
 spec with no plan file, so the skill derives the task list itself and shows it
 for approval before Task 1. The scripts needed no change — a spec is a file on
 disk, so `plan-workspace` keys off its basename exactly as it does for a plan.
