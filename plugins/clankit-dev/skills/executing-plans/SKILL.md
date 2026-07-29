@@ -1,6 +1,6 @@
 ---
 name: executing-plans
-description: "Use when a design is ready to build - either a written implementation plan, or an approved spec being built directly (routing modes A and B). Runs delegated by default - a fresh subagent per task with a review and fix loop between tasks - or inline when the work is short. Reviews the source critically before starting and stops when blocked rather than guessing."
+description: "Use when a design is ready to build - either a written implementation plan, or an approved spec being built directly. Runs delegated by default - a fresh subagent per task with a review and fix loop between tasks - or inline when the work is short. Reviews the source critically before starting and stops when blocked rather than guessing."
 ---
 
 # Executing Plans
@@ -11,12 +11,12 @@ Take an approved design and turn it into committed, reviewed work.
 
 ## What you were handed
 
-This skill is the destination for routing modes A, B and C, so the source
-document differs:
+Three of the four routing modes end here, so the source document differs:
 
-- **A plan file** (mode C, or a plan handed over) → it already carries tasks,
-  Global Constraints, and an acceptance bar per task. Use them as written.
-- **A spec** (modes A and B — built directly, no plan file) → it carries the
+- **A plan file** (after *plan first*, or a plan handed over) → it already
+  carries tasks, Global Constraints, and an acceptance bar per task. Use them as
+  written.
+- **A spec** (*all at once* or *in batches* — built directly, no plan file) → it carries the
   design, not a task breakdown. **Derive the task list first:** right-size the
   tasks per the rules in `writing-plans`, give each one an acceptance bar
   ("done when…"), and **show the list for approval before Task 1.** That
@@ -27,10 +27,10 @@ document differs:
 
 Everything below reads "the plan" to mean whichever of these you hold.
 
-## Two modes
+## Delegated or inline
 
-After loading and reviewing the plan, ask which one — unless the routing mode
-already settled it:
+After loading and reviewing the plan, ask which one — unless the mode that sent
+you here already settled it, as *in batches* does:
 
 ```
 Plan loaded and reviewed. How should this run?
@@ -45,7 +45,7 @@ context matters, or when you want each task reviewed by something that didn't
 write it. **Inline** is right for short plans and tightly coupled tasks, where
 handing off costs more than it saves.
 
-Modes are independent of gates. See Gates below.
+This choice is independent of gates. See Gates below.
 
 ## Setup
 
@@ -120,16 +120,21 @@ on multi-step work, costing more overall.
 
 ## Gates
 
-Independent of the delegated/inline mode. The routing mode usually already
-settled this — **A and D mean none, B means per-task.** If you arrived without
-one, confirm which applies before Task 1:
+Independent of delegated or inline. The mode that sent you here usually settled
+it: *all at once* and *autopilot* mean none, *in batches* means a diff per task.
 
-- **Per-task** — present each task's diff and wait for approval before moving on.
-  Use a diff-review tool if one is available rather than pasting the diff.
-- **Once** — approval up front, then run to completion.
-- **None** — run to completion, report at the end.
+**If nothing settled it, ask before Task 1** — one `AskUserQuestion` call, not a
+sentence with an objection window. A plan handed over, a spec opened cold, or an
+`/executing-plans` typed straight at the work all arrive with the gates open,
+and this is where they get answered:
 
-With gates set to none, do not pause to check in between tasks. "Should I
+| Answer | What it means |
+|---|---|
+| **All at once** | run to completion, report at the end |
+| **In batches** | present each task's diff and wait for approval before moving on. Use a diff-review tool if one is available rather than pasting the diff |
+| **Hand it off** | stop before Task 1 — the work goes to another session |
+
+Building all at once, do not pause to check in between tasks. "Should I
 continue?" prompts waste the user's time — they asked for the plan to run, so
 run it. The only reasons to stop are BLOCKED you cannot resolve, ambiguity that
 genuinely prevents progress, or all tasks complete.
@@ -276,7 +281,7 @@ name. Every adjudication is a ledger entry — silent discards are forbidden.
 Mark the todo complete and move on. Never move to the next task while the review
 has open Critical/Important issues that are neither fixed nor parked with a ruling.
 
-## Inline mode
+## Running inline
 
 Same setup, ledger, and pre-flight scan. Then, per task: implement it, meet the
 acceptance bar in the task's "Done when", commit, and record the completion line.
