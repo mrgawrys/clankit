@@ -80,9 +80,9 @@ hunk / few lines) or illustrative snippets. Override anytime with "inline".
 
 Once a design is approved or a spec is opened, ask me which mode — always ask,
 never infer it from something I said earlier about where the work happens. The
-four modes live in the session bootstrap; `executing-plans` runs A, B and C.
+four modes live in the session bootstrap; three of them end in `executing-plans`.
 
-**Mode B (build it in batches) is my usual pick**, so get it right:
+***In batches* is my usual pick**, so get it right:
 
 1. Show me the **task list** and get my approval on the shape before writing any
    code.

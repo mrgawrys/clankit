@@ -1,6 +1,6 @@
 ---
 name: autopilot
-description: Use when you want a feature implemented end-to-end autonomously, without supervision — writes the plan, builds and reviews it task by task, fixes what review finds, and opens a draft PR, all inside a git worktree so the main workspace is never touched. Routing mode D. Use when the user says "/autopilot", "autopilot this", "ship this without me watching", "build this end to end", or hands over a self-contained feature and steps away.
+description: Use when you want a feature implemented end-to-end autonomously, without supervision — writes the plan, builds and reviews it task by task, fixes what review finds, and opens a draft PR, all inside a git worktree so the main workspace is never touched. Use when the user says "/autopilot", "autopilot this", "ship this without me watching", "build this end to end", or hands over a self-contained feature and steps away.
 user_invocable: true
 ---
 
@@ -10,7 +10,7 @@ Take a self-contained feature from a one-line ask to a **draft PR**, with no hum
 the loop in between. The result handed back is one PR link (plus the worktree path)
 for you to check out at your leisure.
 
-Autopilot is **routing mode D**, and its premise is: run the workflow exactly as a
+Autopilot's premise is: run the workflow exactly as a
 human would — the plan gets written, every task gets reviewed, findings get fixed —
 with nobody present to confirm any of it. It is not a lighter path. It is the same
 path with the gates answered in advance.
@@ -75,7 +75,7 @@ A "short build brief" cannot do any of these. Don't substitute one.
 
 ### Phase 1 · Plan (orchestrator)
 - Use the `writing-plans` skill to produce a real plan file in the worktree. **No user
-  gate** — that's the one thing mode D answers in advance.
+  gate** — that's the one thing autopilot answers in advance.
 - The acceptance bar follows the work: code in a repo with tests earns tests; work
   that's hard to test (UI, visual, external systems) earns a named verification run;
   prose and config earn a behavior check and no tests.
