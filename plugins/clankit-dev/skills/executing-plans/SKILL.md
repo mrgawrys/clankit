@@ -11,17 +11,18 @@ Take an approved design and turn it into committed, reviewed work.
 
 ## What you were handed
 
-Three of the four routing modes end here, so the source document differs:
+What you hold depends on the route that sent you here:
 
 - **A plan file** (after *plan first*, or a plan handed over) → it already
   carries tasks, Global Constraints, and an acceptance bar per task. Use them as
   written.
-- **A spec** (*all at once* or *in batches* — built directly, no plan file) → it carries the
-  design, not a task breakdown. **Derive the task list first:** right-size the
-  tasks per the rules in `writing-plans`, give each one an acceptance bar
-  ("done when…"), and **show the list for approval before Task 1.** That
-  approved list is your task sequence, your todos, and your ledger entries —
-  it is not a document, and it does not get written to `docs/plans/`.
+- **A spec** (*all at once* or *in batches* — built directly, no plan file) → it
+  carries the design, not a task breakdown. **Derive the task list first:**
+  right-size the tasks per the rules in `writing-plans`, give each one an
+  acceptance bar ("done when…"), and **show the list for approval before
+  Task 1.** That approved list is your task sequence, your todos, and your
+  ledger entries — it is not a document, and it does not get written to
+  `docs/plans/`.
 - **Neither — just an ask** → you are in the wrong skill. Go design it first
   with `brainstorming`.
 
@@ -30,7 +31,8 @@ Everything below reads "the plan" to mean whichever of these you hold.
 ## Delegated or inline
 
 After loading and reviewing the plan, ask which one — unless the mode that sent
-you here already settled it, as *in batches* does:
+you here already settled it: *in batches* means inline, *all at once* and
+*autopilot* mean delegated.
 
 ```
 Plan loaded and reviewed. How should this run?
@@ -132,9 +134,11 @@ and this is where they get answered:
 |---|---|
 | **All at once** | run to completion, report at the end |
 | **In batches** | present each task's diff and wait for approval before moving on. Use a diff-review tool if one is available rather than pasting the diff |
-| **Hand it off** | stop before Task 1 — the work goes to another session |
 
-Building all at once, do not pause to check in between tasks. "Should I
+There is no hand-off answer here. Reaching this skill means the work gets built;
+handing it over is a choice made before arriving, in `writing-plans`.
+
+With gates set to none, do not pause to check in between tasks. "Should I
 continue?" prompts waste the user's time — they asked for the plan to run, so
 run it. The only reasons to stop are BLOCKED you cannot resolve, ambiguity that
 genuinely prevents progress, or all tasks complete.
