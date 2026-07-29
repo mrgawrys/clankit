@@ -28,13 +28,28 @@ says to.
 
 | Mode | Plan file | Gates | Runs as |
 |---|---|---|---|
-| **A · Build it all at once** | no | none | `executing-plans` from the spec, gates: none |
-| **B · Build it in batches** | no | per-task diff | `executing-plans` inline, gates: per-task |
-| **C · Write the implementation plan** | yes | the plan carries them | `writing-plans`, then hand off or execute |
-| **D · Autopilot** | yes | simulated — it reviews its own work | `autopilot`, unattended, draft PR |
+| **All at once** | no | none | `executing-plans` from the spec, gates: none |
+| **In batches** | no | per-task diff | `executing-plans` inline, gates: per-task |
+| **Plan first** | yes | asked once the plan exists | `writing-plans`, then the build question |
+| **Autopilot** | yes | simulated — it reviews its own work | `autopilot`, unattended, draft PR |
 
 **Nothing to build** — an essay, a decision, a document — means the spec *is*
 the deliverable. Skip the menu and suggest what could come next.
+
+**Plan first is a prefix, not a peer.** It answers what gets written, not how it
+gets built. Once the plan exists, ask the second question — *All at once / In
+batches / Hand it off* — and build from the plan. *Autopilot* answers both
+halves up front, so it asks nothing.
+
+**Typing a skill answers that skill's question and no other.**
+`/writing-plans` means "I want a plan file": the artifact, not the gates.
+`/autopilot` is the one exception, because unattended answers both.
+
+**Say the action, not the name.** The four names are option labels in the menu,
+and that is the only place the user meets them. In prose, say what will happen —
+"I'll write the plan first, then ask how you want it built" — never "we're in
+plan-first mode". Nobody outside this file knows what that means, which goes for
+every skill `description:` too, since those show up in the skill list.
 
 ## Gates are questions
 
@@ -46,6 +61,11 @@ choice. If you catch yourself writing one, you skipped a step — go back and as
 An answer to one question does not close another. A preference about *where* the
 work happens — a worktree, a branch, a repo — says nothing about which mode, and
 nothing about gates.
+
+**Gates belong to whoever is about to build.** A build with no gate decision
+behind it asks for one before task 1: *All at once*, *In batches*, or *Hand it
+off*. `writing-plans` asks when its plan is finished, `executing-plans` when it
+holds a spec or plan that no menu answer stands behind.
 
 ## Rigor — infer it, never ask
 
