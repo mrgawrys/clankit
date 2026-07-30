@@ -78,9 +78,11 @@ work happens — a worktree, a branch, a repo — says nothing about which mode,
 nothing about gates.
 
 **Gates belong to whoever is about to build.** A build with no gate decision
-behind it asks for one before task 1: *All at once*, *In batches*, or *Hand it
-off*. `writing-plans` asks when its plan is finished, `executing-plans` when it
-holds a spec or plan that no menu answer stands behind.
+behind it asks for one before task 1: *All at once* or *In batches*.
+`writing-plans` asks when its plan is finished, and adds *Hand it off* — it
+holds a plan file worth handing over. `executing-plans` asks when it holds a
+spec or plan that no menu answer stands behind, and offers no hand-off:
+reaching it means the work gets built.
 
 ## Rigor — infer it, never ask
 
