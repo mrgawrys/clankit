@@ -83,25 +83,11 @@ default to the `revdiff` skill (floating pane, my inline annotations come back
 as feedback) instead of inline markdown. Skip it for small changes (a single
 hunk / few lines) or illustrative snippets. Override anytime with "inline".
 
-## Building in the Current Session
+## Doc Locations
 
-Once a design is approved or a spec is opened, ask me which mode — always ask,
-never infer it from something I said earlier about where the work happens. The
-four modes live in the session bootstrap, and they all end in `executing-plans`.
-
-***In batches* is my usual pick**, so get it right:
-
-1. Show me the **task list** and get my approval on the shape before writing any
-   code.
-2. Then go **task by task**: present one task as a diff, pause for my approval,
-   and build it as soon as I approve. Don't batch approvals — build each step
-   before presenting the next.
-3. If a later step reveals an earlier one was wrong, flag it and stop before
-   compounding.
-
-**Doc locations:** specs to `docs/specs/`, plans to `docs/plans/`, other docs to
-`docs/<category>/`. A design document goes to `docs/specs/` even if a repo keeps
-other things elsewhere.
+Specs to `docs/specs/`, plans to `docs/plans/`, other docs to
+`docs/<category>/`. A design document goes to `docs/specs/` even if a repo
+keeps other things elsewhere.
 
 ## Suggest Reusable Extraction
 
