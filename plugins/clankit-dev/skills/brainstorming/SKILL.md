@@ -185,10 +185,14 @@ One `AskUserQuestion` call, four named answers, taken from the session bootstrap
 
 | Mode | What it does |
 |---|---|
-| **All at once** | `executing-plans` from the spec, no gates, report at the end |
-| **In batches** | `executing-plans` inline, a diff per task, you approve each |
+| **All at once** | `executing-plans` delegated from the spec — a subagent per task, a review after each, a fix loop; the user sees the finished branch |
+| **In batches** | `executing-plans` inline — one task at a time in this session; the user approves each diff and is the reviewer |
 | **Plan first** | `writing-plans` produces the plan, then asks how it gets built |
-| **Autopilot** | unattended — plans, builds, reviews itself, opens a draft PR |
+| **Autopilot** | unattended — plans, builds, reviews its own work in a worktree, opens a draft PR |
+
+The option descriptions must carry the machinery, not just the label — the
+labels name review cadence, and "all at once" alone reads lighter than the
+thorough path it is.
 
 Those four names are the option labels. Everywhere else, say the action rather
 than the name: "I'll write the plan first, then ask how you want it built".

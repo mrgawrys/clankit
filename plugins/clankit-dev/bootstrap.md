@@ -33,6 +33,20 @@ says to.
 | **Plan first** | yes | asked once the plan exists | `writing-plans`, then the build question |
 | **Autopilot** | yes | simulated — it reviews its own work | `autopilot`, unattended, draft PR |
 
+**The menu descriptions name the machinery.** The labels name the user's review
+cadence, and "all at once" alone reads lighter than it is — it is the *thorough*
+path. So each option's description states who builds, who reviews, and what the
+user sees, roughly:
+
+- *All at once* — "subagents build it task by task, each task reviewed and
+  fixed; you see the finished branch"
+- *In batches* — "built in this session; you approve each task's diff — you're
+  the reviewer"
+- *Plan first* — "a plan file gets written first, then the same choice about how
+  it gets built"
+- *Autopilot* — "unattended: plans, builds, reviews its own work in a worktree,
+  opens a draft PR"
+
 **Nothing to build** — an essay, a decision, a document — means the spec *is*
 the deliverable. Skip the menu and suggest what could come next.
 

@@ -207,8 +207,8 @@ question — the plan file — so end by asking the other half, with one
 
 | Answer | What happens |
 |---|---|
-| **All at once** | `executing-plans` from the plan, no gates, report at the end |
-| **In batches** | `executing-plans` inline, a diff per task, you approve each |
+| **All at once** | `executing-plans` delegated from the plan — a subagent and a review per task, no gates; report at the end |
+| **In batches** | `executing-plans` inline — a diff per task, the user approves each and is the reviewer |
 | **Hand it off** | stop here — the plan is the deliverable |
 
 Recommend one and say why; you know how big the work is and who will execute it.

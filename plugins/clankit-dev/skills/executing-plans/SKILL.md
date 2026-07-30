@@ -137,8 +137,8 @@ and this is where they get answered:
 
 | Answer | What it means |
 |---|---|
-| **All at once** | run to completion, report at the end |
-| **In batches** | present each task's diff and wait for approval before moving on. Use a diff-review tool if one is available rather than pasting the diff |
+| **All at once** | delegated: run to completion — a fresh subagent and a review per task — and report at the end |
+| **In batches** | inline: present each task's diff and wait for approval before moving on — the user is the reviewer. Use a diff-review tool if one is available rather than pasting the diff |
 
 There is no hand-off answer here. Reaching this skill means the work gets built;
 handing it over is a choice made before arriving, in `writing-plans`.
