@@ -30,28 +30,28 @@ Everything below reads "the plan" to mean whichever of these you hold.
 
 ## Delegated or inline
 
-After loading and reviewing the plan, ask which one — unless the mode that sent
-you here already settled it: *in batches* means inline, *all at once* and
-*autopilot* mean delegated.
-
-```
-Plan loaded and reviewed. How should this run?
-
-1. Delegated (default) — a fresh subagent per task, isolated context,
-                         review and fix loop between tasks
-2. Inline               — the work happens in this session
-```
+This choice travels with gates, by design — oversight substitutes for
+machinery. Per-task diffs mean the user reviews every task, so the work runs
+inline and takes one review at the end; no gates means nobody is watching, so
+each task earns a fresh implementer and its own review. The mode that sent you
+here usually answers both: *in batches* means inline, *all at once* and
+*autopilot* mean delegated. If neither is settled, ask the Gates question
+first (see below) — its answer settles this one too.
 
 **Delegated** is right when the plan has more than a couple of tasks, when
 context matters, or when you want each task reviewed by something that didn't
 write it. **Inline** is right for short plans and tightly coupled tasks, where
-handing off costs more than it saves.
+handing off costs more than it saves. Ask delegated-or-inline on its own only
+when gates are already settled but run style somehow isn't (e.g. the user said
+"don't stop between tasks" without picking a mode):
 
-This choice travels with gates, by design — oversight substitutes for
-machinery. Per-task diffs mean the user reviews every task, so the work runs
-inline and takes one review at the end; no gates means nobody is watching, so
-each task earns a fresh implementer and its own review. If neither is settled,
-ask the Gates question first (see below) — its answer settles this one too.
+```
+Plan loaded and reviewed. How should this run?
+
+1. Delegated — a fresh subagent per task, isolated context,
+               review and fix loop between tasks
+2. Inline    — the work happens in this session
+```
 
 ## Setup
 
