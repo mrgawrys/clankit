@@ -31,10 +31,14 @@ fail=0
 mkdir -p "$SANDBOX/bin" "$SANDBOX/fastbin" "$SANDBOX/nobin"
 
 # The notifier stub: earlier on $PATH than any real terminal-notifier, one line
-# per call.
+# per call. Each argument is bracketed rather than space-joined, so the log
+# records argv structure — an unquoted payload would reach the real notifier as
+# `-message Still` plus a tail of stray arguments, and a flattened log could not
+# tell that apart from a correct call.
 cat > "$SANDBOX/bin/terminal-notifier" <<STUB
 #!/bin/bash
-printf '%s\n' "\$*" >> "$LOG"
+for a in "\$@"; do printf '<%s>' "\$a"; done >> "$LOG"
+printf '\n' >> "$LOG"
 STUB
 
 # A `sleep` that does not, so cases about the message rather than the timing fire
@@ -142,20 +146,19 @@ reset_log
 payload PreToolUse t-fire "mix test --only slow" /tmp/myproject "" | run
 wait_for_calls 1
 one_call_matching "threshold passes: one ping with command and project" \
-  "Still running after 1s: mix test --only slow (myproject)"
-case "$(cat "$LOG")" in
-  *"-title Clanker"*"-sound Sosumi"*)
-    pass=$((pass + 1)); printf '  ok    ping carries title and sound\n' ;;
-  *) fail=$((fail + 1))
-     printf '  FAIL  title and sound\n        actual: %s\n' "$(cat "$LOG")" ;;
-esac
+  "<-message><Still running after 1s: mix test --only slow (myproject)>"
+# The whole argv, once: the flags, their order, and the message as one argument.
+check "ping argv is exactly title, sound, message" \
+  "<-title><Clanker><-sound><Sosumi><-message><Still running after 1s: mix test --only slow (myproject)>" \
+  "$(cat "$LOG")"
 check "the timer consumes the watch file" "gone" "$(watch_state t-fire)"
 
 # --- subagent marker --------------------------------------------------------
 reset_log
 payload PreToolUse t-agent "pnpm build" /tmp/myproject agent-7 | run
 wait_for_calls 1
-one_call_matching "agent_id present: subagent marker" "(myproject, subagent)"
+one_call_matching "agent_id present: subagent marker" \
+  "<-message><Still running after 1s: pnpm build (myproject, subagent)>"
 
 # --- non-zero exit ----------------------------------------------------------
 reset_log
@@ -196,7 +199,7 @@ for spec in "47 47s" "252 4m12s" "3780 1h03m" "60 1m00s" "3600 1h00m"; do
   payload PreToolUse "t-fmt$i" "sleep 1" /tmp/myproject "" | THRESH="$1" runfast
   wait_for_calls 1
   one_call_matching "threshold ${1}s renders as $2" \
-    "Still running after $2: sleep 1 (myproject)"
+    "<-message><Still running after $2: sleep 1 (myproject)>"
 done
 
 # --- never break the call ---------------------------------------------------
