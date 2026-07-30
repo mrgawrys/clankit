@@ -28,7 +28,7 @@ blocks nothing.
 
 ## Architecture
 
-Two events on one script, `plugins/clankit-dev/hooks/bash-duration.sh`,
+Three events on one script, `plugins/clankit-dev/hooks/bash-duration.sh`,
 dispatching on `hook_event_name` the way `context-usage.sh` already does.
 
 ```
@@ -36,15 +36,29 @@ PreToolUse  (matcher: Bash)
     date +%s  →  $TMPDIR/clanker-bash-start-<tool_use_id>
     no stdout, never blocks
 
-PostToolUse (matcher: Bash)
+PostToolUse, PostToolUseFailure  (matcher: Bash)
     read stamp, delete it
     elapsed = now - start
 
-    no stamp             →  silent
-    interrupted == true  →  silent  (guard; see Must verify)
-    elapsed < threshold  →  silent
-    otherwise            →  one line of additionalContext
+    no stamp              →  silent
+    interrupted == true   →  silent
+    timedOutAfterMs set   →  silent (the tool already reports it)
+    elapsed < threshold   →  silent
+    otherwise             →  one line of additionalContext
 ```
+
+**Both post events are registered deliberately.** A non-zero exit is handled as
+a tool *error* — `is_error: true`, with the result arriving as a plain string
+rather than the usual object — so it is expected to reach
+`PostToolUseFailure`. That is 4.7% of Bash calls (801 of 16,877 measured), and a
+test suite that fails after four minutes is the single case this feature most
+wants to catch. Registering both events also makes the routing question moot:
+whichever event fires consumes the stamp, so neither double-reports and neither
+is missed.
+
+Because an error result is a string, the post side must tolerate
+`tool_response` being either an object or a string. A string means a non-zero
+exit, which is reported.
 
 Threshold defaults to 30 seconds, overridable by `CLAUDE_SLOW_BASH_SECONDS`,
 following the `CLAUDE_CONTEXT_STEP` precedent in `context-usage.sh`.
@@ -173,21 +187,36 @@ parallel agents never contend.
 elapsed is ~0 and the hook stays silent. Taking the hook's advice makes it stop
 talking. The same holds for calls Claude Code auto-backgrounds.
 
-## Must verify before shipping
+## Event routing — resolved
 
-**Which post event a failing Bash call fires.** The design assumes a non-zero
-exit is a normal result and reaches `PostToolUse`, so a suite that fails after
-four minutes still gets reported — the most valuable case. Tool-level errors
-(timeout, interrupt) are assumed to reach `PostToolUseFailure`, which this hook
-deliberately does not register: an interrupted command's duration is
-meaningless, and a timed-out one already reports `timedOutAfterMs`.
+Measured across 16,877 Bash results. Direct observation of hook events was not
+available (installing a probe hook is a privileged action and was refused), so
+these read the *shape of the recorded result*, which distinguishes the paths
+cleanly.
 
-This is inferred from documentation, not observed. If slow *failures* route to
-`PostToolUseFailure`, the hook is blind to what it was built for and must
-register there too, guarded on `interrupted`.
+| case | result shape | `is_error` | conclusion |
+|---|---|---|---|
+| exit 0 | object (`stdout`, `stderr`, …) | `false` | `PostToolUse` |
+| non-zero exit | plain string | `true` | expected `PostToolUseFailure` |
+| tool timeout | object + `timedOutAfterMs` + `backgroundTaskId` | `false` | `PostToolUse` |
+| interrupt | never observed | — | unverified |
 
-**Whether subagents share the parent's `session_id`.** Determines whether the
-marker key needs `agent_id` at all. Include it regardless; it is free.
+Three consequences, all folded into the design above:
+
+**Non-zero exits need `PostToolUseFailure`** — 4.7% of calls, and the highest
+value case. Registering both events makes the routing inference non-load-bearing.
+
+**A tool timeout is not a failure.** It carries `backgroundTaskId`, so the call
+is handed to a background task rather than killed, and it reaches
+`PostToolUse` as a normal result. Suppressed on `timedOutAfterMs`, because the
+tool already tells the model it timed out and the duration adds nothing.
+
+**`interrupted: true` never appears** in any of the 16,877 results. The guard
+stays — it costs nothing — but it ships unverified, and confirming it needs a
+human pressing Esc.
+
+**Whether subagents share the parent's `session_id` is still unknown**, and does
+not matter: `agent_id` is in the marker key regardless.
 
 ## Out of scope
 
@@ -232,8 +261,12 @@ synthetic payloads and confirm each case:
 | elapsed over threshold, second in session | terse text |
 | `agent_id` present, first in session | subagent wording |
 | `interrupted: true` | no stdout |
+| `timedOutAfterMs` set | no stdout |
+| `tool_response` is a string (non-zero exit) | reported, not a crash |
+| `PostToolUseFailure` event | same behavior as `PostToolUse` |
 | no stamp file | no stdout |
 | `jq` absent from `PATH` | exit 0, no stdout |
+| `$TMPDIR` unwritable | exit 0, no stdout |
 | 47 s / 252 s / 3780 s | `47s` / `4m12s` / `1h03m` |
 
 Then a live check: run a `sleep 35` in a real session and confirm one expanded
