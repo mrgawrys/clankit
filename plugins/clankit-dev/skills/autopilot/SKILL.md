@@ -76,8 +76,9 @@ A "short build brief" cannot do any of these. Don't substitute one.
 ### Phase 1 · Plan (orchestrator)
 - Use the `writing-plans` skill to produce a real plan file in the worktree. **Tell the
   subagent it is running under autopilot** — it cannot know otherwise, and that is what
-  exempts it from both questions: no gate on the plan, and no handoff question at the
-  end. Phase 2 answers the second one.
+  exempts it from the question `writing-plans` asks at the end (how the plan gets
+  built): under autopilot nobody is asked, and Phase 2 already holds the answer —
+  gates none, delegated.
 - The acceptance bar follows the work: code in a repo with tests earns tests; work
   that's hard to test (UI, visual, external systems) earns a named verification run;
   prose and config earn a behavior check and no tests.
