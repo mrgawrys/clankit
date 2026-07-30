@@ -28,8 +28,8 @@ says to.
 
 | Mode | Plan file | Gates | Runs as |
 |---|---|---|---|
-| **All at once** | no | none | `executing-plans` from the spec, gates: none |
-| **In batches** | no | per-task diff | `executing-plans` inline, gates: per-task |
+| **All at once** | no | none | `executing-plans` from the spec |
+| **In batches** | no | per-task diff | `executing-plans` inline |
 | **Plan first** | yes | asked once the plan exists | `writing-plans`, then the build question |
 | **Autopilot** | yes | simulated — it reviews its own work | `autopilot`, unattended, draft PR |
 
