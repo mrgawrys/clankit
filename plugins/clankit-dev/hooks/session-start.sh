@@ -5,10 +5,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BOOTSTRAP="$(cat "${SCRIPT_DIR}/../bootstrap.md")"
 
-# Sweep bash-duration stamps orphaned by a denied permission or a killed
-# session. Once per session, because a per-call sweep would cost more than the
-# 11 bytes it reclaims.
-find "${TMPDIR:-/tmp}" -maxdepth 1 -name 'clanker-bash-start-*' -mmin +720 -delete 2>/dev/null || true
+# Sweep bash-duration stamps and bash-watchdog watch files orphaned by a
+# denied permission or a killed session. Once per session, because a per-call
+# sweep would cost more than the bytes it reclaims.
+find "${TMPDIR:-/tmp}" -maxdepth 1 \
+  \( -name 'clanker-bash-start-*' -o -name 'clanker-bash-watch-*' \) \
+  -mmin +720 -delete 2>/dev/null || true
 
 # Parameter substitution beats a per-character loop by orders of magnitude.
 escape_for_json() {
