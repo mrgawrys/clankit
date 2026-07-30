@@ -47,7 +47,11 @@ context matters, or when you want each task reviewed by something that didn't
 write it. **Inline** is right for short plans and tightly coupled tasks, where
 handing off costs more than it saves.
 
-This choice is independent of gates. See Gates below.
+This choice travels with gates, by design — oversight substitutes for
+machinery. Per-task diffs mean the user reviews every task, so the work runs
+inline and takes one review at the end; no gates means nobody is watching, so
+each task earns a fresh implementer and its own review. If neither is settled,
+ask the Gates question first (see below) — its answer settles this one too.
 
 ## Setup
 
@@ -122,8 +126,9 @@ on multi-step work, costing more overall.
 
 ## Gates
 
-Independent of delegated or inline. The mode that sent you here usually settled
-it: *all at once* and *autopilot* mean none, *in batches* means a diff per task.
+The mode that sent you here usually settled it: *all at once* and *autopilot*
+mean none, *in batches* means a diff per task. The answer settles delegated or
+inline too (see above) — the two are welded, not independent.
 
 **If nothing settled it, ask before Task 1** — one `AskUserQuestion` call, not a
 sentence with an objection window. A plan handed over, a spec opened cold, or an

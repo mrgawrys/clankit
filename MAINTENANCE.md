@@ -130,6 +130,16 @@ itself and shows it for approval before Task 1. The scripts needed no change —
 spec is a file on disk, so `plan-workspace` keys off its basename exactly as it
 does for a plan.
 
+**Gates and run style are welded — oversight substitutes for machinery.** *In
+batches* runs inline with one review at the end; *all at once* runs delegated
+with a review per task and the fix loop. A human approving every diff makes
+per-task subagent reviews redundant hoops, and nobody watching is exactly what
+those hoops exist for. An earlier revision called the delegated/inline choice
+"independent of gates" — a leftover from when the axes were designed as
+orthogonal — and that sentence read as license to un-weld them. If a later edit
+reintroduces independence, or offers delegated *in batches* by default, it
+regresses this intent.
+
 **No hand-off answer in the gates question.** Reaching this skill already means
 the work gets built, so offering "stop before Task 1" asks it to undo its own
 invocation. It also has nothing to hand over on the spec path: the derived task
