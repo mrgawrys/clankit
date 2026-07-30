@@ -145,6 +145,17 @@ check "empty stdin: silent" "" "$out"
 out="$(printf 'not json' | run 2>&1)"
 check "malformed stdin: silent" "" "$out"
 
+# Without the threshold guard the comparison itself errors, so stderr is where
+# the failure would show — hence 2>&1 on both.
+stamp t-badthresh 252
+out="$(payload PostToolUse t-badthresh s4 "" false "" \
+  | CLAUDE_SLOW_BASH_SECONDS=thirty run 2>&1)"
+check "non-numeric threshold: silent" "" "$out"
+stamp t-zerothresh 252
+out="$(payload PostToolUse t-zerothresh s4 "" false "" \
+  | CLAUDE_SLOW_BASH_SECONDS=0 run 2>&1)"
+check "zero threshold: silent" "" "$out"
+
 # --- duration formatting ----------------------------------------------------
 seen s-fmt
 i=0

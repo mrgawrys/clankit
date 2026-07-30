@@ -187,7 +187,15 @@ check "multi-line command keeps only its first line" \
   "Still running after 5s: echo one (myproject)" \
   "$(cat "$SANDBOX/clanker-bash-watch-t-multi")"
 
-rm -f "$SANDBOX/clanker-bash-watch-t-long" "$SANDBOX/clanker-bash-watch-t-multi"
+# A command carrying the field separator the hook joins on. Left in, it ends the
+# field early and the message picks up cwd and agent_id as command text.
+payload PreToolUse t-us 'echo one\u001ftwo' /tmp/myproject "" | THRESH=5 run
+check "unit separator in the command is stripped" \
+  "Still running after 5s: echo onetwo (myproject)" \
+  "$(cat "$SANDBOX/clanker-bash-watch-t-us")"
+
+rm -f "$SANDBOX/clanker-bash-watch-t-long" "$SANDBOX/clanker-bash-watch-t-multi" \
+      "$SANDBOX/clanker-bash-watch-t-us"
 
 # --- threshold rendering ----------------------------------------------------
 # On the neutered sleep, so the hour-long thresholds cost nothing.

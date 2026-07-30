@@ -51,6 +51,9 @@ fields="$(printf '%s' "$input" | jq -r '
   , (.tool_use_id // "")
   , ((.tool_input // {}) | if type == "object" then (.command // "") else "" end
      | split("\n")[0]
+     # A command may legitimately contain the separator; left in, it would end
+     # the field early and shift cwd and agent_id into the message text.
+     | gsub("\u001f"; "")
      | if length > 60 then .[0:57] + "..." else . end)
   , (.cwd // "")
   , (.agent_id // "")

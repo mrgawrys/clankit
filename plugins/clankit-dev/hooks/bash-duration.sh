@@ -22,6 +22,14 @@ trap 'exit 0' EXIT   # a duration reporter must never fail a Bash call
 THRESHOLD="${CLAUDE_SLOW_BASH_SECONDS:-30}"
 STATE_DIR="${TMPDIR:-/tmp}"
 
+# A threshold that is not a positive integer would make the comparison below
+# error, and the trap would swallow the failure — inert, but only after printing
+# to stderr. Stay quiet instead, as bash-watchdog.sh does with its own.
+case "$THRESHOLD" in
+  ''|*[!0-9]*) exit 0 ;;
+esac
+[ "$THRESHOLD" -gt 0 ] || exit 0
+
 command -v jq >/dev/null 2>&1 || exit 0
 
 input=""
