@@ -57,7 +57,7 @@ ln -s "$(command -v jq)" "$SANDBOX/nobin/jq"
 # reproduces the shape a non-zero exit arrives in.
 payload() {
   local event="$1" id="$2" cmd="$3" cwd="$4" agent="$5"
-  printf '{"hook_event_name":"%s","tool_use_id":"%s","cwd":"%s"' \
+  printf '{"hook_event_name":"%s","tool_use_id":"%s","cwd":"%s","session_id":"sess-1234-abcd"' \
     "$event" "$id" "$cwd"
   [ -n "$agent" ] && printf ',"agent_id":"%s"' "$agent"
   printf ',"tool_input":{"command":"%s"}' "$cmd"
@@ -123,6 +123,15 @@ runfast() {
     CLAUDE_BASH_WATCHDOG_SECONDS="${THRESH:-1}" bash "$HOOK"
 }
 
+# The same as run, with the opt-in trace pointed into the sandbox. The path is
+# two levels deep on purpose: the hook must create missing parents itself.
+WLOG="$SANDBOX/logs/watchdog.log"
+runlog() {
+  PATH="$SANDBOX/bin:$PATH" TMPDIR="$SANDBOX" \
+    CLAUDE_BASH_WATCHDOG_SECONDS="${THRESH:-1}" \
+    CLAUDE_BASH_WATCHDOG_LOG="$WLOG" bash "$HOOK"
+}
+
 echo "verifying $HOOK"
 echo
 
@@ -168,6 +177,27 @@ check "PostToolUseFailure emits nothing" "" "$out"
 check "PostToolUseFailure disarms" "gone" "$(watch_state t-err)"
 sleep 2
 check "non-zero exit: never notifies" "0" "$(calls)"
+
+# --- opt-in trace log --------------------------------------------------------
+# Every line carries the tool id and the truncated session id, so a shared log
+# can be split back into sessions after the fact — the forensic gap this exists
+# to close.
+wlog_line() { grep -c "^[0-9T:-]* $1 $2 sid=sess-123" "$WLOG" 2>/dev/null | tr -d ' '; }
+
+reset_log
+payload PreToolUse t-wfire "sleep 300" /tmp/myproject "" | runlog
+wait_for_calls 1
+check "log: arm line with threshold, command and project" "1" \
+  "$(grep -c '^[0-9T:-]* arm t-wfire sid=sess-123 threshold=1s cmd=sleep 300 (myproject)$' "$WLOG" | tr -d ' ')"
+check "log: fire line when the ping is sent" "1" "$(wlog_line fire t-wfire)"
+
+payload PreToolUse t-wdis "sleep 300" /tmp/myproject "" | runlog
+payload PostToolUse t-wdis "sleep 300" /tmp/myproject "" | runlog
+sleep 2
+check "log: disarm line when the post side wins" "1" "$(wlog_line disarm t-wdis)"
+check "log: expire line when the timer wakes disarmed" "1" "$(wlog_line expire t-wdis)"
+check "log: a disarmed call never logs fire" "0" "$(wlog_line fire t-wdis)"
+check "log: opting in never notifies extra" "1" "$(calls)"
 
 # --- long and multi-line commands -------------------------------------------
 # Asserted on the watch file, so the threshold has to outlast the assertion —

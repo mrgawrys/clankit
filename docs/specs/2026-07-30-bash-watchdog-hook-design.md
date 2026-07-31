@@ -63,7 +63,27 @@ lifetime, since the watchdog's state is garbage the moment the command
 finishes.
 
 Threshold defaults to 120 seconds, overridable by
-`CLAUDE_BASH_WATCHDOG_SECONDS`. Parsing uses `jq`, like the sibling hooks.
+`CLAUDE_BASH_WATCHDOG_SECONDS`; `0` disables the watchdog, which is the
+recommended setting for headless sessions nobody is watching. Parsing uses
+`jq`, like the sibling hooks.
+
+## Trace log (opt-in)
+
+Set `CLAUDE_BASH_WATCHDOG_LOG` to a path and the hook appends one line per
+decision — `arm` (with threshold, command, project), `disarm`, `fire` (ping
+sent), `expire` (timer woke already disarmed), plus `arm-fail` and
+`parse-fail`. Each line carries the tool id and the first eight characters of
+the session id, so a log shared by concurrent sessions splits back apart.
+Missing parent directories are created; a log that cannot be written is
+silently dropped, never a hook failure. Unset means no log and no cost — the
+notification path is byte-for-byte the pre-logging behavior.
+
+This exists because the notification itself is unauditable: it names a command
+but not the session or outcome, so a burst of pings cannot be diagnosed after
+the fact. With the log, "why did I get pinged" is one grep: a healthy trace
+pairs every `arm` with a `disarm`; an `arm` followed by `fire` with no
+`disarm` in between is a call that never came back — genuinely long, or the
+denial case below.
 
 ## Notification
 
@@ -94,10 +114,19 @@ and Bash's 10-minute timeout ceiling bounds it anyway.
 `$TMPDIR`, malformed stdin: `exit 0` silently, `trap 'exit 0' EXIT`. A watchdog
 that breaks a Bash call is worse than none.
 
-**Permission-wait false ping.** `PreToolUse` fires before the permission check,
-so a call sitting 2+ minutes at an approval prompt pings as "still running".
-Rare under auto mode, and a permission notification already announced the same
-prompt. Accepted.
+**Permission-denial false ping.** `PreToolUse` fires before the permission
+check, and a call that is then *denied* fires neither `PostToolUse` nor
+`PostToolUseFailure` — the denial returns to the model as a tool error with no
+post hook event at all. The armed timer therefore always fires: one false
+"still running" ping per denied call, for a command that never ran.
+Interactively this is rare (a call waiting at an approval prompt, already
+announced by a permission notification). In a headless session under a
+restricted allowlist it is common and silent — confirmed in the field, where
+one automated review session produced ~37 false pings, one per denied call.
+The env vars above are the mitigations: `CLAUDE_BASH_WATCHDOG_SECONDS=0` for
+sessions nobody watches, and the trace log shows the pattern (`arm` then
+`fire`, no `disarm`) when a burst needs diagnosing. A real fix needs a hook
+event that fires on denial; none exists today.
 
 **The 120-second race.** A command with an unraised timeout is backgrounded at
 exactly 120s — the same moment the timer fires, so the ping is nondeterministic
@@ -158,6 +187,9 @@ var so nothing waits two minutes.
 | `agent_id` present | message carries the subagent marker |
 | non-zero exit (`PostToolUseFailure`) | disarms, stub never called |
 | `terminal-notifier` absent | exit 0, no stdout |
+| log opted in, armed → fired | `arm` and `fire` lines, tool + session ids |
+| log opted in, disarmed | `disarm` then `expire` lines, no `fire` |
+| log unset | no log file, behavior unchanged |
 | unwritable `$TMPDIR` | exit 0, no stdout |
 | malformed stdin | exit 0, no stdout |
 | Pre side latency | returns in milliseconds despite the live timer |

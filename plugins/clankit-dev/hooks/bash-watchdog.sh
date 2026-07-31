@@ -25,6 +25,17 @@ trap 'exit 0' EXIT   # a watchdog that breaks a Bash call is worse than none
 THRESHOLD="${CLAUDE_BASH_WATCHDOG_SECONDS:-120}"
 STATE_DIR="${TMPDIR:-/tmp}"
 
+# Opt-in trace: one line per arm / disarm / fire / expire, appended to
+# $CLAUDE_BASH_WATCHDOG_LOG. A notification names a command but not the session
+# that armed it, so a burst of pings is undiagnosable after the fact without
+# this. Off unless the variable is set; never fails the hook.
+LOG="${CLAUDE_BASH_WATCHDOG_LOG:-}"
+case "$LOG" in */*) mkdir -p "${LOG%/*}" 2>/dev/null || LOG="" ;; esac
+wlog() {
+  [ -n "$LOG" ] || return 0
+  { printf '%s %s\n' "$(date '+%Y-%m-%dT%H:%M:%S')" "$*" >> "$LOG"; } 2>/dev/null || true
+}
+
 # A threshold that is not a positive integer would make `sleep` fail instantly
 # and fire the notification the moment the call started. Stay inert instead.
 case "$THRESHOLD" in
@@ -57,18 +68,27 @@ fields="$(printf '%s' "$input" | jq -r '
      | if length > 60 then .[0:57] + "..." else . end)
   , (.cwd // "")
   , (.agent_id // "")
+  , (.session_id // "")
   ] | join("\u001f")' 2>/dev/null)"
-[ -n "$fields" ] || exit 0
+[ -n "$fields" ] || { wlog "parse-fail"; exit 0; }
 
-IFS=$'\037' read -r event tool_id cmd cwd agent <<EOF
+IFS=$'\037' read -r event tool_id cmd cwd agent sid <<EOF
 $fields
 EOF
 [ -n "$event" ] && [ -n "$tool_id" ] || exit 0
+sid="${sid:0:8}"   # eight chars tell sessions apart without widening every line
 
 watch="$STATE_DIR/clanker-bash-watch-$tool_id"
 
 if [ "$event" != "PreToolUse" ]; then
-  rm -f "$watch" 2>/dev/null
+  # "gone" here means the timer already fired (or nothing armed) — in a healthy
+  # trace every arm has a matching disarm, so "gone" rows mark the anomalies.
+  if [ -f "$watch" ]; then
+    rm -f "$watch" 2>/dev/null
+    wlog "disarm $tool_id sid=$sid"
+  else
+    wlog "disarm $tool_id sid=$sid (gone)"
+  fi
   exit 0
 fi
 
@@ -95,7 +115,9 @@ where="${where:-unknown}"
 # The braces matter: `2>/dev/null` on printf alone silences printf, not the
 # shell's own "cannot open" message when $TMPDIR is unwritable.
 msg="Still running after $pretty: $cmd ($where)"
-{ printf '%s\n' "$msg" > "$watch"; } 2>/dev/null || exit 0
+{ printf '%s\n' "$msg" > "$watch"; } 2>/dev/null \
+  || { wlog "arm-fail $tool_id sid=$sid (watch file unwritable)"; exit 0; }
+wlog "arm $tool_id sid=$sid threshold=${THRESHOLD}s cmd=$cmd ($where)"
 
 # All three fds must be redirected. The subshell inherits the hook's stdout pipe
 # and Claude Code waits for that pipe to close, so without this the hook blocks
@@ -104,7 +126,9 @@ msg="Still running after $pretty: $cmd ($where)"
   # One read, so a disarm landing between an existence test and the read cannot
   # announce a command that already finished.
   payload="$(cat "$watch" 2>/dev/null)"
-  [ -n "$payload" ] || exit 0
+  [ -n "$payload" ] || { wlog "expire $tool_id sid=$sid"; exit 0; }
+  # Logged before notifying, so a hung notifier still leaves a trace.
+  wlog "fire $tool_id sid=$sid"
   terminal-notifier -title "Clanker" -sound Sosumi -message "$payload"
   rm -f "$watch" 2>/dev/null
 ) </dev/null >/dev/null 2>&1 &
