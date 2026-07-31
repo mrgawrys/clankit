@@ -28,32 +28,34 @@ says to.
 
 | Mode | Plan file | Gates | Runs as |
 |---|---|---|---|
-| **All at once** | no | none | `executing-plans` from the spec |
-| **In batches** | no | per-task diff | `executing-plans` inline |
-| **Plan first** | yes | asked once the plan exists | `writing-plans`, then the build question |
+| **Vibe** | no | none — you eyeball the result | `vibe`, inline, this session |
+| **Review each task** | no | per-task diff | `executing-plans` inline |
+| **Review at the end** | no | none | `executing-plans` from the spec |
 | **Autopilot** | yes | simulated — it reviews its own work | `autopilot`, unattended, draft PR |
 
-**The menu descriptions name the machinery.** The labels name the user's review
-cadence, and "all at once" alone reads lighter than it is — it is the *thorough*
-path. So each option's description states who builds, who reviews, and what the
-user sees, roughly:
+**Labels name the user's review cadence and carry an effort parenthetical; the
+descriptions name the machinery.** Each option states who builds, who reviews,
+and what the user sees, roughly:
 
-- *All at once* — "subagents build it task by task, each task reviewed and
-  fixed; you see the finished branch"
-- *In batches* — "built in this session; you approve each task's diff — you're
-  the reviewer"
-- *Plan first* — "a plan file gets written first, then the same choice about how
-  it gets built"
-- *Autopilot* — "unattended: plans, builds, reviews its own work in a worktree,
-  opens a draft PR"
+- *Vibe (minutes, no safety net)* — "built inline right now; no subagents, no
+  ledger, no review; you eyeball the result"
+- *Review each task (your time, quality = your eyes)* — "built in this session;
+  you approve each task's diff — you're the reviewer"
+- *Review at the end (slow, thorough)* — "subagents build it task by task, each
+  task reviewed and fixed; you see the finished branch"
+- *Autopilot (slowest, thorough, zero attention)* — "unattended: plans, builds,
+  reviews its own work in a worktree, opens a draft PR"
 
 **Nothing to build** — an essay, a decision, a document — means the spec *is*
 the deliverable. Skip the menu and suggest what could come next.
 
-**Plan first is a prefix, not a peer.** It answers what gets written, not how it
-gets built. Once the plan exists, ask the second question — *All at once / In
-batches / Hand it off* — and, unless they hand it off, build from the plan.
-*Autopilot* answers both halves up front, so it asks nothing.
+**A plan file is a typed route, not a menu answer.** `AskUserQuestion` caps the
+menu at four, and Vibe holds the fourth seat. `/writing-plans` is how a plan
+gets asked for, and it stays a prefix: it answers what gets written, then asks
+how it gets built — *Review at the end / Review each task / Hand it off*.
+*Autopilot* answers both halves up front, so it asks nothing. When the work is
+big enough to deserve a plan file, say so in the recommendation line and name
+`/writing-plans` — the menu no longer can.
 
 **Typing a skill answers that skill's question and no other.**
 `/writing-plans` means "I want a plan file": the artifact, not the gates.
@@ -78,7 +80,7 @@ work happens — a worktree, a branch, a repo — says nothing about which mode,
 nothing about gates.
 
 **Gates belong to whoever is about to build.** A build with no gate decision
-behind it asks for one before task 1: *All at once* or *In batches*.
+behind it asks for one before task 1: *Review at the end* or *Review each task*.
 `writing-plans` asks when its plan is finished, and adds *Hand it off* — it
 holds a plan file worth handing over. `executing-plans` asks when it holds a
 spec or plan that no menu answer stands behind, and offers no hand-off:

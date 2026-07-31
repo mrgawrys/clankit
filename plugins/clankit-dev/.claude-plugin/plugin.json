@@ -1,6 +1,6 @@
 {
   "name": "clankit-dev",
-  "description": "The design-to-build workflow — a session bootstrap that triages an ask before any ceremony and routes an approved design to the right destination; plus autopilot (small features end-to-end in a worktree), my-prs (open-PR status overview and what to tackle first), screenshot (Playwright-driven page capture), visualize-code (interactive structure diagrams), writing-clearly-and-concisely (Strunk prose rules), and a context-budget hook that reports context usage each turn",
+  "description": "The design-to-build workflow — a session bootstrap that triages an ask before any ceremony and routes an approved design to the right destination; plus vibe (build it now, inline, no machinery), autopilot (small features end-to-end in a worktree), my-prs (open-PR status overview and what to tackle first), screenshot (Playwright-driven page capture), visualize-code (interactive structure diagrams), writing-clearly-and-concisely (Strunk prose rules), and a context-budget hook that reports context usage each turn",
   "author": {
     "name": "Michal Gawrys"
   }
