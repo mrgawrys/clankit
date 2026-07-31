@@ -57,16 +57,29 @@ So: a menu with named answers, asked with a tool call, not a table to compute
 against. If a re-sync or a later edit turns the four modes back into inferred
 axes — artifact × gates — it will regress the same way.
 
-**The modes have names, not letters, and *plan first* is a prefix.** The letters
+**The modes have names, not letters, and a plan file is a prefix.** The letters
 A–D lived only in the bootstrap, and a session duly told its user "we're in Mode
 C" — vocabulary nobody outside that file could decode. The handles are now the
 option labels and nothing else speaks them. The same pass fixed what the letters
-had hidden: *plan first* answers which artifact gets written, not how the build
-is gated, so it ends by asking the second question — *All at once / In batches /
-Hand it off*. That question cannot become a fifth menu entry, because
-`AskUserQuestion` caps options at four, and it must not become an axis computed
-up front, for the reason in the paragraph above. Asking it late is what keeps it
-a menu.
+had hidden: a plan file answers which artifact gets written, not how the build
+is gated, so `writing-plans` ends by asking the second question — *Review at the
+end / Review each task / Hand it off*. That question cannot become a fifth menu
+entry, because `AskUserQuestion` caps options at four, and it must not become an
+axis computed up front, for the reason in the paragraph above. Asking it late is
+what keeps it a menu.
+
+**Labels name cadence, *vibe* holds the fourth seat, and a plan file is
+typed-only.** A later pass renamed the build-now modes: *all at once* read
+lighter than the thorough path it is — the flow even carried a warning sentence
+compensating for the label — so the labels now name the user's review cadence
+(*review at the end*, *review each task*) and carry an effort parenthetical in
+the menu. The seat freed by *plan first* went to *vibe*: inline, this session,
+no subagents, no ledger, no review — the light path small work never had, since
+handing over a spec skips triage's "small → just do it" row by construction and
+every other answer buys machinery. A plan file is reached by typing
+`/writing-plans`, which still ends with the build question. A tidy-up that
+re-seats *plan first* in the menu, drops *vibe*, or gives *vibe* artifacts or
+gates regresses this — vibe's whole job is suppression.
 
 **Gates are questions, not announcements.** Added, because the failure above had
 a second half: every gate in that session came out as a statement with an
@@ -124,20 +137,21 @@ correct only when the user asked for no gates.
 
 **No brief-extraction script.** A task in the reduced format is already a brief.
 
-**It accepts a spec, not only a plan.** *All at once* and *in batches* build
+**It accepts a spec, not only a plan.** *Review at the end* and *review each task* build
 straight from the spec with no plan file, so the skill derives the task list
 itself and shows it for approval before Task 1. The scripts needed no change — a
 spec is a file on disk, so `plan-workspace` keys off its basename exactly as it
 does for a plan.
 
-**Gates and run style are welded — oversight substitutes for machinery.** *In
-batches* runs inline with one review at the end; *all at once* runs delegated
+**Gates and run style are welded — oversight substitutes for machinery.**
+*Review each task* runs inline with one review when the plan is done; *review
+at the end* runs delegated
 with a review per task and the fix loop. A human approving every diff makes
 per-task subagent reviews redundant hoops, and nobody watching is exactly what
 those hoops exist for. An earlier revision called the delegated/inline choice
 "independent of gates" — a leftover from when the axes were designed as
 orthogonal — and that sentence read as license to un-weld them. If a later edit
-reintroduces independence, or offers delegated *in batches* by default, it
+reintroduces independence, or offers delegated *review each task* by default, it
 regresses this intent.
 
 **No hand-off answer in the gates question.** Reaching this skill already means
