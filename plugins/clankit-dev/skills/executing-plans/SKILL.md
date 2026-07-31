@@ -13,10 +13,11 @@ Take an approved design and turn it into committed, reviewed work.
 
 What you hold depends on the route that sent you here:
 
-- **A plan file** (after *plan first*, or a plan handed over) → it already
+- **A plan file** (from `/writing-plans`, or a plan handed over) → it already
   carries tasks, Global Constraints, and an acceptance bar per task. Use them as
   written.
-- **A spec** (*all at once* or *in batches* — built directly, no plan file) → it
+- **A spec** (*review at the end* or *review each task* — built directly, no
+  plan file) → it
   carries the design, not a task breakdown. **Derive the task list first:**
   right-size the tasks per the rules in `writing-plans`, give each one an
   acceptance bar ("done when…"), and **show the list for approval before
@@ -34,8 +35,8 @@ This choice travels with gates, by design — oversight substitutes for
 machinery. Per-task diffs mean the user reviews every task, so the work runs
 inline and takes one review at the end; no gates means nobody is watching, so
 each task earns a fresh implementer and its own review. The mode that sent you
-here usually answers both: *in batches* means inline, *all at once* and
-*autopilot* mean delegated. If neither is settled, ask the Gates question
+here usually answers both: *review each task* means inline, *review at the end*
+and *autopilot* mean delegated. If neither is settled, ask the Gates question
 first (see below) — its answer settles this one too.
 
 **Delegated** is right when the plan has more than a couple of tasks, when
@@ -126,8 +127,9 @@ on multi-step work, costing more overall.
 
 ## Gates
 
-The mode that sent you here usually settled it: *all at once* and *autopilot*
-mean none, *in batches* means a diff per task. The answer settles delegated or
+The mode that sent you here usually settled it: *review at the end* and
+*autopilot* mean none, *review each task* means a diff per task. The answer
+settles delegated or
 inline too (see above) — the two are welded, not independent.
 
 **If nothing settled it, ask before Task 1** — one `AskUserQuestion` call, not a
@@ -137,8 +139,8 @@ and this is where they get answered:
 
 | Answer | What it means |
 |---|---|
-| **All at once** | delegated: run to completion — a fresh subagent and a review per task — and report at the end |
-| **In batches** | inline: present each task's diff and wait for approval before moving on — the user is the reviewer. Use a diff-review tool if one is available rather than pasting the diff |
+| **Review at the end** | delegated: run to completion — a fresh subagent and a review per task — and report at the end |
+| **Review each task** | inline: present each task's diff and wait for approval before moving on — the user is the reviewer. Use a diff-review tool if one is available rather than pasting the diff |
 
 There is no hand-off answer here. Reaching this skill means the work gets built;
 handing it over is a choice made before arriving, in `writing-plans`.

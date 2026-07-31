@@ -22,9 +22,10 @@ values the spec pinned down. Give them those. Leave the implementation to them.
 
 A plan exists because the work crosses a context boundary — a fresh session
 after clearing, a subagent, someone who wasn't in the design conversation. Two
-modes call for one: *plan first* (this skill, then a question about how the plan
-gets built) and *autopilot* (which runs the plan unattended). *All at once* and
-*in batches* build straight from the spec and want no plan file at all.
+routes call for one: typing `/writing-plans` (this skill, then a question about
+how the plan gets built) and *autopilot* (which runs the plan unattended). The
+menu modes — *vibe*, *review each task*, *review at the end* — build straight
+from the spec and want no plan file at all.
 
 Being invoked directly is itself an answer: `/writing-plans` says the user wants
 a plan file. Write it. What it does not say is how the build gets gated — that
@@ -80,9 +81,9 @@ its own is either two tasks or none.
 # [Feature Name] Implementation Plan
 
 > **To execute this plan:** use the `executing-plans` skill. It reviews the plan,
-> then asks how you want it built — all at once (delegated: a subagent and a
-> review per task, report at the end), or in batches (inline: a diff per task
-> for you to approve).
+> then asks how you want it built — review at the end (delegated: a subagent
+> and a review per task, report at the end), or review each task (inline: a
+> diff per task for you to approve).
 
 **Goal:** [One sentence describing what this builds]
 
@@ -208,8 +209,8 @@ question — the plan file — so end by asking the other half, with one
 
 | Answer | What happens |
 |---|---|
-| **All at once** | `executing-plans` delegated from the plan — a subagent and a review per task, no gates; report at the end |
-| **In batches** | `executing-plans` inline — a diff per task, the user approves each and is the reviewer |
+| **Review at the end** | `executing-plans` delegated from the plan — a subagent and a review per task, no gates; report at the end |
+| **Review each task** | `executing-plans` inline — a diff per task, the user approves each and is the reviewer |
 | **Hand it off** | stop here — the plan is the deliverable |
 
 Recommend one and say why; you know how big the work is and who will execute it.

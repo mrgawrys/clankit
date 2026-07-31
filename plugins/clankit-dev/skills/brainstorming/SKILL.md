@@ -136,9 +136,9 @@ If the user already said where the work happens — a worktree, a branch, a repo
 **Write the spec — by default, always:**
 
 The spec is the durable record of what was decided and the input every mode
-consumes: *all at once* and *in batches* build from it, *plan first* turns it
-into a plan, *autopilot* takes it away and runs it. Skip it only when the user
-says to.
+consumes: *vibe*, *review each task* and *review at the end* build from it,
+`/writing-plans` turns it into a plan, *autopilot* takes it away and runs it.
+Skip it only when the user says to.
 
 - Write the validated design (spec) to `docs/specs/YYYY-MM-DD-<topic>-design.md`
   - A design document goes in `docs/specs/` even when the repo keeps other
@@ -156,9 +156,10 @@ choice is owed rather than assuming one:
 ```markdown
 # [Topic] — Design
 
-> **To act on this design:** pick a mode — *all at once*, *in batches*
-> (per-task diffs), *plan first* (`writing-plans`, then a second question about
-> how it gets built), or *autopilot*. Ask the user which; don't pick for them.
+> **To act on this design:** pick a mode — *vibe* (inline, no machinery),
+> *review each task* (per-task diffs), *review at the end* (delegated, reviewed
+> per task), or *autopilot*. A plan file first is `/writing-plans`. Ask the
+> user which; don't pick for them.
 ```
 
 **Spec Self-Review:**
@@ -184,14 +185,17 @@ One `AskUserQuestion` call, four named answers, taken from the session bootstrap
 
 | Mode | What it does |
 |---|---|
-| **All at once** | `executing-plans` delegated from the spec — a subagent per task, a review after each, a fix loop; the user sees the finished branch |
-| **In batches** | `executing-plans` inline — one task at a time in this session; the user approves each diff and is the reviewer |
-| **Plan first** | `writing-plans` produces the plan, then asks how it gets built |
+| **Vibe** | inline, right now — no subagents, no ledger, no review; the user eyeballs the result |
+| **Review each task** | `executing-plans` inline — one task at a time in this session; the user approves each diff and is the reviewer |
+| **Review at the end** | `executing-plans` delegated from the spec — a subagent per task, a review after each, a fix loop; the user sees the finished branch |
 | **Autopilot** | unattended — plans, builds, reviews its own work in a worktree, opens a draft PR |
 
-The option descriptions must carry the machinery, not just the label — the
-labels name review cadence, and "all at once" alone reads lighter than the
-thorough path it is.
+The option labels name review cadence and carry an effort parenthetical —
+*(minutes, no safety net)* through *(slowest, thorough, zero attention)* — and
+the descriptions carry the machinery; the bootstrap's menu section holds the
+canonical wording. When the work deserves a plan file, say so in the
+recommendation and name `/writing-plans` — it is a typed route, not a menu
+answer.
 
 Those four names are the option labels. Everywhere else, say the action rather
 than the name: "I'll write the plan first, then ask how you want it built".
