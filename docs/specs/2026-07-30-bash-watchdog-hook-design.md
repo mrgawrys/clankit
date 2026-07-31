@@ -125,10 +125,13 @@ restricted allowlist it is common and silent — confirmed in the field, where
 one automated review session produced ~37 false pings, one per denied call.
 The env vars above are the mitigations: `CLAUDE_BASH_WATCHDOG_SECONDS=0` for
 sessions nobody watches, and the trace log shows the pattern (`arm` then
-`fire`, no `disarm`) when a burst needs diagnosing. The likely real fix is
-registering the hook on the `PermissionDenied` event — the script already
-disarms on any non-`PreToolUse` event, so it would work as-is *if* that
-event's payload carries `tool_use_id`; unverified, not yet done.
+`fire`, no `disarm`) when a burst needs diagnosing. The `PermissionDenied`
+hook event is not the fix: verified empirically (a scratch project with a
+deny rule and a stdin-dumping hook) that it fires only for auto-mode
+classifier denials — a rule or dontAsk denial fires no event at all, so
+nothing can disarm per call. `PreToolUse` input does carry `permission_mode`,
+but gating on it would also silence attended dontAsk sessions, so it stays
+unused. Unattended sessions should simply set the threshold to `0`.
 
 **The 120-second race.** A command with an unraised timeout is backgrounded at
 exactly 120s — the same moment the timer fires, so the ping is nondeterministic
