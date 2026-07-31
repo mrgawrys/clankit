@@ -13,7 +13,7 @@ Take an approved design and turn it into committed, reviewed work.
 
 What you hold depends on the route that sent you here:
 
-- **A plan file** (from `/writing-plans`, or a plan handed over) → it already
+- **A plan file** (after *plan first*, or a plan handed over) → it already
   carries tasks, Global Constraints, and an acceptance bar per task. Use them as
   written.
 - **A spec** (*review at the end* or *review each task* — built directly, no

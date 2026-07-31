@@ -31,7 +31,7 @@ says to.
 | **Vibe** | no | none — you eyeball the result | `vibe`, inline, this session |
 | **Review each task** | no | per-task diff | `executing-plans` inline |
 | **Review at the end** | no | none | `executing-plans` from the spec |
-| **Autopilot** | yes | simulated — it reviews its own work | `autopilot`, unattended, draft PR |
+| **Plan first** | yes | asked once the plan exists | `writing-plans`, then the build question |
 
 **Labels name the user's review cadence and carry an effort parenthetical; the
 descriptions name the machinery.** Each option states who builds, who reviews,
@@ -43,19 +43,26 @@ and what the user sees, roughly:
   you approve each task's diff — you're the reviewer"
 - *Review at the end (slow, thorough)* — "subagents build it task by task, each
   task reviewed and fixed; you see the finished branch"
-- *Autopilot (slowest, thorough, zero attention)* — "unattended: plans, builds,
-  reviews its own work in a worktree, opens a draft PR"
+- *Plan first (adds a reviewable plan file)* — "a plan file gets written first,
+  then the same choice about how it gets built"
+
+The question line keeps the typed route visible:
+"Which mode? (unattended end-to-end is also an option — type /autopilot)"
 
 **Nothing to build** — an essay, a decision, a document — means the spec *is*
 the deliverable. Skip the menu and suggest what could come next.
 
-**A plan file is a typed route, not a menu answer.** `AskUserQuestion` caps the
-menu at four, and Vibe holds the fourth seat. `/writing-plans` is how a plan
-gets asked for, and it stays a prefix: it answers what gets written, then asks
-how it gets built — *Review at the end / Review each task / Hand it off*.
-*Autopilot* answers both halves up front, so it asks nothing. When the work is
-big enough to deserve a plan file, say so in the recommendation line and name
-`/writing-plans` — the menu no longer can.
+**Autopilot is a typed route, not a menu answer.** `AskUserQuestion` caps the
+menu at four, and Vibe took a seat — the one nobody discovers from a list.
+`/autopilot` arrives already decided, runs unattended (plans, builds, reviews
+its own work in a worktree, opens a draft PR), and answers both halves — plan
+file and gates — asking nothing. The question line above is what keeps it
+visible.
+
+**Plan first is a prefix, not a peer.** It answers what gets written, not how it
+gets built. Once the plan exists, ask the second question — *Review at the end /
+Review each task / Hand it off* — and, unless they hand it off, build from the
+plan.
 
 **Typing a skill answers that skill's question and no other.**
 `/writing-plans` means "I want a plan file": the artifact, not the gates.

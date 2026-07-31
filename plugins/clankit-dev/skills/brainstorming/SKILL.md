@@ -137,7 +137,7 @@ If the user already said where the work happens — a worktree, a branch, a repo
 
 The spec is the durable record of what was decided and the input every mode
 consumes: *vibe*, *review each task* and *review at the end* build from it,
-`/writing-plans` turns it into a plan, *autopilot* takes it away and runs it.
+*plan first* turns it into a plan, `/autopilot` takes it away and runs it.
 Skip it only when the user says to.
 
 - Write the validated design (spec) to `docs/specs/YYYY-MM-DD-<topic>-design.md`
@@ -158,8 +158,9 @@ choice is owed rather than assuming one:
 
 > **To act on this design:** pick a mode — *vibe* (inline, no machinery),
 > *review each task* (per-task diffs), *review at the end* (delegated, reviewed
-> per task), or *autopilot*. A plan file first is `/writing-plans`. Ask the
-> user which; don't pick for them.
+> per task), or *plan first* (`writing-plans`, then how it gets built).
+> Unattended end-to-end is `/autopilot`. Ask the user which; don't pick for
+> them.
 ```
 
 **Spec Self-Review:**
@@ -188,14 +189,13 @@ One `AskUserQuestion` call, four named answers, taken from the session bootstrap
 | **Vibe** | inline, right now — no subagents, no ledger, no review; the user eyeballs the result |
 | **Review each task** | `executing-plans` inline — one task at a time in this session; the user approves each diff and is the reviewer |
 | **Review at the end** | `executing-plans` delegated from the spec — a subagent per task, a review after each, a fix loop; the user sees the finished branch |
-| **Autopilot** | unattended — plans, builds, reviews its own work in a worktree, opens a draft PR |
+| **Plan first** | `writing-plans` produces a reviewable plan file, then asks how it gets built |
 
 The option labels name review cadence and carry an effort parenthetical —
-*(minutes, no safety net)* through *(slowest, thorough, zero attention)* — and
-the descriptions carry the machinery; the bootstrap's menu section holds the
-canonical wording. When the work deserves a plan file, say so in the
-recommendation and name `/writing-plans` — it is a typed route, not a menu
-answer.
+*(minutes, no safety net)* and up — and the descriptions carry the machinery;
+the bootstrap's menu section holds the canonical wording, including the
+question line that names the typed route: unattended end-to-end is
+`/autopilot`, never a menu row — nobody discovers unattended from a list.
 
 Those four names are the option labels. Everywhere else, say the action rather
 than the name: "I'll write the plan first, then ask how you want it built".

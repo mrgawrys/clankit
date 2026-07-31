@@ -2,8 +2,9 @@
 
 > **To act on this design:** pick a mode — *vibe* (inline, no machinery),
 > *review each task* (per-task diffs), *review at the end* (delegated, reviewed
-> per task), or *autopilot*. A plan file first is `/writing-plans`. Ask the
-> user which; don't pick for them.
+> per task), or *plan first* (`writing-plans`, then how it gets built).
+> Unattended end-to-end is `/autopilot`. Ask the user which; don't pick for
+> them.
 
 ## The problem
 
@@ -42,11 +43,12 @@ machinery. The menu becomes, lightest first:
    session; you approve each task's diff — you're the reviewer
 3. **Review at the end** *(slow, thorough)* — subagents build it task by task,
    each task reviewed and fixed; you see the finished branch
-4. **Autopilot** *(slowest, thorough, zero attention)* — unattended: plans,
-   builds, reviews its own work in a worktree, opens a draft PR
+4. **Plan first** *(adds a reviewable plan file)* — `writing-plans` writes the
+   plan, then asks how it gets built
 
 With labels finally naming cadence, the "reads lighter than it is" warning
-sentence retires — the parenthetical does its job.
+sentence retires — the parenthetical does its job. The menu is now a clean
+gradient of the user's attention, every row attended.
 
 ### Vibe is a mode and a skill
 
@@ -58,20 +60,25 @@ you go, stop only when blocked or done, report what was built and how to check
 it. Repo hard gates still bind — CLAUDE.md outranks skills already; vibe skips
 process, never rules.
 
-### Plan first leaves the menu, not the flow
+### Autopilot leaves the menu, not the flow
 
-Vibe takes the fourth slot permanently; *plan first* becomes typed-only via
-`/writing-plans`. It remains a prefix: the skill still ends by asking how the
-build gets gated — *Review at the end / Review each task / Hand it off* — and
-*autopilot* still writes its plan unasked. When the work is big enough to
-deserve a plan file, the recommendation line says so and names the typed route;
-the menu no longer can.
+Vibe needs a seat and `AskUserQuestion` caps the menu at four. The seat comes
+from *autopilot*, not *plan first*: nobody discovers unattended in a menu —
+`/autopilot` arrives already decided, has always been a typed entrance, and
+answers both halves (plan file and gates) by itself. *Plan first*, by contrast,
+is a judgment call the recommendation line can guide, which is what menus are
+for. It keeps its seat and stays a prefix: `writing-plans` ends by asking how
+the build gets gated — *Review at the end / Review each task / Hand it off*.
+
+So the typed route stays visible, the question line names it:
+
+> Which mode? (unattended end-to-end is also an option — type /autopilot)
 
 ## The edits
 
 | File | Change |
 |---|---|
-| `bootstrap.md` | Routing table gains the Vibe row and drops *Plan first*; labels renamed; descriptions gain parentheticals; the prefix paragraph rewritten for the typed-only route; Gates section renamed. |
+| `bootstrap.md` | Routing table gains the Vibe row and drops *Autopilot*; labels renamed; descriptions gain parentheticals; the question line names the typed `/autopilot` route; Gates section renamed. |
 | `skills/vibe/SKILL.md` | New. One screen. |
 | `brainstorming/SKILL.md` | Menu table and spec-header template take the new four; rationale sentence about "all at once" retires. |
 | `writing-plans/SKILL.md` | "Two modes call for one" rewritten for the typed route; plan header template and Handoff table take the new names. |

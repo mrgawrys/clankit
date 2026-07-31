@@ -22,10 +22,10 @@ values the spec pinned down. Give them those. Leave the implementation to them.
 
 A plan exists because the work crosses a context boundary — a fresh session
 after clearing, a subagent, someone who wasn't in the design conversation. Two
-routes call for one: typing `/writing-plans` (this skill, then a question about
-how the plan gets built) and *autopilot* (which runs the plan unattended). The
-menu modes — *vibe*, *review each task*, *review at the end* — build straight
-from the spec and want no plan file at all.
+routes call for one: *plan first* (this skill, then a question about how the
+plan gets built) and `/autopilot` (which runs the plan unattended). The other
+modes — *vibe*, *review each task*, *review at the end* — build straight from
+the spec and want no plan file at all.
 
 Being invoked directly is itself an answer: `/writing-plans` says the user wants
 a plan file. Write it. What it does not say is how the build gets gated — that

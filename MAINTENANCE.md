@@ -68,18 +68,19 @@ entry, because `AskUserQuestion` caps options at four, and it must not become an
 axis computed up front, for the reason in the paragraph above. Asking it late is
 what keeps it a menu.
 
-**Labels name cadence, *vibe* holds the fourth seat, and a plan file is
-typed-only.** A later pass renamed the build-now modes: *all at once* read
-lighter than the thorough path it is — the flow even carried a warning sentence
-compensating for the label — so the labels now name the user's review cadence
-(*review at the end*, *review each task*) and carry an effort parenthetical in
-the menu. The seat freed by *plan first* went to *vibe*: inline, this session,
-no subagents, no ledger, no review — the light path small work never had, since
-handing over a spec skips triage's "small → just do it" row by construction and
-every other answer buys machinery. A plan file is reached by typing
-`/writing-plans`, which still ends with the build question. A tidy-up that
-re-seats *plan first* in the menu, drops *vibe*, or gives *vibe* artifacts or
-gates regresses this — vibe's whole job is suppression.
+**Labels name cadence, *vibe* is seated, and *autopilot* is typed-only.** A
+later pass renamed the build-now modes: *all at once* read lighter than the
+thorough path it is — the flow even carried a warning sentence compensating for
+the label — so the labels now name the user's review cadence (*review at the
+end*, *review each task*) and carry an effort parenthetical in the menu. *Vibe*
+joined as the light path small work never had: inline, this session, no
+subagents, no ledger, no review — handing over a spec skips triage's "small →
+just do it" row by construction, and every other answer buys machinery. Its
+seat came from *autopilot*, because the menu caps at four and unattended is the
+one mode nobody discovers from a list: `/autopilot` arrives already decided and
+answers both halves by itself. The question line names the typed route so it
+stays visible. A tidy-up that re-seats *autopilot*, drops *vibe*, or gives
+*vibe* artifacts or gates regresses this — vibe's whole job is suppression.
 
 **Gates are questions, not announcements.** Added, because the failure above had
 a second half: every gate in that session came out as a statement with an
