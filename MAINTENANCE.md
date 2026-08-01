@@ -80,7 +80,20 @@ seat came from *autopilot*, because the menu caps at four and unattended is the
 one mode nobody discovers from a list: `/autopilot` arrives already decided and
 answers both halves by itself. The question line names the typed route so it
 stays visible. A tidy-up that re-seats *autopilot*, drops *vibe*, or gives
-*vibe* artifacts or gates regresses this — vibe's whole job is suppression.
+*vibe* artifacts regresses this — vibe's whole job is suppression.
+
+**Vibe's one gate: here or handed off.** Amends the paragraph above, which said
+vibe gets no gates. Vibe now opens by asking where it runs — this session, or
+one subagent at a capable or a cheap tier — because vibe is the only mode that
+builds inline, so it is the only one whose cost is the invoking context. The
+other modes were considered and excluded: *review at the end* and `/autopilot`
+already dispatch a subagent per task, and moving their orchestrator into a
+subagent would break the per-task review it dispatches; *review each task* needs
+the diffs back in the user's context by definition. The question is asked every
+time rather than gated on a token threshold — the threshold only picks which
+answer gets recommended. This is the one gate vibe is allowed; anything that
+adds a second, or a ledger, or a review, is the regression the paragraph above
+is guarding.
 
 **Gates are questions, not announcements.** Added, because the failure above had
 a second half: every gate in that session came out as a statement with an

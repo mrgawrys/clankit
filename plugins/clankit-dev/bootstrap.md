@@ -28,7 +28,7 @@ says to.
 
 | Mode | Plan file | Gates | Runs as |
 |---|---|---|---|
-| **Vibe** | no | none — you eyeball the result | `vibe`, inline, this session |
+| **Vibe** | no | none — you eyeball the result | `vibe` — here, or one subagent; it asks |
 | **Review each task** | no | per-task diff | `executing-plans` inline |
 | **Review at the end** | no | none | `executing-plans` from the spec |
 | **Plan first** | yes | asked once the plan exists | `writing-plans`, then the build question |
@@ -37,8 +37,8 @@ says to.
 descriptions name the machinery.** Each option states who builds, who reviews,
 and what the user sees, roughly:
 
-- *Vibe (minutes, no safety net)* — "built inline right now; no subagents, no
-  ledger, no review; you eyeball the result"
+- *Vibe (minutes, no safety net)* — "built right now, here or by one subagent;
+  no ledger, no review; you eyeball the result"
 - *Review each task (your time, quality = your eyes)* — "built in this session;
   you approve each task's diff — you're the reviewer"
 - *Review at the end (slow, thorough)* — "subagents build it task by task, each
