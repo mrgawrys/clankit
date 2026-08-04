@@ -30,6 +30,22 @@ Scripts I'll paste somewhere must run nothing on paste — I invoke deliberately
 Elixir: a module with the call in a trailing comment. Shell/other: definitions
 only, call commented out. Skip only if I ask for a runnable one-liner.
 
+## PR Descriptions
+
+The body is for humans deciding how to review — reviewers run AI on the diff
+anyway, so detail they can regenerate from the code is noise. One screen, tops.
+
+- **What & why, a few sentences.** Provenance counts ("mirrors the Journey
+  endpoint, most code copied from there") — it tells the reviewer what's
+  actually new versus borrowed.
+- **Optionally:** what to look at in particular; what this PR is *not*
+  (deferred, out of scope, known gaps); related PRs / docs / tickets.
+- **Never:** module-by-module change lists, function or file inventories, API
+  contract dumps, or a Verification section — CI already says the tests pass.
+  Verification earns a mention only when it reports real manual or usability
+  testing. If deep detail is genuinely worth keeping, put it in a follow-up PR
+  comment or a linked doc, never the body.
+
 ## PR Comment Style
 
 When writing comments on someone else's PR:
