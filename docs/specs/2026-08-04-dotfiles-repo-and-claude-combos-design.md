@@ -53,7 +53,16 @@ dotfiles/                          clankit/
     claude-accounts.zsh
   install.sh
   README.md
+  CLAUDE.md
 ```
+
+`dotfiles/CLAUDE.md` exists from the first commit. It is short, and it carries
+the two things a future session is most likely to get wrong:
+
+- the boundary rule above — shell reads it, or Claude Code reads it
+- **link config you author, copy anything the machine writes back into**
+
+Plus a pointer to the README for everything else, so the two never disagree.
 
 `clankit/home/claude-accounts.fish` moves to `dotfiles/fish/conf.d/`. Today
 that file is a template carrying a "copy this to conf.d by hand" comment, so
@@ -200,6 +209,34 @@ real file it would displace to `.bak`, then symlinks.
 2. **Delete `clankit/home/claude-accounts.fish`.** That is a commit in the
    other repo.
 
+## Why not a dotfiles manager
+
+Considered and rejected, as of August 2026. The deciding concern was **drift** —
+config edited in place while the repo goes stale.
+
+**Symlinks make drift impossible by construction.** The live file and the repo
+file are one inode with two names, so editing either edits both and `git
+status` sees it immediately. Only `git commit` stays manual. Any tool that
+*copies* reintroduces the problem.
+
+| Tool | Mechanism | Verdict |
+|---|---|---|
+| `install.sh` | symlink | **chosen** — no dependency, mirrors clankit's installer |
+| GNU Stow | symlink | Layout must mirror `$HOME`; can't write the `.zshrc` line, so a script survives anyway — two mechanisms for six files |
+| mise | symlink | Viable — mise is already installed — but the dotfiles feature only left experimental in July 2026, and the zsh machine would need mise too |
+| lnk | symlink + git | Closest drop-in, but v0.9.1 with ~20 installs/month — too early |
+| chezmoi | **copy** | Rejected. No passive reverse-sync: `autoCommit`/`autoPush` commit the *source* directory and never pull `$HOME` edits back, so `chezmoi add`/`edit` stays a forgettable step — precisely the failure being avoided |
+| yadm | `$HOME` is the work tree | Drift-free, but wants to own all of `$HOME`; too much for six files, and `$HOME` in a public repo needs care |
+| home-manager | nix store symlink | Overkill; macOS friction |
+
+No tool addresses the fish/zsh split — they move files, they don't understand
+shell semantics. One shared table plus a thin per-shell loader is the standard
+answer and is independent of the deployment mechanism.
+
+**The one gap symlinks leave:** a new config file created directly in
+`~/.config/fish/conf.d/` and never moved into the repo. Only yadm makes that
+impossible. Accepted.
+
 ## Known consequence
 
 **These names do not work in scripts.** Fish abbreviations expand only in
@@ -246,7 +283,7 @@ proving the flags reach a real session.
 
 | # | Repo | Commit |
 |---|---|---|
-| 1 | dotfiles | init: README, `install.sh` with `link()` + backup |
+| 1 | dotfiles | init: README, `CLAUDE.md`, `install.sh` with `link()` + backup |
 | 2 | dotfiles | `shared/combos.tsv` + fish loader |
 | 3 | dotfiles | zsh loader + `init.zsh` |
 | 4 | dotfiles | `claude-accounts` — moved fish file + new zsh port |
