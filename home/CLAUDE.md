@@ -43,8 +43,9 @@ anyway, so detail they can regenerate from the code is noise. One screen, tops.
 - **Never:** module-by-module change lists, function or file inventories, API
   contract dumps, or a Verification section — CI already says the tests pass.
   Verification earns a mention only when it reports real manual or usability
-  testing. If deep detail is genuinely worth keeping, put it in a follow-up PR
-  comment or a linked doc, never the body.
+  testing. If deep detail is genuinely worth keeping, fold it into a collapsed
+  `<details>` appendix at the bottom, a follow-up PR comment, or a linked doc —
+  never the readable body.
 
 ## PR Comment Style
 
