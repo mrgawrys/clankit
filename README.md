@@ -56,6 +56,7 @@ building it, write the spec, then ask how the work should be built and reviewed.
 | `verification-before-completion` | Evidence before assertions — run the command before claiming it passes |
 | `writing-good-tests` | Six rules for tests that can actually fail |
 | `receiving-code-review` | Verify review feedback on its merits instead of implementing it on reflex |
+| `why` | "Why didn't you follow my rule?" gets an evidence-ranked causal analysis instead of an apology |
 | `writing-skills` | Creating, editing, and verifying skills |
 | `writing-clearly-and-concisely` | Strunk-style prose rules for anything humans read — adapted from [obra/the-elements-of-style](https://github.com/obra/the-elements-of-style) (public domain) |
 
