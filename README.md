@@ -10,9 +10,12 @@ Two layers:
   `clankit-dev` (dev/work skills, hooks, and the session bootstrap that routes
   between them) and `clankit-life` (personal-life skills), installable
   independently per machine.
-- **`home/`** — the dotfiles layer: global `CLAUDE.md` and a `settings.json`
+- **`home/`** — the `~/.claude` layer: global `CLAUDE.md` and a `settings.json`
   bootstrap template. Installed by `install.sh` as symlinks, so this repo stays
   the source of truth.
+
+Shell config lives elsewhere: if Claude Code reads it, it belongs here; if the
+shell reads it, it belongs in a dotfiles repo.
 
 ## New machine
 
@@ -93,9 +96,9 @@ CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude plugin install clankit-dev@clank
 CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude plugin install clankit-life@clankit
 ```
 
-Copy `home/claude-accounts.fish` to `~/.config/fish/conf.d/` to switch stores
-automatically by directory — edit `personal_roots` in the file to match the
-machine's layout. Then `claude` + `/login` once in each store.
+Switching stores automatically by directory is shell config, so it lives in a
+separate dotfiles repo — `claude-accounts` there sets `CLAUDE_CONFIG_DIR` on
+`cd`, for fish and zsh. Then `claude` + `/login` once in each store.
 
 ## Notes
 
