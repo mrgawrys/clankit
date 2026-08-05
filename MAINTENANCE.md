@@ -108,6 +108,15 @@ this skill" pointer. Once a spec can be the only artifact, it has to say what to
 do with it, and it must not be filed in `docs/plans/`, where a reader expects
 tasks and an acceptance bar.
 
+**No todo-list mandate.** Upstream opens the checklist by ordering the model to
+track every step as a task in the native task list, on the theory that an
+unfinished task is what makes a skipped step visible. That theory needs a reader.
+The panel is disabled here, so the list is written and never seen — ceremony on
+every run, buying nothing. Ours says only that the steps are completed in order;
+the checklist itself is untouched. The same cut applies to `executing-plans`,
+where a ledger file already does the job for real. Upstream ships this mandate in
+more than one skill, so expect a re-sync to bring it back.
+
 **The trigger is narrowed and the domain is neutral.** Triage lives in the session
 bootstrap, so this skill does not need to fire on everything. Its code-specific
 design guidance is scoped to software, because the skill is meant to work on a
@@ -151,11 +160,23 @@ correct only when the user asked for no gates.
 
 **No brief-extraction script.** A task in the reduced format is already a brief.
 
+**No todo-list mandate**, for the reason recorded under `brainstorming`. The
+ledger file is the progress record; todos were a second, unread copy of it.
+
 **It accepts a spec, not only a plan.** *Review at the end* and *review each task* build
 straight from the spec with no plan file, so the skill derives the task list
 itself and shows it for approval before Task 1. The scripts needed no change — a
 spec is a file on disk, so `plan-workspace` keys off its basename exactly as it
 does for a plan.
+
+**The derived list has a specified render, and the bodies live in the ledger.**
+Saying "show the list for approval" and stopping there is what an observed
+session did with it: five task bodies, box-drawing separators and a pre-flight
+finding in one message nobody could read. The gate is now one line per task and
+the bodies go to `progress.md`. This is not a loosening of the "not a document"
+rule — that rule names `docs/plans/`, and the ledger is git-ignored workspace
+that dies with the plan. If a later edit drops the render constraint as
+redundant, the prose padding comes straight back.
 
 **Gates and run style are welded — oversight substitutes for machinery.**
 *Review each task* runs inline with one review when the plan is done; *review

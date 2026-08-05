@@ -21,7 +21,12 @@ What you hold depends on the route that sent you here:
   carries the design, not a task breakdown. **Derive the task list first:**
   right-size the tasks per the rules in `writing-plans`, give each one an
   acceptance bar ("done when…"), and **show the list for approval before
-  Task 1.** That approved list is your task sequence, your todos, and your
+  Task 1.** The full bodies go in the ledger once the workspace exists (Setup,
+  below); the approval message itself is **one line per task** — `<ID>  <verb
+  phrase>` — and nothing else. No tables, no box-drawing, no acceptance bars,
+  no per-task prose. A gate the reviewer has to wade through is a gate they
+  rubber-stamp; they approve off something scannable and read the ledger when
+  they want the detail. That approved list is your task sequence and your
   ledger entries — it is not a document, and it does not get written to
   `docs/plans/`.
 - **Neither — just an ask** → you are in the wrong skill. Go design it first
@@ -62,8 +67,7 @@ consent.
 
 Conversation memory does not survive compaction. In real sessions, controllers
 that lost their place have re-dispatched entire completed task sequences — the
-single most expensive failure observed. Track progress in a ledger file, not
-only in todos.
+single most expensive failure observed. Track progress in a ledger file on disk.
 
 - Run `scripts/plan-workspace PLAN_FILE`, passing the plan **or the spec** —
   either way it is a file on disk and the workspace is named after it. It prints
@@ -78,13 +82,19 @@ only in todos.
   different plan file is another plan's progress — leave it and start your own.
 - Create the ledger with its identity on the first line:
   `# Ledger — plan: <plan file path>`.
+- On the spec path, the derived task bodies go here, under the identity line —
+  `## <ID>` with its task and its "done when…", one section each. This is the
+  home for the detail the approval message deliberately leaves out, and it puts
+  the acceptance bars somewhere that survives compaction. Writing them here is
+  not writing a plan document: the ban is on `docs/plans/`, and the ledger is
+  git-ignored workspace that dies with the plan.
 - The ledger is your recovery map: the commits it names exist in git even when
   your context no longer remembers creating them. After compaction, trust the
   ledger and `git log` over your own recollection.
 
-Read the plan once, note its Global Constraints, and create a todo per task. From
-a spec, the constraints are whatever it pinned down as decided — exact values,
-naming, response shapes — and they bind every task the same way.
+Read the plan once and note its Global Constraints. From a spec, the constraints
+are whatever it pinned down as decided — exact values, naming, response
+shapes — and they bind every task the same way.
 
 **Pre-flight scan.** Before dispatching Task 1, scan the plan for conflicts:
 tasks that contradict each other or the Global Constraints, and anything the
@@ -289,7 +299,7 @@ name. Every adjudication is a ledger entry — silent discards are forbidden.
 - `Task <N>: complete (commits <base7>..<head7>, review clean)`
 - `Task <N>: complete (commits <base7>..<head7>, <K> parked)` after a breaker
 
-Mark the todo complete and move on. Never move to the next task while the review
+Append that ledger line and move on. Never move to the next task while the review
 has open Critical/Important issues that are neither fixed nor parked with a ruling.
 
 ## Running inline

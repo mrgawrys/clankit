@@ -31,9 +31,7 @@ present it and get approval.
 
 ## Checklist
 
-You MUST track these as tasks in your task list and complete them in order. Do
-it at the start, before step 1 — an unfinished task is the only thing that makes
-a skipped step visible while there is still time to go back.
+You MUST complete these in order.
 
 1. **Explore project context** — check files, docs, recent commits
 2. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval, start the companion and the user's browser opens to it. If no visual question ever arises, never offer it. See the Visual Companion section below.
