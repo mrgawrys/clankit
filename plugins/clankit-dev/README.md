@@ -16,7 +16,7 @@ couple of Bash-call observability hooks.
 - `CLAUDE_SLOW_BASH_SECONDS` — threshold in seconds before `bash-duration.sh`
   reports a call as slow. Default 30.
 - `CLAUDE_BASH_WATCHDOG_SECONDS` — threshold in seconds before
-  `bash-watchdog.sh` pings that a call is still running. Default 120.
+  `bash-watchdog.sh` pings that a call is still running. Default 300.
   Set to `0` to disable the watchdog entirely — useful for headless or
   unattended sessions nobody is watching.
 - `CLAUDE_BASH_WATCHDOG_LOG` — path of an append-only trace of the watchdog's

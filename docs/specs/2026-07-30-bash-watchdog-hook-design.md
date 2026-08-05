@@ -62,7 +62,7 @@ it destroys exactly the data that would have been announced — the right
 lifetime, since the watchdog's state is garbage the moment the command
 finishes.
 
-Threshold defaults to 120 seconds, overridable by
+Threshold defaults to 300 seconds, overridable by
 `CLAUDE_BASH_WATCHDOG_SECONDS`; `0` disables the watchdog, which is the
 recommended setting for headless sessions nobody is watching. Parsing uses
 `jq`, like the sibling hooks.
@@ -133,10 +133,13 @@ nothing can disarm per call. `PreToolUse` input does carry `permission_mode`,
 but gating on it would also silence attended dontAsk sessions, so it stays
 unused. Unattended sessions should simply set the threshold to `0`.
 
-**The 120-second race.** A command with an unraised timeout is backgrounded at
-exactly 120s — the same moment the timer fires, so the ping is nondeterministic
-there. When it does fire it is not wrong: the command is still running, in a
-background task. Accepted.
+**What a 300-second threshold gives up.** The default Bash timeout backgrounds
+a call at 120s, which disarms it long before the timer wakes. So the watchdog
+now speaks only for calls given a raised timeout, or ones still running as a
+background task — which is the population worth interrupting a human for. An
+earlier 120s default sat exactly on the backgrounding point and fired
+nondeterministically; that race is gone. The cost is coverage: in one trace of
+5301 calls, 22 passed 120s and 6 passed 300s.
 
 **Esc interrupt.** Whether any post event fires on interrupt is still
 unverified (see the duration hook's spec). If none does, the watch file

@@ -22,7 +22,7 @@
 set -u
 trap 'exit 0' EXIT   # a watchdog that breaks a Bash call is worse than none
 
-THRESHOLD="${CLAUDE_BASH_WATCHDOG_SECONDS:-120}"
+THRESHOLD="${CLAUDE_BASH_WATCHDOG_SECONDS:-300}"
 STATE_DIR="${TMPDIR:-/tmp}"
 
 # Opt-in trace: one line per arm / disarm / fire / expire, appended to

@@ -5,7 +5,7 @@
 # lands later, in another process, so it earns a driver that fabricates the
 # events rather than unit tests. `terminal-notifier` is stubbed by a fake earlier
 # on $PATH that appends its argv to a log, and the threshold shrinks through the
-# env var so nothing waits two minutes.
+# env var so nothing waits out the real default.
 #
 # Run:  bash plugins/clankit-dev/hooks/bash-watchdog-verify.sh
 
