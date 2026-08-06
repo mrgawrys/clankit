@@ -59,10 +59,8 @@ few lines. The phases force coverage, not word count.
 - **Verdict first.** One or two sentences: what happened and the top-ranked
   cause, written to stand alone.
 - **Decision trace.** The reconstruction: quoted inputs, the turn, what won
-  and why. Prose or a short table.
-- **Decision tree.** A mermaid diagram of the actual branch points — taken
-  path marked, expected path shown diverging. Only where there genuinely was
-  a branch; a straight-line case skips the tree.
+  and why. Prose or a short table. No diagrams — a branch point is one
+  sentence naming what won over what.
 - **Cause ranking.** The phase-4 list, labels visible, so the reader sees
   which parts are load-bearing and which are speculation.
 
