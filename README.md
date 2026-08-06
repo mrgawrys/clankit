@@ -19,18 +19,47 @@ shell reads it, it belongs in a dotfiles repo.
 
 ## New machine
 
+The two layers install separately and update differently.
+
+**Plugins** — add the marketplace from GitHub, inside Claude Code:
+
+```
+/plugin marketplace add mrgawrys/clankit
+/plugin install clankit-dev@clankit
+/plugin install clankit-life@clankit   # optional — personal-life skills
+```
+
+**The `~/.claude` layer** — needs a checkout, since `install.sh` symlinks into it:
+
 ```sh
 git clone https://github.com/mrgawrys/clankit
 clankit/install.sh
 ```
 
-Then inside Claude Code:
+### Staying up to date
 
 ```
-/plugin marketplace add path/to/clankit
-/plugin install clankit-dev@clankit
-/plugin install clankit-life@clankit   # optional — personal-life skills
+/plugin marketplace update clankit
 ```
+
+Then restart the session. Plugin versions resolve to the marketplace's git
+commit SHA, so every commit pushed to `master` is a new version — nothing to
+bump, no release to cut.
+
+For the `home/` layer, `git pull` in the checkout; the symlinks pick it up.
+
+### Working on clankit itself
+
+Point the marketplace at the working tree instead, so edits go live on save:
+
+```
+/plugin marketplace add ./clankit
+```
+
+A directory source *is* the checkout — no cached copy, no fetch step. The
+tradeoff is that it never tracks GitHub: `/plugin marketplace update` has no
+remote to pull from, so it reports success and changes nothing. Use this only
+for the clone you're editing, never to install on another machine.
 
 ## What's in the plugins
 
@@ -91,7 +120,7 @@ independent config store with its own login:
 ```sh
 mkdir -p ~/.claude-personal
 CLAUDE_CONFIG_DIR=$HOME/.claude-personal ./install.sh
-CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude plugin marketplace add path/to/clankit
+CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude plugin marketplace add mrgawrys/clankit
 CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude plugin install clankit-dev@clankit
 CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude plugin install clankit-life@clankit
 ```
@@ -105,6 +134,13 @@ separate dotfiles repo — `claude-accounts` there sets `CLAUDE_CONFIG_DIR` on
 - **`settings.json` is copy-once, not symlinked** — live settings accrue
   machine-specific state (granted permissions, hook wiring from installed
   tools). Fold anything worth keeping back into the template by hand.
+- **Neither plugin declares a `version`, deliberately.** Setting one pins the
+  plugin to that string: users then get changes only when it's bumped, and
+  pushing commits alone does nothing. Omitting it falls back to the commit SHA,
+  which is what makes `master` the release channel. Don't add one.
+- **`owner/repo` shorthand clones over SSH by default.** On a machine whose SSH
+  key belongs to a different account than the one hosting this repo, set
+  `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` to clone over HTTPS instead.
 - The bundled `elements-of-style.md` is public domain (Strunk, 1918, via
   Project Gutenberg), adapted from
   [obra/the-elements-of-style](https://github.com/obra/the-elements-of-style).
