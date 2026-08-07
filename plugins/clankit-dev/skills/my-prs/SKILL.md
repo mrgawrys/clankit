@@ -39,9 +39,13 @@ If the script exits non-zero, show the user its stderr (usually "run
 `gh auth login`") and stop.
 
 If `fetchedAt` is older than a couple of minutes, say the data age when
-presenting ("status as of 12 min ago"). Re-run with `--refresh` before
-acting on a specific PR (merging, fixing CI) or when the user asks for
-fresh status.
+presenting ("status as of 12 min ago"). Saying the age is usually the
+right move on its own — prefer it to refetching.
+
+Use `--refresh` when there's a reason to: the user asks for fresh or
+up-to-date status, or you know the cache is stale because something
+changed since it was written (you pushed to a PR, a review landed
+mid-session). Don't refetch just because the data is a few minutes old.
 
 ## 2. Scope
 
