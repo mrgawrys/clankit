@@ -100,10 +100,20 @@ run to discover.
 
 ### 4 · Dispatch
 
-One tester by default, on the most capable model available, prompted from
-`tester-brief.md`. The reason is context, not throughput: a full run burns most
-of a context window, which is the entire justification for the subagent
-existing. The orchestrator does not drive the app itself.
+One tester by default, prompted from `tester-brief.md`. The reason is context,
+not throughput: a full run burns most of a context window, which is the entire
+justification for the subagent existing. The orchestrator does not drive the app
+itself.
+
+**A mid-tier model is the default tier.** The same argument that justifies the
+subagent decides its size: the cost is context, not capability. Every judgment is
+front-loaded into the brief — numbered scenarios, pinned expected values, the
+out-of-scope list — so execution is navigate, capture, quote. The top tier is an
+escalation, for an unfamiliar app where navigation has to be improvised, for
+scenarios turning on setup-versus-defect (the one call that cannot be pinned in
+advance), or after a cheap tester returns prose. Its failure mode is not a wrong
+verdict but a confident one on a scenario nobody sampled, which is why the brief
+makes an unquoted `observed` a discard condition rather than a style note.
 
 The run splits into a **sequential chain** of testers when the plan exceeds
 roughly fifteen scenarios, or when it spans distinct phases that hand off

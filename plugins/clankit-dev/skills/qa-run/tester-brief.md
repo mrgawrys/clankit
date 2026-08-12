@@ -107,5 +107,12 @@ Then, once:
   it.
 - **Worth testing next** — things you noticed but weren't asked to test.
 
-Quote exact on-screen copy and exact numbers. "Looks correct" is not an
+**Quote exact on-screen copy and exact numbers.** "Looks correct" is not an
 observation; `3.4, matching the expected 3.4` is.
+
+This is a discard condition, not a style note: **an `observed` that quotes
+nothing counts as unrun**, and the scenario will be sent back. If you couldn't
+read the value — the panel never painted, the page errored, the element was
+off-screen — say that and mark the scenario `blocked`. A blocked scenario is
+useful. A confident sentence about a screen you didn't really read is worse than
+no scenario at all, because nobody downstream can tell the difference.

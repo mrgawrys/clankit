@@ -89,13 +89,30 @@ otherwise costs a full tester run to discover.
 
 ### 4 · Dispatch
 
-**One tester by default**, on the most capable model available, prompted from
-[tester-brief.md](tester-brief.md) — fill in every `<…>`; the subagent can't see
-this conversation. You do not drive the app yourself.
+**One tester by default**, prompted from [tester-brief.md](tester-brief.md) —
+fill in every `<…>`; the subagent can't see this conversation. You do not drive
+the app yourself.
 
 The reason is context, not throughput: a full run burns most of a context window,
 which is the entire justification for the subagent existing. Spend yours on
 planning and judgment.
+
+**A mid-tier model is the right default.** Every judgment is front-loaded — the
+scenarios are numbered, the expected values are pinned, the out-of-scope list is
+spelled out. What's left is navigate, capture, report exact strings, and a
+cheaper tester does that at a fraction of the cost. Escalate to the most capable
+model when:
+
+- the app is unfamiliar or the run is exploratory, so navigation has to be
+  improvised rather than followed;
+- scenarios turn on telling a **setup problem** from a **defect** — that call is
+  made live, against what's on screen, and can't be pinned in advance;
+- a cheaper tester already came back once with prose, vague observations, or
+  screenshots that didn't match its claims.
+
+The last one is the honest failure mode of a cheap tester: not a wrong verdict,
+a *confident* one nobody sampled. The brief's discard condition — an `observed`
+that quotes nothing counts as unrun — is what makes it fail loudly instead.
 
 **Chain testers sequentially** when the plan exceeds roughly fifteen scenarios,
 or when it spans distinct phases that hand off through application state —
