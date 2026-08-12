@@ -1,6 +1,6 @@
 ---
 name: autopilot
-description: Use when you want a feature implemented end-to-end autonomously, without supervision — writes the plan, builds and reviews it task by task, fixes what review finds, and opens a draft PR, all inside a git worktree so the main workspace is never touched. Use when the user says "/autopilot", "autopilot this", "ship this without me watching", "build this end to end", or hands over a self-contained feature and steps away.
+description: Use when you want a feature implemented end-to-end autonomously, without supervision — writes the plan, hands the whole build to one implementer, reviews the finished branch, fixes what review finds, and opens a draft PR, all inside a git worktree so the main workspace is never touched. Use when the user says "/autopilot", "autopilot this", "ship this without me watching", "build this end to end", or hands over a self-contained feature and steps away.
 user_invocable: true
 ---
 
@@ -8,12 +8,12 @@ user_invocable: true
 
 Take a self-contained feature from a one-line ask to a **draft PR**, with no human
 in the loop in between. The result handed back is one PR link (plus the worktree
-path) for you to check out at your leisure.
+path), and a report of every decision that was made for you along the way.
 
 Autopilot's premise is: run the workflow exactly as a human would — the plan gets
-written, every task gets reviewed, findings get fixed — with nobody present to
-confirm any of it. It is not a lighter path. It is the same path with the gates
-answered in advance.
+written, the build gets independently reviewed, findings get fixed — with nobody
+present to confirm any of it. It is not a lighter path. It is the same path with
+the gates answered in advance.
 
 Use this when you trust the task enough not to sit over it. It is autonomous by
 design: **after invocation it does not stop to ask you anything** unless it genuinely
@@ -40,24 +40,35 @@ rule, say "clank, clank" before launching each subagent.
 ## The plan file is not optional
 
 Autopilot always produces a written plan before it builds, and always executes it
-through `executing-plans`. Three reasons, all of which bite hardest precisely
+through `executing-plans`. Two reasons, both of which bite hardest precisely
 because nobody is watching:
 
 - **Traceability.** The PR is reviewed by someone who wasn't there. The plan is
-  what they check the diff against.
+  what they check the diff against — and what the final review's spec axis
+  checks it against first.
 - **Resumability.** An unattended run that dies halfway has no conversation to
-  recover from. The plan plus `executing-plans`' ledger is the whole recovery map.
-- **Review in between.** A per-task review catches a wrong turn at task 2 instead
-  of inheriting it through task 7. An end-only review on unattended work reviews a
-  compounded mistake.
+  recover from. The plan, the git log, and the build report are the whole
+  recovery map.
 
-A "short build brief" cannot do any of these. Don't substitute one.
+A "short build brief" cannot do either. Don't substitute one.
+
+## The decision report
+
+Nobody is present to answer the questions the attended flow would ask, so every
+phase answers them itself. That debt is repaid at the end: **throughout the run,
+collect every decision a gate would normally have put to the user** — approaches
+chosen between and why, trade-offs taken, ambiguities in the ask or the spec and
+how they were resolved, findings adjudicated after review. Carry the list
+forward from phase to phase and report it in your **final chat message**,
+alongside the PR link. Nothing is written elsewhere — no decision log in the
+repo or the PR body beyond its normal summary. The final message is where the
+user learns where their judgment was substituted, and where to intervene.
 
 ## Phases
 
 ### Phase 0 · Understand & set up (orchestrator)
-- **Check what you were handed.** Autopilot is a routing destination as well as a
-  standalone entry point, so the work may already be designed:
+- **Check what you were handed.** Autopilot is invoked deliberately, and the work
+  may already be designed:
   - **A plan file** → you already have Phase 1's output. Skip to Phase 2.
   - **An approved design or spec** → that is the input to Phase 1, not a substitute
     for it. Don't re-derive the design; do turn it into a plan.
@@ -85,46 +96,48 @@ A "short build brief" cannot do any of these. Don't substitute one.
 - Skip only if Phase 0 handed you a plan file already.
 
 ### Phase 2 · Build and review (orchestrator, via `executing-plans`)
-- Run the plan through the `executing-plans` skill with **gates: none** and its
-  **per-task loop** — the delegated shape reserved for unattended runs; name it
-  explicitly, since attended runs default to single-builder. That gives you,
-  without asking anyone: a subagent per task, a task
-  review after each, the fix loop with its five-round cap, the ledger, and the final
-  whole-branch review.
-- Do not re-implement any of that here. `executing-plans` owns the build loop; this
-  skill owns the envelope around it — worktree, plan, PR, and the decision that
-  nobody will be asked.
-- Carry its outcome forward: tasks completed, findings parked or deferred, and the
-  verification status it observed.
+- Run the plan through the `executing-plans` skill, **delegated, with gates:
+  none**. That gives you, without asking anyone: one implementer building the
+  whole plan, the two-axis final review of the finished branch, the fix wave,
+  and the adjudication of whatever the fix wave leaves open.
+- Do not re-implement any of that here. `executing-plans` owns the build and its
+  review; this skill owns the envelope around it — worktree, plan, PR, and the
+  decision that nobody will be asked.
+- Carry its outcome forward: what was built, findings deferred or adjudicated,
+  the verification status it observed — and every adjudication into the decision
+  report.
 - `executing-plans` ends by presenting integration options and waiting for a human.
   **You are that human.** Take its report and go to Phase 3 — don't stall, and don't
   ask the user.
 
 ### Phase 3 · Ship (orchestrator)
 - Push the branch and open a **draft** PR with `gh pr create --draft`.
-- PR body covers: what was built, the review summary, anything parked or deferred by
-  the fix loop, and the best-effort verification status (note failures plainly — they
+- PR body covers: what was built, the review summary, anything deferred or ruled on
+  by the review, and the best-effort verification status (note failures plainly — they
   do NOT block the PR). Link the plan file; it is what a reviewer checks the diff
   against.
-- Report back to the user: the **PR link** and the **worktree path**. Stop.
+- Report back to the user: the **PR link**, the **worktree path**, and the
+  **decision report** — every choice made on their behalf, per the section above.
+  Stop.
 
 ## Model tiers
 
-`executing-plans` owns tier selection for everything inside the build loop — follow its
-Model Selection section, which scales implementers and reviewers to the task rather
-than fixing a tier per phase. The one call this skill makes directly is Phase 1's
-planning, which is design work and takes the most capable model available.
+`executing-plans` owns tier selection for everything inside the build — follow its
+Model Selection section, which scales the builder, reviewers, and fix subagent to the
+work rather than fixing a tier per phase. The one call this skill makes directly is
+Phase 1's planning, which is design work and takes the most capable model available.
 
 ## Verification policy
 
 Best-effort, never blocking. Subagents run whatever checks the repo exposes and report
 results; failures are recorded in the PR body, not treated as a stop condition.
 
-What substitutes for a human sanity-check is the per-task review inside
-`executing-plans` — each task's diff is checked against its own acceptance bar by
-something that didn't write it. That is the whole reason autopilot plans before it
-builds: without an acceptance bar per task there is nothing for a reviewer to check
-intent against, only taste.
+What substitutes for a human sanity-check is the plan's acceptance bars plus the
+two-axis final review inside `executing-plans`: the finished branch is checked
+against the plan by reviewers that didn't write it — one axis for what was asked,
+one for how well it's built. That is the whole reason autopilot plans before it
+builds: without acceptance bars there is nothing for a reviewer to check intent
+against, only taste.
 
 ## Guardrails
 
@@ -140,8 +153,9 @@ intent against, only taste.
 Stop and report instead of opening a PR when:
 - The target repo can't be resolved and the user isn't around to disambiguate.
 - The build produced no usable changes, or could not implement the feature at all.
-- `executing-plans` reports BLOCKED on a load-bearing finding. Its breaker exists to
-  stop work building on a structural failure; shipping past it defeats the point.
+- `executing-plans` stops on a load-bearing finding. Its adjudication exists to
+  stop work shipping on a structural failure; pushing past it defeats the point.
 
 A draft PR with *failing tests* is a valid outcome (flag it). A draft PR with *nothing
-meaningful built* is not — report the failure instead.
+meaningful built* is not — report the failure instead. An abort still owes the
+decision report for everything decided up to the stop.
