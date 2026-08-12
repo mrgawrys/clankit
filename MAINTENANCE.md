@@ -189,6 +189,19 @@ orthogonal — and that sentence read as license to un-weld them. If a later edi
 reintroduces independence, or offers delegated *review each task* by default, it
 regresses this intent.
 
+**Attended delegated runs are single-builder.** Amends the welding entry above,
+which described *review at the end* as a subagent and a review per task. Usage
+data said that machinery priced the mode out of existence: with per-task
+reviews and fix loops it was slow enough that vibe won every time, so the
+safety net caught nothing. Foundation defects it was meant to catch early are
+rare in practice and mostly caught at the plan stage anyway. Now one
+implementer builds the whole plan and the final review is the only review. The
+per-task loop keeps exactly two callers — `/autopilot`, where per-task review
+substitutes for the absent human, and plans too large for one implementer's
+context — and autopilot names it explicitly when invoking `executing-plans`.
+If a later edit makes the per-task loop the attended default again, it
+regresses this intent.
+
 **No hand-off answer in the gates question.** Reaching this skill already means
 the work gets built, so offering "stop before Task 1" asks it to undo its own
 invocation. It also has nothing to hand over on the spec path: the derived task

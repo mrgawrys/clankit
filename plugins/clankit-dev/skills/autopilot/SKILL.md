@@ -86,7 +86,9 @@ A "short build brief" cannot do any of these. Don't substitute one.
 
 ### Phase 2 · Build and review (orchestrator, via `executing-plans`)
 - Run the plan through the `executing-plans` skill with **gates: none** and its
-  delegated mode. That gives you, without asking anyone: a subagent per task, a task
+  **per-task loop** — the delegated shape reserved for unattended runs; name it
+  explicitly, since attended runs default to single-builder. That gives you,
+  without asking anyone: a subagent per task, a task
   review after each, the fix loop with its five-round cap, the ledger, and the final
   whole-branch review.
 - Do not re-implement any of that here. `executing-plans` owns the build loop; this

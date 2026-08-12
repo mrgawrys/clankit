@@ -1,6 +1,6 @@
 ---
 name: executing-plans
-description: "Use when a design is ready to build - either a written implementation plan, or an approved spec being built directly. Runs delegated by default - a fresh subagent per task with a review and fix loop between tasks - or inline when the work is short. Reviews the source critically before starting and stops when blocked rather than guessing."
+description: "Use when a design is ready to build - either a written implementation plan, or an approved spec being built directly. Runs delegated by default - one subagent builds the whole plan, one independent review at the end - or inline when the work is short. Reviews the source critically before starting and stops when blocked rather than guessing."
 ---
 
 # Executing Plans
@@ -39,23 +39,32 @@ Everything below reads "the plan" to mean whichever of these you hold.
 This choice travels with gates, by design — oversight substitutes for
 machinery. Per-task diffs mean the user reviews every task, so the work runs
 inline and takes one review at the end; no gates means nobody is watching, so
-each task earns a fresh implementer and its own review. The mode that sent you
+the build earns a reviewer that didn't write it. The mode that sent you
 here usually answers both: *review each task* means inline, *review at the end*
 and *autopilot* mean delegated. If neither is settled, ask the Gates question
 first (see below) — its answer settles this one too.
 
-**Delegated** is right when the plan has more than a couple of tasks, when
-context matters, or when you want each task reviewed by something that didn't
-write it. **Inline** is right for short plans and tightly coupled tasks, where
-handing off costs more than it saves. Ask delegated-or-inline on its own only
+**Delegated has two shapes, and the caller picks:**
+
+- **Single-builder** — the default for an attended *review at the end*. One
+  implementer subagent builds the entire plan, then the final review is the
+  review. No per-task reviews, no fix loop between tasks: quality comes from
+  the plan it was handed and the independent review at the end.
+- **The per-task loop** — a fresh implementer and a review per task. Two
+  callers only: *autopilot*, where per-task review substitutes for the absent
+  human, and a plan too large for one implementer's context window. On an
+  attended run, say which of those two reasons applies before using it.
+
+**Inline** is right for short plans and tightly coupled tasks, where handing
+off costs more than it saves. Ask delegated-or-inline on its own only
 when gates are already settled but run style somehow isn't (e.g. the user said
 "don't stop between tasks" without picking a mode):
 
 ```
 Plan loaded and reviewed. How should this run?
 
-1. Delegated — a fresh subagent per task, isolated context,
-               review and fix loop between tasks
+1. Delegated — one subagent builds the whole plan,
+               an independent review at the end
 2. Inline    — the work happens in this session
 ```
 
@@ -149,7 +158,7 @@ and this is where they get answered:
 
 | Answer | What it means |
 |---|---|
-| **Review at the end** | delegated: run to completion — a fresh subagent and a review per task — and report at the end |
+| **Review at the end** | delegated, single-builder: one subagent builds the whole plan, an independent review at the end — report when done |
 | **Review each task** | inline: present each task's diff and wait for approval before moving on — the user is the reviewer. Use a diff-review tool if one is available rather than pasting the diff |
 
 There is no hand-off answer here. Reaching this skill means the work gets built;
@@ -160,7 +169,33 @@ continue?" prompts waste the user's time — they asked for the plan to run, so
 run it. The only reasons to stop are BLOCKED you cannot resolve, ambiguity that
 genuinely prevents progress, or all tasks complete.
 
+## The single-builder run
+
+Same setup, ledger, and pre-flight scan. Then one dispatch:
+
+- Record BASE (`git rev-parse HEAD`) and append `Build: dispatched (BASE
+  <sha7>)` to the ledger — if compaction hits mid-build, this line is what
+  says a builder is already out.
+- Dispatch ONE implementer. Its brief is the plan or spec itself — pass the
+  path, introduced as "read this first — it is your requirements, with the
+  exact values to use verbatim" — plus the Global Constraints and your
+  resolution of anything the pre-flight scan surfaced.
+- Standing orders in the dispatch: work the tasks in plan order; run the tests
+  the change touches as you go and the full suite at the end; commit at each
+  working step; write the full report to `<workspace>/build-report.md`; return
+  only status, commits, a one-line test summary, and concerns.
+- Model per Model Selection — a whole plan nearly always carries design
+  judgment, so the capable tier is the default, not the exception.
+- **BLOCKED / NEEDS_CONTEXT / DONE_WITH_CONCERNS** are handled as in step 2 of
+  the task loop below. Never let an implementer guess through a plan defect.
+
+On DONE, append `Build: complete (commits <base7>..<head7>)` and go straight
+to Final review. It is the review — there are no per-task reviews to skip.
+
 ## The delegated task loop
+
+**Autopilot and oversized plans only** — an attended *review at the end* runs
+single-builder, above.
 
 Everything you paste into a dispatch prompt — and everything a subagent prints
 back — stays resident in your context for the rest of the session and is re-read

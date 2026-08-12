@@ -81,9 +81,9 @@ its own is either two tasks or none.
 # [Feature Name] Implementation Plan
 
 > **To execute this plan:** use the `executing-plans` skill. It reviews the plan,
-> then asks how you want it built — review at the end (delegated: a subagent
-> and a review per task, report at the end), or review each task (inline: a
-> diff per task for you to approve).
+> then asks how you want it built — review at the end (delegated: one subagent
+> builds it all, an independent review at the end), or review each task
+> (inline: a diff per task for you to approve).
 
 **Goal:** [One sentence describing what this builds]
 
@@ -209,7 +209,7 @@ question — the plan file — so end by asking the other half, with one
 
 | Answer | What happens |
 |---|---|
-| **Review at the end** | `executing-plans` delegated from the plan — a subagent and a review per task, no gates; report at the end |
+| **Review at the end** | `executing-plans` delegated from the plan — one subagent builds it all, an independent review at the end, no gates; report when done |
 | **Review each task** | `executing-plans` inline — a diff per task, the user approves each and is the reviewer |
 | **Hand it off** | stop here — the plan is the deliverable |
 

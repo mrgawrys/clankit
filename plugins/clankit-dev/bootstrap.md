@@ -41,8 +41,9 @@ and what the user sees, roughly:
   no ledger, no review; you eyeball the result"
 - *Review each task (your time, quality = your eyes)* — "built in this session;
   you approve each task's diff — you're the reviewer"
-- *Review at the end (slow, thorough)* — "subagents build it task by task, each
-  task reviewed and fixed; you see the finished branch"
+- *Review at the end (hands-off, reviewed once)* — "one subagent builds the
+  whole thing, a reviewer that didn't write it checks the finished branch;
+  you see the result"
 - *Plan first (adds a reviewable plan file)* — "a plan file gets written first,
   then the same choice about how it gets built"
 

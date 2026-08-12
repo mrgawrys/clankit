@@ -155,8 +155,8 @@ choice is owed rather than assuming one:
 # [Topic] — Design
 
 > **To act on this design:** pick a mode — *vibe* (inline, no machinery),
-> *review each task* (per-task diffs), *review at the end* (delegated, reviewed
-> per task), or *plan first* (`writing-plans`, then how it gets built).
+> *review each task* (per-task diffs), *review at the end* (one subagent
+> builds, one review at the end), or *plan first* (`writing-plans`, then how it gets built).
 > Unattended end-to-end is `/autopilot`. Ask the user which; don't pick for
 > them.
 ```
@@ -186,7 +186,7 @@ One `AskUserQuestion` call, four named answers, taken from the session bootstrap
 |---|---|
 | **Vibe** | inline, right now — no subagents, no ledger, no review; the user eyeballs the result |
 | **Review each task** | `executing-plans` inline — one task at a time in this session; the user approves each diff and is the reviewer |
-| **Review at the end** | `executing-plans` delegated from the spec — a subagent per task, a review after each, a fix loop; the user sees the finished branch |
+| **Review at the end** | `executing-plans` delegated from the spec — one subagent builds it all, an independent review at the end; the user sees the finished branch |
 | **Plan first** | `writing-plans` produces a reviewable plan file, then asks how it gets built |
 
 The option labels name review cadence and carry an effort parenthetical —
