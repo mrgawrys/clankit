@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# Resolve and ensure the working-tree directory SDD uses for one plan's
-# short-lived artifacts: task briefs, implementer reports, review packages,
-# and the progress ledger. Print the plan directory's absolute path.
+# Resolve and ensure the working-tree directory executing-plans uses for one
+# plan's short-lived artifacts: the build report, the chunk log, review
+# packages, and the derived task file. Print the plan directory's absolute path.
 #
 # One directory per plan (.clankit/plans/<plan-basename>/) so a follow-up
 # plan in the same working tree can never read or overwrite another plan's
-# artifacts. A stale ledger misread as current progress makes controllers
-# skip whole task sequences — plan-scoping removes that failure structurally.
+# artifacts — a stale report misread as this plan's is a structural failure,
+# not a judgment call.
 #
 # The workspace lives in the working tree (not under .git/) because Claude Code
 # treats .git/ as a protected path and denies agent writes there — which blocks
-# an implementer subagent from writing its report file. A self-ignoring
+# a builder subagent from writing its report file. A self-ignoring
 # .gitignore at .clankit/plans/ keeps every plan's workspace out of
 # `git status` and out of accidental commits without modifying any tracked file.
 #
-# Single source of truth for the workspace location, so the brief writer and
+# Single source of truth for the workspace location, so the controller and
 # review-package cannot drift to different directories.
 #
 # Usage: plan-workspace PLAN_FILE
