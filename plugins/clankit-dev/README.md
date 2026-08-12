@@ -10,6 +10,8 @@ couple of Bash-call observability hooks.
 - **`terminal-notifier`** (`brew install terminal-notifier`) — the watchdog
   hook sends its desktop notification through it. Without it, the watchdog is
   inert; the duration hook doesn't need it.
+- **`node`** — `qa-run`'s report generator is a dependency-free ES module run
+  with plain `node`; nothing to install.
 
 ## Tunables
 
