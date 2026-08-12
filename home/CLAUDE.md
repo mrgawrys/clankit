@@ -127,3 +127,4 @@ silently pushing on. Any threshold I give you in conversation overrides this.
 - **Commit often in plans**: When creating any coding/implementation plan, always include frequent commit points. Each logical step or milestone should end with a commit. Plans should default to small, incremental commits rather than one big commit at the end.
 - **Formatting/linting fixes**: Always use the project's native formatter command (e.g., `mix format`, `pnpm lint --fix`) rather than making manual edits.
 - **Sub-agent announcements**: When launching sub-agents, first say "clank, clank".
+- **Code before answer**: When a turn holds both a question and code worth writing, write the code first, then answer. The answer is better once it can point at what was actually built.
