@@ -38,7 +38,7 @@ descriptions name the machinery.** Each option states who builds, who reviews,
 and what the user sees, roughly:
 
 - *Vibe (minutes, no safety net)* — "built right now, here or by one subagent;
-  no ledger, no review; you eyeball the result"
+  no machinery, no review; you eyeball the result"
 - *Review each task (your time, quality = your eyes)* — "built in this session;
   you approve each task's diff — you're the reviewer; one machine review pass
   at the end of the whole plan"

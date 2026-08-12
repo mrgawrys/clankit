@@ -187,7 +187,7 @@ One `AskUserQuestion` call, four named answers, taken from the session bootstrap
 
 | Mode | What it does |
 |---|---|
-| **Vibe** | inline, right now — no subagents, no ledger, no review; the user eyeballs the result |
+| **Vibe** | inline, right now — no subagents, no machinery, no review; the user eyeballs the result |
 | **Review each task** | `executing-plans` inline — one task at a time in this session; the user approves each diff and is the reviewer. The only machine review is one `code-review` pass at the end of the whole plan |
 | **Review at the end** | `executing-plans` delegated from the spec — one subagent builds it all, an independent review at the end; the user sees the finished branch |
 | **Plan first** | `writing-plans` produces a reviewable plan file, then asks how it gets built |
