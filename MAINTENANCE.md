@@ -189,18 +189,30 @@ orthogonal — and that sentence read as license to un-weld them. If a later edi
 reintroduces independence, or offers delegated *review each task* by default, it
 regresses this intent.
 
-**Attended delegated runs are single-builder.** Amends the welding entry above,
-which described *review at the end* as a subagent and a review per task. Usage
-data said that machinery priced the mode out of existence: with per-task
-reviews and fix loops it was slow enough that vibe won every time, so the
-safety net caught nothing. Foundation defects it was meant to catch early are
-rare in practice and mostly caught at the plan stage anyway. Now one
-implementer builds the whole plan and the final review is the only review. The
-per-task loop keeps exactly two callers — `/autopilot`, where per-task review
-substitutes for the absent human, and plans too large for one implementer's
-context — and autopilot names it explicitly when invoking `executing-plans`.
-If a later edit makes the per-task loop the attended default again, it
-regresses this intent.
+**Single-builder is the only delegated shape — the per-task loop is gone.**
+Amends the welding entry above, which described *review at the end* as a
+subagent and a review per task. Usage data said that machinery priced the
+delegated modes out of existence: with per-task reviews and fix loops every
+real session picked vibe, so the safety net caught nothing. Foundation defects
+the loop was meant to catch early are rare in practice and mostly caught at
+the plan stage anyway. Now one implementer builds the whole plan — autopilot
+included — and the final review is the only review: two reviewers in parallel
+over the same package, a spec axis and a standards axis, reported side by side
+so neither masks the other, then one fix wave, one scoped re-review, and
+adjudication of the residuals. The ledger went with the loop — git log and the
+build report are the recovery record, and the workspace survives purely as the
+file home for reports, review packages, and the spec path's derived task
+bodies (now `tasks.md`, re-homed from the ledger). Oversized plans run as
+sequential chunks of the same shape with a one-line chunk log, never as a
+different process — zero interim reviews at any scale. Autopilot lost its seat
+in the flow artifacts: the bootstrap's question line and the spec header no
+longer name it. It remains a deliberately typed skill, shrunk to the envelope
+(worktree → plan → single-builder with gates none → draft PR), and now owes a
+decision report — every choice a gate would have asked the user, reported in
+its final message, written nowhere else. If a later edit reintroduces a
+per-task review loop, adds interim reviews to chunked builds, merges the two
+review axes into one ranked list, or re-advertises autopilot in the flow
+artifacts, it regresses this intent.
 
 **No hand-off answer in the gates question.** Reaching this skill already means
 the work gets built, so offering "stop before Task 1" asks it to undo its own
@@ -209,8 +221,10 @@ list is deliberately never written to disk, so a session that stopped there
 would leave the next one re-deriving different tasks from the same spec. Handing
 work over is `writing-plans`' answer to give, because there a plan file exists.
 
-Ported close to verbatim, and worth keeping that way: the fix loop, the five-round
-circuit breaker, and the adjudication rules. Those encode real failures.
+Ported close to verbatim, and worth keeping that way: the adjudication rules —
+they encode real failures. (The per-task fix loop and its five-round breaker
+were ported too, then removed with the loop; the rules now apply once, to
+residuals after the final review's fix wave. See the single-builder entry.)
 
 ### `autopilot` (not vendored — ours, but it moved)
 
@@ -256,8 +270,6 @@ Recorded in `docs/specs/2026-07-27-clankit-workflow-skills-design.md`:
   `executing-plans` with gates off, then a draft PR — it is deterministic control
   flow over subagents, which is what the harness's workflow scripts are for.
   Revisit once the current shape has run a few times.
-- **Replacing the ledger with the native task list** — worth doing, but it adds
-  divergence to `executing-plans`, the file most likely to be rewritten upstream.
 - **Splitting `brainstorming` into its own plugin** — it is domain-independent and
   worth sharing with people who don't write software, who should not receive a
   hook-injected preamble about repos and subagents. Deferred only because nobody
