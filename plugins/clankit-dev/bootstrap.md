@@ -40,25 +40,18 @@ and what the user sees, roughly:
 - *Vibe (minutes, no safety net)* — "built right now, here or by one subagent;
   no ledger, no review; you eyeball the result"
 - *Review each task (your time, quality = your eyes)* — "built in this session;
-  you approve each task's diff — you're the reviewer"
+  you approve each task's diff — you're the reviewer; one machine review pass
+  at the end of the whole plan"
 - *Review at the end (hands-off, reviewed once)* — "one subagent builds the
   whole thing, a reviewer that didn't write it checks the finished branch;
   you see the result"
 - *Plan first (adds a reviewable plan file)* — "a plan file gets written first,
   then the same choice about how it gets built"
 
-The question line keeps the typed route visible:
-"Which mode? (unattended end-to-end is also an option — type /autopilot)"
+The question line is just "Which mode?"
 
 **Nothing to build** — an essay, a decision, a document — means the spec *is*
 the deliverable. Skip the menu and suggest what could come next.
-
-**Autopilot is a typed route, not a menu answer.** `AskUserQuestion` caps the
-menu at four, and Vibe took a seat — the one nobody discovers from a list.
-`/autopilot` arrives already decided, runs unattended (plans, builds, reviews
-its own work in a worktree, opens a draft PR), and answers both halves — plan
-file and gates — asking nothing. The question line above is what keeps it
-visible.
 
 **Plan first is a prefix, not a peer.** It answers what gets written, not how it
 gets built. Once the plan exists, ask the second question — *Review at the end /
@@ -67,7 +60,6 @@ plan.
 
 **Typing a skill answers that skill's question and no other.**
 `/writing-plans` means "I want a plan file": the artifact, not the gates.
-`/autopilot` is the one exception, because unattended answers both.
 
 **Say the action, not the name.** The four names are option labels — in the menu,
 and in the artifact headers that stand in for it. Nowhere else. In running prose,
