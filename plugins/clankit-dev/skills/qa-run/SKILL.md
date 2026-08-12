@@ -22,14 +22,15 @@ outside the session will read the result, you want one of those.
 ```
 1 Read the claims      PR description(s) -> plan/spec doc -> the diff (last resort)
                        every claim becomes a numbered scenario with an expected outcome
-2 Ground truth         resolve the ACTUAL values the scenarios will assert
-3 -- GATE --           show numbered scenarios + expected values; user approves or cuts
-4 Dispatch             one tester by default; chained by phase when the plan is large
-5 Spot-check           open 2-3 screenshots from the riskiest scenarios FIRST
-6 Report               findings.json -> generator -> report.html; summarize and stop
+2 Stand it up          branch, servers, safe-env, login, reachability — never the tester's job
+3 Ground truth         resolve the ACTUAL values, against the system now running
+4 -- GATE --           show numbered scenarios + expected values; user approves or cuts
+5 Dispatch             one tester by default; chained by phase when the plan is large
+6 Spot-check           open 2-3 screenshots from the riskiest scenarios FIRST
+7 Report               findings.json -> generator -> report.html; summarize and stop
 ```
 
-Resolve the environment card (below) before step 2 — steps 2 and 4 both need it.
+Resolve the environment card (below) first — step 2 is nothing but acting on it.
 
 ### 1 · Read the claims
 
@@ -59,12 +60,48 @@ On top of the claims, a floor that is not optional:
 Give scenarios ids that group by phase — `A1…A6` issuing, `B1…B4` redeeming. The
 letter survives into a chained run's handoff.
 
-### 2 · Ground truth
+### 2 · Stand it up
 
-Before writing a single expected value, resolve what is **actually true in the
-environment**: are the feature's flags on, do the rows the feature needs exist,
-which defaults or fallbacks will fire, which account and tenant the run will use.
-Cheap queries and direct API calls, done by you — not by the tester.
+**The tester never sets up the environment.** Bringing an app up is the most
+failure-prone part of a run and the part that most needs judgment — half the
+traps below are environment traps. Handing it to the cheapest agent in the chain
+is exactly backwards. The tester's job starts at a working app.
+
+Do it yourself, or hand it to **one capable subagent** when it's likely to be
+long and noisy — a fresh worktree, installs, migrations, a build. That work burns
+context on logs and produces three lines of output, which is precisely what a
+subagent is for. Ask it back for: the URLs, each repo's sha, server start times,
+and any environment-card line that turned out wrong.
+
+Nothing gets dispatched until all of these hold:
+
+- **The branch is checked out where you think it is**, in every repo under test,
+  and you have each sha.
+- **The servers are serving *this* checkout.** Compare each server's start time
+  against the checkout — a backend may hot-reload where a bundler won't. A dev
+  server older than the checkout is running the old code, and every scenario
+  after that is fiction.
+- **The safe environment is confirmed**, before anything writes.
+- **Login is done and the browser profile is released.** A persistent profile
+  takes one process: log in, let the helper exit, then dispatch. Never hold the
+  profile while a tester tries to launch.
+- **The feature is reachable.** Walk to the entry screen once yourself and
+  confirm the first scenario's starting state exists. This is also the cheapest
+  moment to discover a flag is off.
+- **The run directory exists**, with an empty `screens/`.
+
+If any of it can't be made true, stop and say so. A QA run against an app that
+isn't running produces a report full of confident nonsense.
+
+### 3 · Ground truth
+
+With the system now up, resolve what is **actually true in it**: are the
+feature's flags on, do the rows the feature needs exist, which defaults or
+fallbacks will fire, which account and tenant the run will use. Cheap queries and
+direct API calls, done by you — not by the tester.
+
+Resolving this against a system you watched come up is the point. Ground truth
+read off an assumed environment is just a second set of assumptions.
 
 Two distinct failures make this a step rather than a habit:
 
@@ -78,7 +115,7 @@ Two distinct failures make this a step rather than a habit:
 Record each fact with where it came from. A fact with no source is a guess, and
 it goes in the report as `groundTruth[].source` for exactly that reason.
 
-### 3 · The gate
+### 4 · The gate
 
 Show the numbered scenarios with their expected values and **wait**. Ask with
 `AskUserQuestion` — approve as planned, or cut scope — rather than announcing a
@@ -87,7 +124,7 @@ plan with a window to object.
 One decision point, placed where changing your mind is cheapest: a misread claim
 otherwise costs a full tester run to discover.
 
-### 4 · Dispatch
+### 5 · Dispatch
 
 **One tester by default**, prompted from [tester-brief.md](tester-brief.md) —
 fill in every `<…>`; the subagent can't see this conversation. You do not drive
@@ -97,10 +134,12 @@ The reason is context, not throughput: a full run burns most of a context window
 which is the entire justification for the subagent existing. Spend yours on
 planning and judgment.
 
-**A mid-tier model is the right default.** Every judgment is front-loaded — the
-scenarios are numbered, the expected values are pinned, the out-of-scope list is
-spelled out. What's left is navigate, capture, report exact strings, and a
-cheaper tester does that at a fraction of the cost. Escalate to the most capable
+**A mid-tier model is the right default — because step 2 already happened.**
+Every judgment is front-loaded: the app is up and reachable, the scenarios are
+numbered, the expected values are pinned, the out-of-scope list is spelled out.
+What's left is navigate, capture, report exact strings, and a cheaper tester does
+that at a fraction of the cost. Dispatching one into an environment nobody stood
+up first is where this default stops being safe. Escalate to the most capable
 model when:
 
 - the app is unfamiliar or the run is exploratory, so navigation has to be
@@ -121,12 +160,26 @@ chain gets a small brief and a full context, and inherits the previous phase's
 work from the application's own state plus a short written handoff naming **what
 now exists, its identifiers and URLs, and what remains**.
 
+**When a tester bounces, fix and send it back.** The brief tells it to stop on a
+broken environment rather than fix or grind — a blank page, a 500, a missing
+feature, a server that stopped listening. That report is a normal outcome, not a
+failed run. Repair the environment yourself, then re-dispatch with:
+
+- **only the scenarios that remain** — never re-run one that already came back
+  with evidence;
+- **what now exists**, with identifiers and URLs, exactly like a chained phase
+  handoff;
+- **what was actually wrong**, so the tester doesn't re-report it as a defect.
+
+Then correct the environment card. A bounce is the card telling you it's out of
+date, which is the whole reason the card records where each line came from.
+
 **Parallel browser testers are not an option.** A persistent browser profile is
 held by one process at a time, so two concurrent drivers means one fails to
 launch. Non-browser evidence — direct API probes, data-store invariants, test
 suites — can run alongside a browser tester without collision.
 
-### 5 · Spot-check
+### 6 · Spot-check
 
 Open **two or three of the returned screenshots** — riskiest scenarios first —
 and confirm they show what the findings claim, before writing anything.
@@ -134,7 +187,7 @@ and confirm they show what the findings claim, before writing anything.
 A structured findings list is an index, not evidence. The one time it's wrong is
 the time it reads most confidently.
 
-### 6 · Report
+### 7 · Report
 
 Classify every finding three ways. They read identically in a screenshot and
 completely differently to whoever acts on the report:
@@ -188,17 +241,18 @@ any one repo, so they travel with the skill.
 
 | Trap | The rule |
 |---|---|
-| Testing a branch that isn't checked out | Verify where it lives before dispatch; record every repo's sha in the report |
+| Testing a branch that isn't checked out | Step 2, before dispatch: verify where it lives; record every repo's sha in the report |
+| The tester tries to repair the environment | It stops and bounces instead; you fix and re-dispatch. A scenario that passed after the tester repaired something tested the repair |
 | Browser tooling drops images in the repo root | The tester collects them into the run's `screens/` as `<id>-<slug>.png` and deletes the litter |
 | Retina or full-page captures | Viewport-sized only — reports get committed; keep the run small |
 | Desktop-only evidence | Public and brand-new screens also at a phone width |
 | The tester returns a story | The brief's return format is structured per-scenario data; send it back if prose arrives |
 | Headless browsers have no share sheet and may refuse clipboard writes | The deepest fallback firing is designed behaviour, not a defect — list unreachable tiers under not-covered |
 | Creating a test account | Never. Use the seeded ones |
-| Touching a shared environment | Confirm the safe environment before the first write |
+| Touching a shared environment | Step 2 confirms the safe environment before anything writes; the tester re-checks the marker and bounces if it's absent |
 | A setup problem reads exactly like a bug | A missing affordance can be a missing flag or an unseeded row — check the ground truth before recording a defect |
-| A dev server started before the checkout runs the old code | Compare the server's start time against the checkout; a backend may hot-reload where a bundler won't |
-| The login helper and the driving browser both want the profile | A persistent profile takes one process. Log in first, then drive |
+| A dev server started before the checkout runs the old code | Step 2: compare each server's start time against the checkout; a backend may hot-reload where a bundler won't |
+| The login helper and the driving browser both want the profile | A persistent profile takes one process. Step 2 logs in and lets the helper exit; only then dispatch |
 | The spec's out-of-scope list | Feed deliberate non-features into the brief explicitly, or they come back as defects |
 
 ## Out of scope

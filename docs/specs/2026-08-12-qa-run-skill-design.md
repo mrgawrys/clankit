@@ -35,7 +35,7 @@ reports go. Those become slots, resolved per repo rather than hardcoded.
 
 ```
 skills/qa-run/
-  SKILL.md              the orchestrator: six steps, the gate, the failure memory
+  SKILL.md              the orchestrator: seven steps, the gate, the failure memory
   tester-brief.md       fill-in-the-blanks subagent prompt
   report/
     build-report.mjs    findings.json + screens/ -> one self-contained report.html
@@ -49,11 +49,12 @@ Written per repo on first run, not shipped: `docs/qa/environment.md`.
 ```
 1 Read the claims      PR description(s) -> plan/spec doc -> the diff (last resort)
                        every claim becomes a numbered scenario with an expected outcome
-2 Ground truth         resolve the ACTUAL values the scenarios will assert
-3 -- GATE --           show numbered scenarios + expected values; user approves or cuts
-4 Dispatch             one tester by default; chained by phase when the plan is large
-5 Spot-check           open 2-3 screenshots from the riskiest scenarios FIRST
-6 Report               findings.json -> generator -> report.html; summarize and stop
+2 Stand it up          branch, servers, safe-env, login, reachability — never the tester's job
+3 Ground truth         resolve the ACTUAL values, against the system now running
+4 -- GATE --           show numbered scenarios + expected values; user approves or cuts
+5 Dispatch             one tester by default; chained by phase when the plan is large
+6 Spot-check           open 2-3 screenshots from the riskiest scenarios FIRST
+7 Report               findings.json -> generator -> report.html; summarize and stop
 ```
 
 ### 1 · Read the claims
@@ -77,12 +78,33 @@ A mandatory floor on top of the claims:
   change to a shared adapter is a change to every surface that adapts through
   it, and those surfaces are where a regression is expensive.
 
-### 2 · Ground truth
+### 2 · Stand it up
 
-Before writing a single expected value, resolve what is actually true in the
-environment: are the feature's flags on, do the rows the feature needs exist,
-which defaults or fallbacks will fire, which account and tenant the run will
-use. Cheap queries and direct API calls, done by the orchestrator.
+Setting the environment up is never the tester's job. It is the most
+failure-prone part of a run and the part most in need of judgment — most of the
+failure memory below is environment failure — so giving it to the cheapest agent
+in the chain inverts the whole arrangement. The orchestrator does it, or hands it
+to one capable subagent when it will be long and noisy (a fresh worktree,
+installs, migrations, a build): that work burns context on logs and returns three
+lines, which is what a subagent is for.
+
+The preconditions are the ones the failure memory already names — the branch is
+where you think it is, each server is serving *this* checkout, the safe
+environment is confirmed, login is done and the browser profile released, the
+feature is reachable, the run directory exists. Nothing dispatches until they
+hold.
+
+This also puts the tester's stop rule in reach: hitting a broken environment, it
+stops and reports rather than repairing or grinding, and the orchestrator fixes
+and re-dispatches the remaining scenarios with a handoff. A bounce is a normal
+outcome, not a failed run — and a repair made by the tester would mean the
+scenario tested the repair.
+
+### 3 · Ground truth
+
+With the system up, resolve what is actually true in it: are the feature's
+flags on, do the rows the feature needs exist, which defaults or fallbacks will
+fire, which account and tenant the run will use. Cheap queries and direct API calls, done by the orchestrator.
 
 This step exists because of two distinct failures. An expectation written as "a
 plausible score appears" cannot fail, so a scenario that asserts it is theatre;
@@ -91,14 +113,14 @@ And a tester that computes its own expectation and then checks it has tested
 nothing — the expectation has to be fixed before the run, by someone who is not
 also the one looking at the screen.
 
-### 3 · The gate
+### 4 · The gate
 
 The orchestrator shows the numbered scenarios with their expected values and
 waits. The user approves or cuts scope. One decision point, placed where
 changing your mind is cheapest: a misread claim otherwise costs a full tester
 run to discover.
 
-### 4 · Dispatch
+### 5 · Dispatch
 
 One tester by default, prompted from `tester-brief.md`. The reason is context,
 not throughput: a full run burns most of a context window, which is the entire
@@ -128,18 +150,19 @@ by one process at a time, so two concurrent drivers means one fails to launch.
 Non-browser evidence — direct API probes, data-store invariants, test suites —
 can run alongside a browser tester without collision.
 
-The brief keeps four sections, each covering one way a delegated run fails:
-**Context** (the tester tests the wrong thing), **Hard rules** (the tester
-breaks the environment), **Scenarios** (the tester improvises coverage), **What
-to return** (the tester's output is unusable).
+Each section of the brief covers one way a delegated run fails: **Context** (the
+tester tests the wrong thing), **The environment** (it burns the run on a broken
+app, or repairs one), **Hard rules** (the tester breaks the environment),
+**Scenarios** (the tester improvises coverage), **What to return** (the tester's
+output is unusable).
 
-### 5 · Spot-check
+### 6 · Spot-check
 
 Open two or three of the returned screenshots — riskiest scenarios first — and
 confirm they show what the findings claim, before writing anything. A structured
 findings list is an index, not evidence.
 
-### 6 · Report
+### 7 · Report
 
 Every finding is classified three ways, because they read identically in a
 screenshot and completely differently to whoever acts on the report:
@@ -235,6 +258,7 @@ one repo:
 | Trap | The rule |
 |---|---|
 | Testing a branch that isn't checked out | Verify where it lives before dispatch; record every repo's sha in the report |
+| The tester tries to repair the environment | It stops and bounces; the orchestrator fixes and re-dispatches what remains |
 | Browser tooling drops images in the repo root | The tester collects them into the run's `screens/` as `<id>-<slug>.png` and deletes the litter |
 | Retina or full-page captures | Viewport-sized only — reports get committed; keep the run small |
 | Desktop-only evidence | Public and brand-new screens also at a phone width |
