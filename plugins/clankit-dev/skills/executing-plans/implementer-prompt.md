@@ -43,7 +43,7 @@ Subagent (general-purpose):
     - Work the tasks in plan order. Each task ends with its acceptance bar
       met and a commit — commit each working step, don't batch the plan into
       one commit at the end.
-    - Test as you go, at the seams the spec names — the public interfaces
+    - Test as you go, at the seams the plan or spec names — the public interfaces
       the tests exercise. Tests where the work admits them, a named
       verification run where it doesn't; don't substitute one for the other.
     - While iterating, run the focused test for what you're changing; run the
@@ -104,7 +104,7 @@ Subagent (general-purpose):
 
     **Acceptance — whichever each task asked for:**
     - Tests: do they verify behavior (not just mock behavior)? Do they
-      exercise the seams the spec names? Is the output pristine?
+      exercise the seams the plan or spec names? Is the output pristine?
     - A verification run: did I actually run it and look, or am I asserting it
       works? A test that only asserts a file contains a string is not a
       substitute for looking.

@@ -120,6 +120,10 @@ neighbours use.
 **Constraints** — exact values, and the design decisions that are easy to get
 wrong.
 
+**Seams** — the public interfaces this task's tests exercise, carried from the
+spec's Testing section. Omit only where the rigor is a verification run rather
+than tests.
+
 **Done when** — the acceptance bar, and how it gets checked (see Rigor below).
 ````
 
@@ -134,6 +138,7 @@ nothing else touches it.
 **Signatures:** `class Limiter { constructor(o: {max: number, windowMs: number}); allow(key: string): boolean }`
 **Constraints:** sliding window, not fixed — a fixed window lets 2× through at
 the boundary. Keys are tenant ids and unbounded, so entries must be evicted.
+**Seams:** `Limiter.allow` — drive it directly, not through the middleware.
 **Done when:** over-limit requests rejected, the window slides, eviction covered.
 Tests in the repo's idiom. Commit.
 ````

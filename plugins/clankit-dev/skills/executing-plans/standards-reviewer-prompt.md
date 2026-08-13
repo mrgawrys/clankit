@@ -88,7 +88,7 @@ Subagent (general-purpose):
 
     **Tests:**
     - Do they verify real behavior, not mocks? Do they exercise the seams
-      the spec names?
+      the plan or spec names?
     - Are the edge cases covered?
     - If a task asked for a verification run: was it run and observed, or
       only asserted?

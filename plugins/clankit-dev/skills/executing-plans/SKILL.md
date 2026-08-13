@@ -162,8 +162,9 @@ Same setup and pre-flight scan. Then one dispatch:
   your resolution of anything the pre-flight scan surfaced, and on the spec
   path the task file.
 - Standing orders in the dispatch: work the tasks in plan order; test at the
-  seams the spec names as you go and run the full suite at the end; commit at
-  each working step; write the full report to `<workspace>/build-report.md`;
+  seams the plan or spec names as you go and run the full suite at the end;
+  commit at each working step; write the full report to
+  `<workspace>/build-report.md`;
   return only status, commits, a one-line test summary, and concerns.
 - Model per Model Selection — a whole plan nearly always carries design
   judgment, so the capable tier is the default, not the exception.
