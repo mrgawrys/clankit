@@ -15,14 +15,20 @@ absolute path is the working directory you pass to `problem-setter`.
 
 ## 1. Select the unit and generate the scenario
 
-Read `<state dir>/interview-map.md` and choose the weakest architecture-relevant
-unit, breaking ties by stalest `last-seen`.
+Read `<state dir>/interview-map.md` and choose the weakest unit with
+`kind: arch-domain`, breaking ties by stalest `last-seen`. Only those units are
+selectable here — patterns, themes, and Q&A areas belong to the other rounds.
 
-Dispatch `problem-setter` in architecture mode with: scenario domain hints biased
-toward product engineering — multi-tenant SaaS, permissions, event ingestion,
-sync, background jobs — the interviewer persona to generate, and the working
-directory. Pass prior scenarios from `<state dir>/interview-log.md` so it doesn't
-repeat one.
+Read that domain's entry in `curriculum.md` — that entry only — and dispatch
+`problem-setter` in architecture mode with: the domain and its recurring hard
+questions as the scenario hints, the interviewer persona to generate, and the
+working directory. Pass prior scenarios from `<state dir>/interview-log.md` so it
+doesn't repeat one.
+
+A good scenario will touch neighbouring domains — a webhook pipeline that also
+bills per event, a sync protocol with its own permission model. That is
+realistic and welcome. **The selected domain is still the one being graded**: it
+is the `unit` on the log row, and the round's grade lands on its map row.
 
 It returns the vague opening prompt, the persona, and the product constraints you
 may reveal when asked. It writes `scenario.md` and `pressure-list.md` to the
@@ -110,9 +116,13 @@ Close the round explicitly, in one line, so the posture change is unambiguous.
 5. **Capture concept gaps as meanings cards** appended to `learn`'s
    `review-queue.md` in the learn-integration state dir — schema and new-row
    values per the `learn` skill's Phase 0a and Phase 4, not restated here.
-6. **Update state** per `SKILL.md`'s state-update rules: the unit's row in
-   `interview-map.md` and one appended row in `interview-log.md`, whose
-   `what went wrong` names the specific pressure point the design failed.
+6. **Update state** per `SKILL.md`'s state-update rules: the selected domain's
+   row in `interview-map.md` and one appended row in `interview-log.md`, whose
+   `unit` is that domain and whose `what went wrong` names the specific pressure
+   point the design failed. If the scenario ran deep into another domain and the
+   round genuinely showed something about it, add a line to *that* row's note —
+   no confidence change, no second log row. If it only brushed past, leave the
+   other rows alone.
 7. **If the gap is foundational**, recommend a `/learn <topic>` session by name.
 
 The scratchpad dies with the session. Only the map and log rows persist.

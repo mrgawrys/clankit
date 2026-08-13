@@ -42,8 +42,9 @@ evidence about interview conditions; ask those.
 
 ## 2. Probe
 
-Read `curriculum.md` in full — every pattern, every practical theme, every Q&A
-area. Each unit needs enough signal for one confidence level.
+Read `curriculum.md` in full — every pattern, every practical theme, every
+architecture domain, every Q&A area. Each unit needs enough signal for one
+confidence level.
 
 **Batch the questions.** Post several per message — four to six is a good size,
 grouped by area — and let the user answer them all in one reply, by number.
@@ -59,6 +60,10 @@ The questions are short recognition and reasoning prompts, not problems:
 - *Practical themes* — how they'd shape it and what they'd expect to break.
   "You're substituting `%key%` placeholders — what does your first version get
   wrong when a value itself contains a placeholder?"
+- *Architecture domains* — one of the domain's recurring hard questions, asked
+  in the abstract rather than as a design exercise. "You're taking webhooks from
+  a payment provider — what makes your handler safe when they retry a delivery
+  you already processed?" A design round is 60 minutes; this is one answer.
 - *Q&A areas* — one mechanism question each, drawn from `curriculum.md`'s stems.
 
 A unit is covered when the answer shows whether they own the *idea*. Do not
@@ -73,13 +78,14 @@ it" and the next batch is enough.
 
 Write `<state dir>/interview-map.md` with the schema from `SKILL.md`. **Every
 unit in `curriculum.md` gets a row** — all patterns, all practical themes, all
-Q&A areas. A unit you ran out of time to ask about is still a row, at `unknown`
+architecture domains, all Q&A areas, each with the `kind` its curriculum section
+names. A unit you ran out of time to ask about is still a row, at `unknown`
 with a note saying it wasn't assessed. A map with missing rows silently removes
 those units from every future session's selection.
 
 - `confidence` — `unknown` · `weak` · `shaky` · `solid`, from the answers.
-  `solid` needs the trigger signal *and* the invariant (or, for a Q&A area, the
-  mechanism and not just the name). Recognising the name alone is `weak`. Grade
+  `solid` needs the trigger signal *and* the invariant (or, for a Q&A area or an
+  architecture domain, the mechanism and not just the name). Recognising the name alone is `weak`. Grade
   strictly: an inflated map stops serving the unit, and the gap survives.
 - `last-seen` — today for units asked about; `—` for unasked ones and for units
   credited from `learn`.

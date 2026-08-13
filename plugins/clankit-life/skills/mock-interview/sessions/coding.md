@@ -34,11 +34,12 @@ just used in the warm-up — recognition is now primed.
 
 ## 2. Select the unit and generate
 
-Read `<state dir>/interview-map.md`. Choose the weakest unit; break ties by
-stalest `last-seen`. Do not steer toward a comfortable unit, and do not avoid
-one because a past session went badly with it.
+Read `<state dir>/interview-map.md`. Choose the weakest unit whose `kind` is
+`pattern` or `theme`; break ties by stalest `last-seen`. Do not steer toward a
+comfortable unit, and do not avoid one because a past session went badly with
+it.
 
-The unit is either a **pattern** or a **practical theme** (`kind` in the map).
+The unit is either a **pattern** or a **practical theme**.
 Alternate deliberately across sessions — the practical themes are weighted at
 least as heavily as the pattern list, so a run of pattern-only rounds is a
 selection bug.

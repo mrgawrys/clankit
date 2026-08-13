@@ -5,8 +5,8 @@ and generators draw problems from these entries.
 
 `sessions/assessment.md` is the only file that reads this one in full. Every
 other read is narrow: the `problem-setter` agent works from the unit's fields,
-`sessions/coding.md` reads the selected unit's entry and nothing else, and
-`sessions/qa.md` reads the Q&A topic areas section. **Never load the whole file
+`sessions/coding.md` and `sessions/architecture.md` read the selected unit's
+entry and nothing else, and `sessions/qa.md` reads the Q&A topic areas section. **Never load the whole file
 into a solve phase** — a curriculum sitting in the interviewer's context is a
 list of hints waiting to leak.
 
@@ -187,6 +187,71 @@ first-draft code that only ever handled the happy path shows itself here.
 **Mini state machines**
 - *Shape:* consume input one unit at a time with explicit states — a small protocol reader, a quoted-CSV parser, a retry/backoff lifecycle.
 - *Follow-up constraints:* an escape state that suspends the normal transitions; input that ends mid-state (unterminated quote, truncated record); streaming input across chunks with state carried between them; reporting the position where the machine got stuck; recovering to a known state and continuing to collect later errors.
+
+---
+
+## Architecture domains
+
+`kind: arch-domain` in the map. The product-engineering territory an
+architecture round is set in — weighted highest of the four buckets. Each domain
+is a unit the map tracks and the architecture round selects from; the generated
+scenario dresses it in a product, and the pressure list comes from the recurring
+hard questions below.
+
+A scenario usually touches more than one domain. The one selected is the unit
+that gets graded; the others are context.
+
+**Multi-tenant SaaS and permissions**
+- *Covers:* tenant isolation, the data model that enforces it, roles and
+  resource-level permissions, sharing across tenant boundaries, admin/support
+  impersonation.
+- *Recurring hard questions:* where isolation is enforced (row, schema, or
+  database) and what a bug at that layer costs; how a permission check stays
+  cheap on a list endpoint; what happens when one tenant is 90% of the load;
+  how a permission model survives the first customer who wants a custom role.
+
+**Event ingestion and webhooks**
+- *Covers:* accepting events from outside systems, delivery to consumers,
+  retries, ordering, and the storage behind them.
+- *Recurring hard questions:* at-least-once delivery and what makes the consumer
+  idempotent; a sender that retries a burst you already processed; ordering
+  guarantees you actually need versus the ones you claim; backpressure when a
+  downstream consumer is slow; the dead-letter path and who looks at it.
+
+**Sync and offline**
+- *Covers:* clients that read and write while disconnected, reconciliation on
+  reconnect, and what the user sees in between.
+- *Recurring hard questions:* conflict resolution and who wins (and how you tell
+  the user); what the sync protocol sends — deltas, versions, or the whole
+  document; clock skew and why timestamps are a poor arbiter; a client that
+  reconnects after a month; how optimistic UI rolls back.
+
+**Background jobs and scheduling**
+- *Covers:* work moved off the request path — queues, workers, recurring jobs,
+  fan-out, and long-running tasks.
+- *Recurring hard questions:* exactly-once versus idempotent-and-at-least-once;
+  a job that fails halfway through its side effects; the poison message that
+  retries forever; scheduled work in the presence of time zones and DST;
+  isolating a slow job class from a latency-sensitive one; how a job is
+  cancelled or superseded.
+
+**Billing and metering**
+- *Covers:* counting usage, turning it into money, plans and limits, and the
+  invoicing boundary with a payment provider.
+- *Recurring hard questions:* metering accuracy against event volume — sampled,
+  aggregated, or exact, and what each costs; proration, plan changes, and
+  refunds mid-period; enforcing a limit without a synchronous check on the hot
+  path; reconciling with the provider when the two disagree; why billing data
+  gets immutable records instead of updates.
+
+**Search and denormalized reads**
+- *Covers:* read paths that cannot be served by the write model — search
+  indexes, materialised views, caches, and feeds.
+- *Recurring hard questions:* how the denormalized copy is kept fresh and what
+  staleness the product can tolerate; reindexing without downtime; permissions
+  applied to search results without destroying the query's performance;
+  cache invalidation triggered by a write that is several hops away;
+  what breaks when the index and the source of truth disagree.
 
 ---
 

@@ -43,7 +43,7 @@ mock-interview/
 │   ├── architecture.md   ← design conversation (~60 min + post-mortem)
 │   ├── qa.md             ← verbal technical Q&A (~30–45 min + post-mortem)
 │   └── assessment.md     ← first session: seeds interview-map.md
-├── curriculum.md         ← patterns, practical themes, Q&A topic areas
+├── curriculum.md         ← patterns, practical themes, architecture domains, Q&A topic areas
 └── grading.md            ← rubric, outcome grades, anti-pattern instructions
 ```
 
@@ -85,8 +85,8 @@ Load lazily and load little — context you don't need is context that leaks.
    then propose the most valuable next session and **ask**. Rank candidates by
    weakest confidence first, then stalest `last-seen` — the structural fix for
    serving what feels comfortable. Present two or three options, each with a
-   one-line why ("architecture round on event ingestion — `weak`, and the log
-   shows two failed designs under load questions"). The user picks. Never start
+   one-line why ("architecture round on event ingestion & webhooks — `weak`, and
+   the log shows two failed designs under load questions"). The user picks. Never start
    a round without their pick.
 
 **There is no cadence.** Never schedule sessions, never propose a frequency,
@@ -149,7 +149,7 @@ One row per curriculum unit. Read by the opening flow to propose sessions.
 |------|------|------------|-----------|------|
 
 - `unit` — the curriculum unit's name, verbatim from `curriculum.md`.
-- `kind` — one of `pattern` · `theme` · `qa-area`.
+- `kind` — one of `pattern` · `theme` · `arch-domain` · `qa-area`.
 - `confidence` — one of `unknown` · `weak` · `shaky` · `solid`.
 - `last-seen` — ISO date (YYYY-MM-DD) the unit last came up in a session, or `—`
   if never.
