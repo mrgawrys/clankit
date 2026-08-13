@@ -67,15 +67,42 @@ shown to anyone.
 
 **`tests.ts`** — an adversarial suite that imports the target as `./solution.ts`
 and asserts with `node:assert`. No test framework, no runner config, no
-dependencies:
+dependencies — a tiny per-case harness instead, so one failure never hides the
+rest:
 
 ```ts
 import assert from "node:assert";
 import { theTarget } from "./solution.ts";
 
-// ...cases...
-console.log("all tests passed");
+let passed = 0;
+let failed = 0;
+
+function check(label: string, run: () => void) {
+  try {
+    run();
+    passed++;
+    console.log(`PASS ${label}`);
+  } catch {
+    // Never print the error: an assertion message carries the expected value,
+    // and the interviewer reads this output aloud.
+    failed++;
+    console.log(`FAIL ${label}`);
+  }
+}
+
+check("empty input", () => {
+  assert.deepStrictEqual(theTarget(/* … */), /* … */);
+});
+// ...one check() per case...
+
+console.log(`${passed} passed, ${failed} failed`);
+if (failed > 0) process.exitCode = 1;
 ```
+
+Every case must run and report even when an earlier one failed — that is exactly
+the run the interviewer needs at step 6, where per-case results are the whole
+report. Keep the summary line and the exit code: the verification loop below
+trusts them.
 
 Requirements for the suite:
 - **Probe every underspecified decision.** The candidate may not have asked; the
@@ -87,8 +114,9 @@ Requirements for the suite:
 - Give each case a label that names what it checks without giving the answer
   away — the interviewer reports these labels with pass/fail, so a label like
   `"empty input returns []"` is a leak. `"empty input"` is fine.
-- Print a clear per-case pass/fail line so the interviewer can report results
-  without reading the file.
+- Wrap every case in `check()`. A bare top-level `assert` throws and takes the
+  rest of the suite with it, which is precisely the run that tells the candidate
+  the least.
 
 ### Verification loop
 
@@ -98,8 +126,9 @@ From the working directory:
 cp reference.ts solution.ts && npx tsx tests.ts
 ```
 
-If anything fails, fix `reference.ts` or `tests.ts` — whichever is actually
-wrong — and run again. Iterate until the whole suite passes. A suite whose
+Green means the summary line reads `N passed, 0 failed` and the exit code is 0;
+scan the `FAIL` lines otherwise. Fix `reference.ts` or `tests.ts` — whichever is
+actually wrong — and run again. Iterate until the whole suite passes. A suite whose
 expectations don't match a correct reference is the failure mode this loop
 exists to kill, so do not stop at "close enough".
 
