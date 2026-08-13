@@ -25,15 +25,15 @@ questions as the scenario hints, the interviewer persona to generate, and the
 working directory. Pass prior scenarios from `<state dir>/interview-log.md` so it
 doesn't repeat one.
 
-A good scenario will touch neighbouring domains — a webhook pipeline that also
-bills per event, a sync protocol with its own permission model. That is
-realistic and welcome. **The selected domain is still the one being graded**: it
-is the `unit` on the log row, and the round's grade lands on its map row.
-
 It returns the vague opening prompt, the persona, and the product constraints you
 may reveal when asked. It writes `scenario.md` and `pressure-list.md` to the
 working directory and returns **neither** file's contents beyond those three
 fields.
+
+A good scenario will touch neighbouring domains — a webhook pipeline that also
+bills per event, a sync protocol with its own permission model. That is
+realistic and welcome. **The selected domain is still the one being graded**: it
+is the `unit` on the log row, and the round's grade lands on its map row.
 
 **Do not read `pressure-list.md` now.** Not to "check coverage as we go", not to
 "make sure the scenario is sound". An interviewer who knows the pressure points
