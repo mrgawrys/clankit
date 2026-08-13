@@ -139,10 +139,16 @@ counts against the grade.
 ## 7. Follow-up constraint (~10 min)
 
 Dispatch `problem-setter` in follow-up-constraint mode with the working
-directory and the constraint you want applied — drawn from the unit's
-follow-up list in `curriculum.md` (escaping a literal delimiter, missing keys,
-nested or recursive values, streaming input, reporting first-error position,
-recovering to list all errors, and the like).
+directory and the constraint you want applied.
+
+For a **practical theme**, take the constraint from that theme's follow-up list
+in `curriculum.md` (escaping a literal delimiter, missing keys, nested or
+recursive values, streaming input, reporting first-error position, recovering to
+list all errors, and the like). **Patterns carry no such list** — invent one
+constraint in the spirit of those: input arriving as a stream or in chunks, the
+position of the first violation instead of a boolean, a second kind of query
+over the same structure, a tightened memory bound. Either way it goes to the
+follow-up mode the same way.
 
 It returns the constraint statement and `reference verified, N tests`. Present
 only the constraint statement.
