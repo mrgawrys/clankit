@@ -47,6 +47,20 @@ the core task must be unambiguous. The gaps are the parts a careful engineer
 would ask about, planted deliberately so the clarifying phase has something to
 find.
 
+Two things the statement must never do, because both hand over what the round is
+measuring:
+
+- **Never enumerate or signpost the open decisions.** No "some things are left
+  for you to decide", no bulleted list of what to ask about, no "you may want to
+  confirm…". Spotting the gaps *is* the skill being tested; a statement that
+  lists them has already done the candidate's work. Write it the way a real
+  ticket is written — confidently, as though it were complete.
+- **State input bounds, never the target complexity.** "The array can have up to
+  10⁵ entries" is right; "aim for a linear-time solution" is not. Inferring the
+  intended complexity from the bounds is a graded skill, and the candidate is
+  asked for their complexity claim at the pre-code gate — do not answer that
+  question in advance.
+
 **`reference.ts`** — a correct, straightforward solution, exporting the target
 function. Match the complexity the curriculum entry states. This file is never
 shown to anyone.
