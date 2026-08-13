@@ -3,8 +3,12 @@
 The units this skill tracks. Every entry here gets a row in `interview-map.md`,
 and generators draw problems from these entries.
 
-Read by the `problem-setter` agent and by `sessions/assessment.md`. Not loaded
-during a solve phase.
+`sessions/assessment.md` is the only file that reads this one in full. Every
+other read is narrow: the `problem-setter` agent works from the unit's fields,
+`sessions/coding.md` reads the selected unit's entry and nothing else, and
+`sessions/qa.md` reads the Q&A topic areas section. **Never load the whole file
+into a solve phase** — a curriculum sitting in the interviewer's context is a
+list of hints waiting to leak.
 
 The list is deliberately practical: architecture weighted highest, practical
 coding second, algorithms slimmed to what a product-engineering interview
