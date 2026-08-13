@@ -189,8 +189,11 @@ A plan that won't fit one builder's context runs as sequential chunk
 dispatches, split at task boundaries. Each brief carries the plan path, its
 chunk's tasks, and the prior chunks' reports (each chunk appends to the same
 `build-report.md`); after each dispatch, append one `chunk N done` line to
-`<workspace>/chunk-log.md` — the only bookkeeping. Zero interim reviews at any
-scale: the final review still reviews the whole branch once.
+`<workspace>/chunk-log.md` — the only bookkeeping. Read that log before every
+dispatch and resume at the first chunk without a line: your context can compact
+between chunks, and re-dispatching finished work is the most expensive mistake
+this skill has made. Zero interim reviews at any scale: the final review still
+reviews the whole branch once.
 
 ## Running inline
 
