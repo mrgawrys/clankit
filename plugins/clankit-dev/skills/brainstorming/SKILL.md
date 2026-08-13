@@ -113,7 +113,7 @@ If the user already said where the work happens — a worktree, a branch, a repo
 - Once you believe you understand what you're building, present the design
 - Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced
 - Ask after each section whether it looks right so far
-- Cover what the thing actually has. For software: architecture, components, data flow, error handling, testing. For anything else, the equivalent — the parts, how they fit together, what happens when it goes wrong
+- Cover what the thing actually has. For software: architecture, components, data flow, error handling, testing — including the test seams, the public interfaces the tests will exercise. For anything else, the equivalent — the parts, how they fit together, what happens when it goes wrong
 - Be ready to go back and clarify if something doesn't make sense
 
 **When the work is software — design for isolation and clarity:**
@@ -145,6 +145,10 @@ Skip it only when the user says to.
     its tasks.
   - (An explicit user preference for spec location overrides this default. A
     convention you inferred from the repo does not.)
+- When the work is software, the spec carries a short **Testing** section
+  naming the test seams — the public interfaces the tests exercise — as agreed
+  during design. The builder tests at those seams; test quality is
+  `writing-good-tests`' job, and there is no TDD mandate.
 - Use a writing-clearly-and-concisely skill if available
 - Commit the design document to git
 
@@ -155,10 +159,9 @@ choice is owed rather than assuming one:
 # [Topic] — Design
 
 > **To act on this design:** pick a mode — *vibe* (inline, no machinery),
-> *review each task* (per-task diffs), *review at the end* (delegated, reviewed
-> per task), or *plan first* (`writing-plans`, then how it gets built).
-> Unattended end-to-end is `/autopilot`. Ask the user which; don't pick for
-> them.
+> *review each task* (per-task diffs), *review at the end* (one subagent
+> builds, one review at the end), or *plan first* (`writing-plans`, then how it gets built).
+> Ask the user which; don't pick for them.
 ```
 
 **Spec Self-Review:**
@@ -184,16 +187,14 @@ One `AskUserQuestion` call, four named answers, taken from the session bootstrap
 
 | Mode | What it does |
 |---|---|
-| **Vibe** | inline, right now — no subagents, no ledger, no review; the user eyeballs the result |
-| **Review each task** | `executing-plans` inline — one task at a time in this session; the user approves each diff and is the reviewer |
-| **Review at the end** | `executing-plans` delegated from the spec — a subagent per task, a review after each, a fix loop; the user sees the finished branch |
+| **Vibe** | inline, right now — no subagents, no machinery, no review; the user eyeballs the result |
+| **Review each task** | `executing-plans` inline — one task at a time in this session; the user approves each diff and is the reviewer. The only machine review is one `code-review` pass at the end of the whole plan |
+| **Review at the end** | `executing-plans` delegated from the spec — one subagent builds it all, an independent review at the end; the user sees the finished branch |
 | **Plan first** | `writing-plans` produces a reviewable plan file, then asks how it gets built |
 
 The option labels name review cadence and carry an effort parenthetical —
 *(minutes, no safety net)* and up — and the descriptions carry the machinery;
-the bootstrap's menu section holds the canonical wording, including the
-question line that names the typed route: unattended end-to-end is
-`/autopilot`, never a menu row — nobody discovers unattended from a list.
+the bootstrap's menu section holds the canonical wording.
 
 Those four names are the option labels. Everywhere else, say the action rather
 than the name: "I'll write the plan first, then ask how you want it built".

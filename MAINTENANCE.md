@@ -114,8 +114,8 @@ unfinished task is what makes a skipped step visible. That theory needs a reader
 The panel is disabled here, so the list is written and never seen — ceremony on
 every run, buying nothing. Ours says only that the steps are completed in order;
 the checklist itself is untouched. The same cut applies to `executing-plans`,
-where a ledger file already does the job for real. Upstream ships this mandate in
-more than one skill, so expect a re-sync to bring it back.
+where the git log and the build report already do the job for real. Upstream
+ships this mandate in more than one skill, so expect a re-sync to bring it back.
 
 **The trigger is narrowed and the domain is neutral.** Triage lives in the session
 bootstrap, so this skill does not need to fire on everything. Its code-specific
@@ -160,8 +160,9 @@ correct only when the user asked for no gates.
 
 **No brief-extraction script.** A task in the reduced format is already a brief.
 
-**No todo-list mandate**, for the reason recorded under `brainstorming`. The
-ledger file is the progress record; todos were a second, unread copy of it.
+**No todo-list mandate**, for the reason recorded under `brainstorming`. The git
+log and `build-report.md` are the progress record; todos were a second, unread
+copy of it.
 
 **It accepts a spec, not only a plan.** *Review at the end* and *review each task* build
 straight from the spec with no plan file, so the skill derives the task list
@@ -169,13 +170,13 @@ itself and shows it for approval before Task 1. The scripts needed no change —
 spec is a file on disk, so `plan-workspace` keys off its basename exactly as it
 does for a plan.
 
-**The derived list has a specified render, and the bodies live in the ledger.**
+**The derived list has a specified render, and the bodies live in the workspace.**
 Saying "show the list for approval" and stopping there is what an observed
 session did with it: five task bodies, box-drawing separators and a pre-flight
 finding in one message nobody could read. The gate is now one line per task and
-the bodies go to `progress.md`. This is not a loosening of the "not a document"
-rule — that rule names `docs/plans/`, and the ledger is git-ignored workspace
-that dies with the plan. If a later edit drops the render constraint as
+the bodies go to `tasks.md`. This is not a loosening of the "not a document"
+rule — that rule names `docs/plans/`, and the workspace is git-ignored
+and dies with the plan. If a later edit drops the render constraint as
 redundant, the prose padding comes straight back.
 
 **Gates and run style are welded — oversight substitutes for machinery.**
@@ -189,6 +190,31 @@ orthogonal — and that sentence read as license to un-weld them. If a later edi
 reintroduces independence, or offers delegated *review each task* by default, it
 regresses this intent.
 
+**Single-builder is the only delegated shape — the per-task loop is gone.**
+Amends the welding entry above, which described *review at the end* as a
+subagent and a review per task. Usage data said that machinery priced the
+delegated modes out of existence: with per-task reviews and fix loops every
+real session picked vibe, so the safety net caught nothing. Foundation defects
+the loop was meant to catch early are rare in practice and mostly caught at
+the plan stage anyway. Now one implementer builds the whole plan — autopilot
+included — and the final review is the only review: two reviewers in parallel
+over the same package, a spec axis and a standards axis, reported side by side
+so neither masks the other, then one fix wave, one scoped re-review, and
+adjudication of the residuals. The ledger went with the loop — git log and the
+build report are the recovery record, and the workspace survives purely as the
+file home for reports, review packages, and the spec path's derived task
+bodies (now `tasks.md`, re-homed from the ledger). Oversized plans run as
+sequential chunks of the same shape with a one-line chunk log, never as a
+different process — zero interim reviews at any scale. Autopilot lost its seat
+in the flow artifacts: the bootstrap's question line and the spec header no
+longer name it. It remains a deliberately typed skill, shrunk to the envelope
+(worktree → plan → single-builder with gates none → draft PR), and now owes a
+decision report — every choice a gate would have asked the user, reported in
+its final message, written nowhere else. If a later edit reintroduces a
+per-task review loop, adds interim reviews to chunked builds, merges the two
+review axes into one ranked list, or re-advertises autopilot in the flow
+artifacts, it regresses this intent.
+
 **No hand-off answer in the gates question.** Reaching this skill already means
 the work gets built, so offering "stop before Task 1" asks it to undo its own
 invocation. It also has nothing to hand over on the spec path: the derived task
@@ -196,22 +222,27 @@ list is deliberately never written to disk, so a session that stopped there
 would leave the next one re-deriving different tasks from the same spec. Handing
 work over is `writing-plans`' answer to give, because there a plan file exists.
 
-Ported close to verbatim, and worth keeping that way: the fix loop, the five-round
-circuit breaker, and the adjudication rules. Those encode real failures.
+Ported close to verbatim, and worth keeping that way: the adjudication rules —
+they encode real failures. (The per-task fix loop and its five-round breaker
+were ported too, then removed with the loop; the rules now apply once, to
+residuals after the final review's fix wave. See the single-builder entry.)
 
 ### `autopilot` (not vendored — ours, but it moved)
 
 **Autopilot writes a plan and runs `executing-plans`.** It used to write a few-bullet
-brief, build with one subagent, and review once at the end. That is a *lighter*
-path, and autopilot's premise is the opposite: run the workflow exactly as a human
-would, with the gates answered in advance rather than removed. Unattended work is
-where an end-only review is worst — a wrong turn at task 2 gets inherited through
-task 7 — and where a plan file matters most, because the PR reviewer wasn't there
-and a dead run has no conversation to resume from.
+brief and build with one subagent, skipping the plan file. Autopilot's premise is
+the opposite: run the workflow exactly as a human would, with the gates answered
+in advance rather than removed. A plan file matters most here, because the PR
+reviewer wasn't there and a dead run has no conversation to resume from.
 
 So autopilot is now the envelope: worktree, plan, draft PR, and the standing
-decision that nobody will be asked. `executing-plans` owns the build loop, its
-reviews, its fix rounds, and its model tiers. Don't re-implement any of that here.
+decision that nobody will be asked. `executing-plans` owns the build, its review,
+its fix wave, and its model tiers. Don't re-implement any of that here.
+
+(This entry used to argue that unattended work is where an end-only review is
+worst, a wrong turn at task 2 inherited through task 7. That argument fell with
+the per-task loop — autopilot now gets the same single-builder shape as every
+other delegated build. See the single-builder entry.)
 
 ### `writing-skills`, `systematic-debugging`
 
@@ -243,8 +274,6 @@ Recorded in `docs/specs/2026-07-27-clankit-workflow-skills-design.md`:
   `executing-plans` with gates off, then a draft PR — it is deterministic control
   flow over subagents, which is what the harness's workflow scripts are for.
   Revisit once the current shape has run a few times.
-- **Replacing the ledger with the native task list** — worth doing, but it adds
-  divergence to `executing-plans`, the file most likely to be rewritten upstream.
 - **Splitting `brainstorming` into its own plugin** — it is domain-independent and
   worth sharing with people who don't write software, who should not receive a
   hook-injected preamble about repos and subagents. Deferred only because nobody

@@ -33,8 +33,8 @@ here, "Vibing it — handed to a subagent, no machinery" if not.
 
 - Work straight from whatever you hold — a spec, a plan, or the ask itself.
   Enough is decided to start; start.
-- **No machinery.** No ledger, no plan workspace, no derived task list shown for
-  approval, no dispatched reviews — per-task or final. The user reviews by
+- **No machinery.** No plan workspace, no derived task list shown for
+  approval, no dispatched reviews. The user reviews by
   looking at the result. A handoff is one subagent doing all of the above work,
   not a loop; it buys context, not safety.
 - **Commit as you go.** Small commits at each working step; they are the only

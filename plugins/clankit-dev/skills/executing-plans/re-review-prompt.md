@@ -1,25 +1,27 @@
 # Scoped Re-Review Prompt Template
 
-Use this template when dispatching a re-review after a fix round. The
-re-reviewer verifies the findings were addressed and checks the fix diff for
-new breakage. It is not a fresh review — the full review already happened.
+Use this template when dispatching the re-review after the final review's fix
+wave. The re-reviewer verifies the findings were addressed and checks the fix
+diff for new breakage. It is not a fresh review — the two-axis review already
+happened, and there is no second fix wave: what this re-review leaves open,
+the controller adjudicates.
 
-**Purpose:** Verify each finding from the previous review was addressed, and
+**Purpose:** Verify each finding from the two axis reviews was addressed, and
 that the fix itself broke nothing.
 
 ```
 Subagent (general-purpose):
-  description: "Re-review Task N fix round R"
+  description: "Re-review the fix wave"
   model: [MODEL — REQUIRED: choose per SKILL.md Model Selection; an omitted
          model silently inherits the session's most expensive one]
   prompt: |
-    You are re-reviewing one task's fix round. A previous review produced
-    findings; an implementer has attempted to fix them. Your job is to
-    verdict each finding and inspect the fix diff — nothing else.
+    You are re-reviewing a fix wave. A two-axis review of a finished branch
+    produced findings; a fix subagent has attempted to address them. Your
+    job is to verdict each finding and inspect the fix diff — nothing else.
 
-    ## The Task
+    ## The Requirements
 
-    Read the task brief: [BRIEF_FILE]
+    The plan or spec the branch was built from: [PLAN_FILE]
 
     ## The Findings Under Verification
 
@@ -27,10 +29,9 @@ Subagent (general-purpose):
 
     ## The Fix
 
-    Read the implementer's report (fix reports are appended at the end):
-    [REPORT_FILE]
+    Read the fix subagent's report (appended at the end): [REPORT_FILE]
 
-    **Fix base:** [FIX_BASE_SHA] (the head the previous review saw)
+    **Fix base:** [FIX_BASE_SHA] (the head the axis reviewers saw)
     **Head:** [HEAD_SHA]
     **Diff file:** [DIFF_FILE]
 
@@ -47,14 +48,14 @@ Subagent (general-purpose):
 
     Your scope is the findings list and the fix diff. Verdict every finding.
     Inspect the fix diff for new problems the fix itself introduced. Do NOT
-    re-review code the fix did not touch: if you notice an issue entirely
-    outside the fix diff, report it under Out-of-Scope Observations — it
-    does not block this task and does not extend the loop. A broad
-    whole-branch review happens after all tasks are complete.
+    re-review code the fix did not touch: the branch already had its full
+    review. If you notice an issue entirely outside the fix diff, report it
+    under Out-of-Scope Observations — it is non-blocking and does not
+    trigger another wave.
 
     ## Tests
 
-    The implementer re-ran the tests covering the amended code and appended
+    The fix subagent re-ran the tests covering the amended code and appended
     the results to the report file. Treat the report as unverified claims:
     confirm the fix report names the covering tests and shows their output,
     and verify the claims against the diff. Do not re-run the suite to
@@ -83,24 +84,24 @@ Subagent (general-purpose):
     ### Out-of-Scope Observations
 
     Issues you noticed entirely outside the fix diff. Non-blocking; the
-    controller ledgers these for the final review. "None" if none.
+    controller records these for its final report. "None" if none.
 
     ### Verdict
 
-    **Fix round:** [All findings addressed, no new Critical/Important
+    **Fix wave:** [All findings addressed, no new Critical/Important
     breakage | Findings remain open] — list the open ones.
 ```
 
 **Placeholders:**
 - `[MODEL]` — REQUIRED: reviewer model per SKILL.md Model Selection; scoped
   re-reviews of small fix diffs take a cheap-to-mid tier
-- `[BRIEF_FILE]` — the task brief file (same file the implementer worked from)
-- `[FINDINGS]` — the Critical/Important findings and spec gaps from the
-  previous review, copied verbatim, one per bullet
-- `[REPORT_FILE]` — the implementer's report file (fix reports appended)
-- `[FIX_BASE_SHA]` — the head the previous review saw
+- `[PLAN_FILE]` — the plan or spec path the branch was built from
+- `[FINDINGS]` — the Critical/Important findings and spec gaps from both axis
+  reviews, copied verbatim, one per bullet
+- `[REPORT_FILE]` — the fix subagent's report file
+- `[FIX_BASE_SHA]` — the head the axis reviewers saw
 - `[HEAD_SHA]` — current commit
 - `[DIFF_FILE]` — the path `scripts/review-package PLAN_FILE FIX_BASE HEAD` printed
 
 **Re-reviewer returns:** per-finding verdicts (ADDRESSED / NOT ADDRESSED),
-new breakage in the fix diff, out-of-scope observations, and a round verdict.
+new breakage in the fix diff, out-of-scope observations, and a wave verdict.

@@ -1,53 +1,56 @@
-# Implementer Subagent Prompt Template
+# Builder Prompt Template
 
-Use this template when dispatching an implementer subagent.
+Use this template when dispatching the implementer that builds the whole plan
+(or, on an oversized plan, one chunk of it — adjust the task range and point
+at the prior chunks' reports).
 
 ```
 Subagent (general-purpose):
-  description: "Implement Task N: [task name]"
-  model: [MODEL — REQUIRED: choose per SKILL.md Model Selection; an omitted
-         model silently inherits the session's most expensive one]
+  description: "Build [plan name]"
+  model: [MODEL — REQUIRED: choose per SKILL.md Model Selection; the capable
+         tier is the default for a whole plan. An omitted model silently
+         inherits the session's]
   prompt: |
-    You are implementing Task N: [task name]
+    You are implementing an approved plan end to end.
 
-    ## Task Description
+    ## Requirements
 
-    Read your task brief first: [BRIEF_FILE]
-    It contains the full task text from the plan.
+    Read this first — it is your requirements, with the exact values to use
+    verbatim: [PLAN_FILE]
+    [Spec path only: the approved task breakdown is in [TASK_FILE] — work
+    those tasks, in that order.]
+
+    ## Global Constraints
+
+    [GLOBAL_CONSTRAINTS — copied verbatim from the plan or spec. These bind
+    every task the same way.]
 
     ## Context
 
-    [Scene-setting: where this fits, dependencies, architectural context]
+    [Scene-setting: where this fits, decisions already made, the controller's
+    resolution of anything the pre-flight scan surfaced]
 
     ## Before You Begin
 
-    If you have questions about:
-    - The requirements or acceptance criteria
-    - The approach or implementation strategy
-    - Dependencies or assumptions
-    - Anything unclear in the task description
+    If you have questions about the requirements, the approach, dependencies,
+    or anything unclear in the plan — **ask them now.** Raise concerns before
+    starting work.
 
-    **Ask them now.** Raise any concerns before starting work.
-
-    ## Your Job
-
-    Once you're clear on requirements:
-    1. Implement exactly what the task specifies
-    2. Meet the brief's "Done when" — tests where the work admits them (write
-       the test first and watch it fail), a named verification run where it
-       doesn't. Don't substitute one for the other
-    3. Verify implementation works
-    4. Commit your work
-    5. Self-review (see below)
-    6. Report back
+    ## Standing Orders
 
     Work from: [directory]
 
-    **While you work:** If you encounter something unexpected or unclear, **ask questions**.
-    It's always OK to pause and clarify. Don't guess or make assumptions.
-
-    While iterating, run the focused test for what you're changing; run the
-    full suite once before committing, not after every edit.
+    - Work the tasks in plan order. Each task ends with its acceptance bar
+      met and a commit — commit each working step, don't batch the plan into
+      one commit at the end.
+    - Test as you go, at the seams the plan or spec names — the public interfaces
+      the tests exercise. Tests where the work admits them, a named
+      verification run where it doesn't; don't substitute one for the other.
+    - While iterating, run the focused test for what you're changing; run the
+      full suite once at the end of the build, and make it pass before your
+      final report.
+    - If you encounter something unexpected or unclear, **ask questions**.
+      It's always OK to pause and clarify. Don't guess or make assumptions.
 
     ## Code Organization
 
@@ -68,23 +71,24 @@ Subagent (general-purpose):
     no work. You will not be penalized for escalating.
 
     **STOP and escalate when:**
-    - The task requires architectural decisions with multiple valid approaches
+    - A task requires architectural decisions with multiple valid approaches
+      the plan doesn't settle
     - You need to understand code beyond what was provided and can't find clarity
     - You feel uncertain about whether your approach is correct
-    - The task involves restructuring existing code in ways the plan didn't anticipate
+    - The work involves restructuring existing code in ways the plan didn't anticipate
     - You've been reading file after file trying to understand the system without progress
 
     **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT. Describe
-    specifically what you're stuck on, what you've tried, and what kind of help you need.
-    The controller can provide more context, re-dispatch with a more capable model,
-    or break the task into smaller pieces.
+    specifically what you're stuck on, what you've tried, and what kind of help you
+    need. Commit the working steps you completed first — a partial build that
+    stops cleanly at a task boundary is a good outcome; guessed work is not.
 
     ## Before Reporting Back: Self-Review
 
     Review your work with fresh eyes. Ask yourself:
 
     **Completeness:**
-    - Did I fully implement everything in the spec?
+    - Did I fully implement every task in the plan?
     - Did I miss any requirements?
     - Are there edge cases I didn't handle?
 
@@ -98,32 +102,20 @@ Subagent (general-purpose):
     - Did I only build what was requested?
     - Did I follow existing patterns in the codebase?
 
-    **Acceptance — whichever the brief asked for:**
-    - Tests: do they verify behavior (not just mock behavior)? Did I write the
-      failing test first? Are they comprehensive? Is the output pristine?
+    **Acceptance — whichever each task asked for:**
+    - Tests: do they verify behavior (not just mock behavior)? Do they
+      exercise the seams the plan or spec names? Is the output pristine?
     - A verification run: did I actually run it and look, or am I asserting it
       works? A test that only asserts a file contains a string is not a
       substitute for looking.
 
     If you find issues during self-review, fix them now before reporting.
 
-    ## After Review Findings
-
-    If the task review finds issues, you will be resumed with the findings.
-    Fix them, re-run the tests that cover the amended code, and append a fix
-    report to your report file: what you changed, the covering tests you
-    ran, the command, and the output. Reviewers will not re-run tests for
-    you — your report is the test evidence. Then reply with the same short
-    status contract as your first report.
-
     ## Report Format
 
     Write your full report to [REPORT_FILE]:
-    - What you implemented (or what you attempted, if blocked)
-    - What you tested and test results
-    - **TDD Evidence** (if TDD was required for this task):
-      - RED: command run, relevant failing output before implementation, and why the failure was expected
-      - GREEN: command run and relevant passing output after implementation
+    - What you implemented, task by task (or what you attempted, if blocked)
+    - What you tested and test results, including the full-suite run at the end
     - Files changed
     - Self-review findings (if any)
     - Any issues or concerns
@@ -132,7 +124,7 @@ Subagent (general-purpose):
     report file):
     - **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
     - Commits created (short SHA + subject)
-    - One-line acceptance summary: test results ("14/14 passing, output
+    - One-line test summary: results ("full suite 214/214 passing, output
       pristine") or the verification you ran and what you observed
     - Your concerns, if any
     - The report file path
@@ -141,6 +133,16 @@ Subagent (general-purpose):
     itself — the controller acts on it directly.
 
     Use DONE_WITH_CONCERNS if you completed the work but have doubts about correctness.
-    Use BLOCKED if you cannot complete the task. Use NEEDS_CONTEXT if you need
+    Use BLOCKED if you cannot complete the build. Use NEEDS_CONTEXT if you need
     information that wasn't provided. Never silently produce work you're unsure about.
 ```
+
+**Placeholders:**
+- `[MODEL]` — REQUIRED: builder model per SKILL.md Model Selection
+- `[PLAN_FILE]` — REQUIRED: the plan or spec path — the requirements, exact
+  values verbatim
+- `[TASK_FILE]` — spec path only: `<workspace>/tasks.md`, the approved task
+  breakdown with acceptance bars
+- `[GLOBAL_CONSTRAINTS]` — the binding requirements copied verbatim from the
+  plan's Global Constraints section or the spec
+- `[REPORT_FILE]` — REQUIRED: `<workspace>/build-report.md`
