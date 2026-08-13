@@ -76,8 +76,10 @@ Close the round explicitly, in one line.
    mechanism versus reciting the name, saying "I don't know" cleanly versus
    bluffing. Bluffing is a specific finding — report it as one.
 2. **Assign an outcome grade per area exercised** — `clean`, `slow`, `hinted`,
-   or `failed`. In this round `slow` means they got there only after circling,
-   and `hinted` means only after your follow-ups walked them to it.
+   or `failed`. `slow` keeps its usual meaning, correct but over the budget; in
+   a verbal round the budget is spent in words, so it shows up as rambling
+   toward the answer — circling the topic for minutes before landing on it.
+   `hinted` means only after your follow-ups walked them to it.
 3. **Then teach**, in `learn`'s Phase 3 rhythm — now, all at once, for
    everything held back during step 3. Prioritise: the studied topics that
    flunked under pressure come first, because those are gaps the user believes
