@@ -58,14 +58,16 @@ happened.
 ## Outcome grades
 
 Exactly four. Use these words verbatim in `interview-log.md`; do not invent
-in-between grades.
+in-between grades. **What each grade means is defined in `SKILL.md`'s outcome
+grades table** — that is the source of truth, and this file does not restate it.
+What belongs here is what a grade does to the unit's confidence:
 
-| Grade | Means | Confidence update in `interview-map.md` |
-|-------|-------|------------------------------------------|
-| `clean` | Correct, within time, edge cases raised unprompted | Move up one level (`shaky` → `solid`); a unit already `solid` stays `solid`. |
-| `slow` | Correct, but over the round's time budget | Hold the current level, and record the time cost in the note — correctness without speed is not yet `solid`. |
-| `hinted` | Correct only after a nudge, or after a test failure revealed the gap | Drop to `shaky` if it was `solid`; otherwise hold. The nudge is what the grade records. |
-| `failed` | Not correct at the end of the round | Drop one level, floor `weak`. A `weak` unit that fails stays `weak` — with a sharper note. |
+| Grade | Confidence update in `interview-map.md` |
+|-------|------------------------------------------|
+| `clean` | Move up one level (`shaky` → `solid`); a unit already `solid` stays `solid`. |
+| `slow` | Hold the current level, and record the time cost in the note — correctness without speed is not yet `solid`. |
+| `hinted` | Drop to `shaky` if it was `solid`; otherwise hold. The nudge is what the grade records. |
+| `failed` | Drop one level, floor `weak`. A `weak` unit that fails stays `weak` — with a sharper note. |
 
 `unknown` is a starting state only: any graded session moves the unit off it,
 to the level the round actually demonstrated.

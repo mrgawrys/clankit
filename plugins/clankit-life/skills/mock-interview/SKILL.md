@@ -185,7 +185,7 @@ Exactly four, used in the log and nowhere else spelled differently:
 |-------|-------|
 | `clean` | Correct, within time, edge cases raised unprompted |
 | `slow` | Correct, but over time |
-| `hinted` | Correct only after a nudge |
+| `hinted` | Correct only after a nudge, or after a test failure revealed the gap |
 | `failed` | Not correct |
 
 `grading.md` defines how each grade maps to a confidence update. Problems are
