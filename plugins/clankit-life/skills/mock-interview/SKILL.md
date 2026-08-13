@@ -173,6 +173,10 @@ Append-only. One row per session-and-unit.
   saw the window" is useful; "struggled a bit" is not. Write `—` for a clean
   round.
 
+An **`assess` row is the one exception** to `unit` and `outcome`: an assessment
+spans every unit and assigns confidence levels rather than a grade, so it writes
+`—` in both columns.
+
 ### Outcome grades
 
 Exactly four, used in the log and nowhere else spelled differently:

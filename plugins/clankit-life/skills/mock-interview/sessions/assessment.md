@@ -88,9 +88,9 @@ those units from every future session's selection.
   "shaky on this".
 
 Append one row to `<state dir>/interview-log.md` for the session: round
-`assess`, `unit` `—` (it spans all of them), a one-line summary in `problem`,
-and the shape of the result in `what went wrong`. Outcome for an assessment row
-is `—`; the four outcome grades apply to graded rounds, not to this one.
+`assess`, a one-line summary in `problem`, and the shape of the result in
+`what went wrong`. `unit` and `outcome` are both `—`, per the assessment
+carve-out in `SKILL.md`'s log schema.
 
 ## 4. Closing summary
 
