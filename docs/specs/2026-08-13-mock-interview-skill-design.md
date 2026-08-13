@@ -157,7 +157,7 @@ Information hiding, not parallelism: the main session's context is the
 interviewer's knowledge, and the solution must never enter it (nor the visible
 chat). The agent:
 
-1. Receives pattern/theme + difficulty (+ regeneration instructions for re-serves).
+1. Receives pattern/theme + difficulty.
 2. Writes problem statement, reference solution, and adversarial test suite to the
    session scratchpad.
 3. Runs the suite against the reference; iterates until green.
@@ -166,9 +166,7 @@ chat). The agent:
 
 Follow-up constraints go through the same agent (updated reference, new tests,
 re-verified). At grading time the runner executes tests against the submission
-from disk; the reference is never printed. Re-served queue items are regenerated
-with surface details changed (same bones, different domain words) so the pattern
-is re-tested, not the memory of the answer.
+from disk; the reference is never printed.
 
 Runner: `tsx` + `node:assert` — standalone TS functions, no framework setup.
 Artifacts live in the scratchpad and die with the session; only outcomes persist.
@@ -179,9 +177,11 @@ Dimensions: correctness · edge cases identified **before** being told · comple
 stated correctly · readability and naming · how the design absorbed the follow-up
 constraint · assumptions stated up front · verbalisation quality.
 
-Outcome grades and re-serve intervals: **failed → 3 days · hinted → 1 week ·
-slow → 3 weeks · clean → 2 months.** Retire a problem after two cleans at full
-interval. Never re-serve the same problem twice within a week.
+Outcome grades: **clean** (correct, in time, edge cases unprompted) · **slow**
+(correct, over time) · **hinted** (needed a nudge) · **failed**. A problem is
+never served twice — the grade updates the pattern's confidence in the map (so a
+weak pattern soon gets a *fresh* problem) and is recorded in the log; a bad
+session's post-mortem may recommend a `/learn` session on the underlying topic.
 
 Anti-pattern instructions (verbatim intent from the design brief): no generous
 grading; no praise openers; if a session was bad, say so and say why; run the
@@ -202,13 +202,10 @@ wherever they're installed. Plain markdown tables, user-editable.
 - **`interview-log.md`** — append-only session log: date, round type,
   pattern/theme, one-line problem summary, outcome, time taken, what specifically
   went wrong.
-- **`interview-queue.md`** — re-serve queue with a `due` column, selected via
-  `learn`'s `select-due.mjs` (works on any table with `due`). Intervals per the
-  grading section.
 
-Concept gaps do **not** go in the queue — they become meanings cards in `learn`'s
-`review-queue.md`. The queue holds only "this problem/pattern needs another
-attempt under interview conditions."
+There is no problem queue and no re-serving — problems are single-use. Repetition
+happens at the pattern level (the map steers fresh problems toward weak patterns)
+and at the concept level (meanings cards in `learn`'s `review-queue.md`).
 
 ## Notes-repo integration (separate change)
 
@@ -231,7 +228,7 @@ Prose skill — no automated tests. Verification is a named dry run: fresh sessi
 invokes `/mock-interview` with no state (assessment auto-runs, map gets seeded),
 then one short coding round end-to-end — problem-setter generates and verifies off-
 screen (confirm the solution never appears in chat), submission via file path,
-tests actually execute, grade lands in all three state files, and a meanings card
+tests actually execute, grade lands in both state files, and a meanings card
 lands in `review-queue.md`. Glossary removal verified by re-reading `learn/SKILL.md`
 for dangling references.
 
