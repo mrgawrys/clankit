@@ -51,6 +51,11 @@ The persona shapes what you push on:
 
 ## 3. State the prompt and let the user drive
 
+Record the wall-clock start with `date` before you give the prompt. The timer is
+honest, not enforced: you do not warn about time, count down, or hurry the user.
+Run `date` again at the post-mortem — the elapsed feeds the `slow` grade and the
+log's `time` column, and nothing else.
+
 Give the vague opening prompt and stop. Nothing else — no scope, no
 requirements, no suggested starting point, no "you might want to think about the
 data model first".
@@ -96,9 +101,9 @@ Close the round explicitly, in one line, so the posture change is unambiguous.
    only after you probed, or never reached it. Unprompted coverage is the strong
    signal; that distinction is the reason the list is written before the session
    and read after it.
-3. **Assign the outcome grade** — `clean`, `slow`, `hinted`, or `failed` — where
-   `hinted` means the design only survived a pressure point after your probing
-   walked them to it.
+3. **Assign the outcome grade** — `clean`, `slow`, `hinted`, or `failed` — using
+   the elapsed wall-clock from step 3, and where `hinted` means the design only
+   survived a pressure point after your probing walked them to it.
 4. **Then teach**, in `learn`'s Phase 3 rhythm: the pressure points they missed,
    why each one bites, what a design that absorbs it looks like, and a variation
    for them to apply it to.

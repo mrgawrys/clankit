@@ -38,6 +38,11 @@ script to read out.
 
 ## 2. Ask
 
+Record the wall-clock start with `date` before the first question. The timer is
+honest, not enforced: you do not warn about time, count down, or hurry an
+answer. Run `date` again at the post-mortem — the elapsed feeds the `slow` grade
+and the log's `time` column, and nothing else.
+
 An interviewer's register, not a teacher's:
 
 - One question at a time, stated plainly, no preamble and no context-setting.
@@ -88,7 +93,8 @@ Close the round explicitly, in one line.
    `review-queue.md` in the learn-integration state dir — schema and new-row
    values per the `learn` skill's Phase 0a and Phase 4, not restated here.
 5. **Update state** per `SKILL.md`'s state-update rules: one `interview-map.md`
-   row per `qa-area` exercised, and one `interview-log.md` row per area. The
+   row per `qa-area` exercised, and one `interview-log.md` row per area, each
+   carrying the round's elapsed in `time`. The
    `what went wrong` column names the topic that flunked **under interview
    conditions** specifically, and the follow-up: "couldn't explain index
    selectivity out loud though the note is solid — `/learn databases`".
