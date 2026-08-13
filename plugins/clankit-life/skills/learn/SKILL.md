@@ -123,13 +123,19 @@ node <skill dir>/select-due.mjs <state dir>/review-queue.md 5 <today>
 
 It prints `DUE_TOTAL`, `SELECTED`, `REMAINING_AFTER` (use this to decide whether the
 Phase 0b "Continue meanings review" option is live), then the selected rows verbatim. If
-`SELECTED` is 0, skip this phase silently and proceed to Phase 1 step 4. For each selected
-item:
+`SELECTED` is 0, skip this phase silently and proceed to Phase 1 step 4. Quiz the whole
+batch in **one round-trip** — never one question per message:
 
-1. Ask the question.
-2. Let the user answer from memory.
-3. Reveal the saved answer **and assign a grade** — compare the user's answer to the saved one and state **got it** or **missed it** with a one-line reason (e.g. "you had the idea but missed the word 'transitive' — that's a miss"). Do **not** ask the user to confirm; grade it and move on.
-4. The grade stands unless the user overrides it. They can say "override" (or flip it) anytime; the final grade is always the user's if they speak up.
+1. Post **all selected questions in a single message**, numbered 1–N, each tagged with its
+   topic. Ask the user to answer all of them in one reply, by number.
+2. The user answers from memory in one message. A number left unanswered counts as missed
+   (unless the user says they're still working through the list).
+3. Reply with **one grading message** covering every item in order: for each number, reveal
+   the saved answer and state **got it** or **missed it** with a one-line reason (e.g. "you
+   had the idea but missed the word 'transitive' — that's a miss"). Do **not** ask the user
+   to confirm; grade all items and move on.
+4. Grades stand unless the user overrides them — "override 3" (or flipping any number)
+   works anytime; the final grade is always the user's if they speak up.
 
 **Scheduling:** interval ladder `1 → 3 → 7 → 16 → 35 → 90 → 180 → 365` days (stays at 365 thereafter).
 
@@ -194,17 +200,19 @@ node <skill dir>/select-due.mjs <state dir>/glossary-queue.md 5 <today>
 ```
 
 Use `REMAINING_AFTER` to decide whether the menu's "Glossary review" option stays live.
-For each card:
+Quiz the whole batch in **one round-trip** — never one card per message:
 
-1. Look up the term's row in `<notes root>/Glossary.md`; show the **definition** and `source`
-   (NOT the term).
-2. The user names the term from memory.
-3. Reveal the saved **term** and **assign a grade** — compare the user's answer to the
-   saved term and state **got it** or **missed it** with a one-line reason (synonyms /
+1. Look up each card's row in `<notes root>/Glossary.md`. Post **all cards in a single
+   message**, numbered 1–N, showing each card's **definition** and `source` (NOT the term).
+   Ask the user to name all the terms in one reply, by number.
+2. The user answers from memory in one message. A number left unanswered counts as missed
+   (unless the user says they're still working through the list).
+3. Reply with **one grading message** covering every card in order: for each number, reveal
+   the saved **term** and state **got it** or **missed it** with a one-line reason (synonyms /
    near-misses are a judgment call; lean on whether they produced the canonical name).
-   Do **not** ask the user to confirm; grade it and move on.
-4. The grade stands unless the user overrides it. They can say "override" (or flip it)
-   anytime; the final grade is always the user's if they speak up.
+   Do **not** ask the user to confirm; grade all cards and move on.
+4. Grades stand unless the user overrides them — "override 3" (or flipping any number)
+   works anytime; the final grade is always the user's if they speak up.
 
 **Scheduling** is identical to meanings review — same elapsed-time rule, same ladder
 `1 → 3 → 7 → 16 → 35 → 90 → 180 → 365`, same `reviewed` column. See
