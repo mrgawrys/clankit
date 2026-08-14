@@ -1,6 +1,6 @@
 {
   "name": "clankit-life",
-  "description": "Personal-life skills: learn (adaptive learning companion with spaced repetition), writing-companion (listening-first journaling companion)",
+  "description": "Personal-life skills: learn (adaptive learning companion with spaced repetition), writing-companion (listening-first journaling companion), mock-interview (simulated coding, architecture, and Q&A interview rounds)",
   "author": {
     "name": "Michal Gawrys"
   }

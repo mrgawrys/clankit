@@ -18,7 +18,7 @@ defaults apply otherwise. The rest of this skill refers to them by name.
 | Location | Default | Holds |
 |----------|---------|-------|
 | **Notes root** | `.learn/notes/` | Hub MOCs (at its root), track folders, `Glossary.md` |
-| **State dir** | `.learn/` | `review-queue.md`, `glossary-queue.md`, `progress.md` |
+| **State dir** | `.learn/` | `review-queue.md`, `progress.md` |
 | **Templates** | `templates/` in this skill's directory | `hub-moc.md`, `category-moc.md`, `topic-note.md` |
 
 Note conventions default to the bundled templates' style — wikilinks and
@@ -86,10 +86,9 @@ digraph learn_flow {
 
 ## Phase 0: Opening Review & Menu
 
-Phase 0 always runs first: a **meanings review** (concept recall, unchanged), then a
-**menu** that lets the user steer what comes next. The two recall types are distinct:
-- **Meanings review** — `review-queue.md`, "explain the idea" prompts (real meaning only).
-- **Glossary review** — `glossary-queue.md`, reverse vocabulary recall (definition→term).
+Phase 0 always runs first: a **meanings review** (concept recall from
+`review-queue.md`, "explain the idea" prompts), then a **menu** that lets the user
+steer what comes next.
 
 ### Phase 0a: Meanings review (mandatory, first)
 
@@ -178,48 +177,12 @@ Present only the options that have something to do, plus Continue always:
 1. **Continue meanings review** — *offer only if more `review-queue.md` items are still
    due* (beyond the batch of 5 already shown). Runs the next batch of 5 (Phase 0a flow),
    then returns to this menu.
-2. **Glossary review** — *offer only if `glossary-queue.md` has items where `due <= today`.*
-   Runs the Glossary Review flow below, then returns to this menu.
-3. **Continue with learning** — always offered. Exits the menu and proceeds to Phase 1
+2. **Continue with learning** — always offered. Exits the menu and proceeds to Phase 1
    step 4 (category selection).
 
-After option 1 or 2 finishes, **re-present this menu** (recompute which options are live).
-Option 3, or the user saying they're done, exits the loop. If at session start nothing is
-due in either queue, present the menu with only option 3 live and flow straight into it.
-
-### Glossary Review (reverse recall: definition → term)
-
-Vocabulary drill. Cards live in `<state dir>/glossary-queue.md`; definitions are
-looked up by `term` from `<notes root>/Glossary.md` (never stored in the queue).
-
-**Quiz flow:** Select the batch with the same helper script (it works on any queue with a
-`due` column), which shuffles all due rows and returns up to 5:
-
-```
-node <skill dir>/select-due.mjs <state dir>/glossary-queue.md 5 <today>
-```
-
-Use `REMAINING_AFTER` to decide whether the menu's "Glossary review" option stays live.
-Quiz the whole batch in **one round-trip** — never one card per message:
-
-1. Look up each card's row in `<notes root>/Glossary.md`. Post **all cards in a single
-   message**, numbered 1–N, showing each card's **definition** and `source` (NOT the term).
-   Ask the user to name all the terms in one reply, by number.
-2. The user answers from memory in one message. A number left unanswered counts as missed
-   (unless the user says they're still working through the list).
-3. Reply with **one grading message** covering every card in order: for each number, reveal
-   the saved **term** and state **got it** or **missed it** with a one-line reason (synonyms /
-   near-misses are a judgment call; lean on whether they produced the canonical name).
-   Do **not** ask the user to confirm; grade all cards and move on.
-4. Grades stand unless the user overrides them — "override 3" (or flipping any number)
-   works anytime; the final grade is always the user's if they speak up.
-
-**Scheduling** is identical to meanings review — same elapsed-time rule, same ladder
-`1 → 3 → 7 → 16 → 35 → 90 → 180 → 365`, same `reviewed` column. See
-[Phase 0a's Scheduling](#phase-0a-meanings-review-mandatory-first) for the rationale.
-
-After grading every card, write the updated `reviewed`/`due`/`interval`/`streak` back to
-`glossary-queue.md`, then return to the Phase 0b menu.
+After option 1 finishes, **re-present this menu** (recompute which options are live).
+Option 2, or the user saying they're done, exits the loop. If at session start nothing is
+due, present the menu with only option 2 live and flow straight into it.
 
 ## Phase 1: Load Context
 
@@ -230,7 +193,7 @@ After grading every card, write the updated `reviewed`/`due`/`interval`/`streak`
    - If none → ask user if they want to create a new learning track
 3. **Read the Hub MOC** — parse all category tables. Note status of each topic: `—` (unassessed), `⏭️ skipped`, or a skill level (`beginner`/`intermediate`/`advanced`)
 
-> **Now run [Phase 0: Opening Review & Menu](#phase-0-opening-review--menu)** — meanings review, then the menu (meanings / glossary / continue). Return here at Phase 1 step 4 only when the user picks "Continue with learning".
+> **Now run [Phase 0: Opening Review & Menu](#phase-0-opening-review--menu)** — meanings review, then the menu (continue the review / continue with learning). Return here at Phase 1 step 4 only when the user picks "Continue with learning".
 
 4. **Select category:**
    - If category specified in args (e.g. `/learn databases`) → match to category name (case-insensitive, partial match OK)
@@ -280,10 +243,10 @@ Teaching mode is a dialogue, not a lecture:
 
 **Capture for review (automatic).** While teaching, silently note anything worth re-testing later, sorting each into one of two buckets — do not interrupt the dialogue or ask the user to confirm; hold them and write them out at Wrap Up (Phase 4):
 
-- **Forgotten term / naming** (the user knew the idea but couldn't summon the *word*) → a **glossary** item: the `term`, a crisp ≤18-word `definition`, and the `source` topic note. Goes to `Glossary.md` + `glossary-queue.md`.
+- **Forgotten term / naming** (the user knew the idea but couldn't summon the *word*) → a **glossary** item: the `term`, a crisp ≤18-word `definition`, and the `source` topic note. Goes to `Glossary.md` only — it is a lookup reference, nothing quizzes it.
 - **Concept gap** (a struggled-with idea or something taught from scratch) → a **meanings** item: a short recall `question` and terse `answer`. Goes to `review-queue.md`.
 
-See Phase 0 for both queue schemas.
+See Phase 0 for the review-queue schema.
 
 Stay conversational. This is a dialogue between colleagues, not a classroom lecture.
 
@@ -321,9 +284,9 @@ The track name from the Hub MOC determines all paths:
 
 ### Append review items
 
-6. **Append captured items** — write out everything captured in Phase 3, by bucket. For every new row in either file: assign `id` = max existing id + 1 (1 if empty), `created` = today, `reviewed` = today, `due` = tomorrow, `interval` = `1`, `streak` = `0`. Skip a file if its bucket was empty.
-   - **Meanings → `<state dir>/review-queue.md`** — fill `track`, `topic`, `question`, `answer`.
-   - **Glossary → two files:** first add the term to `<notes root>/Glossary.md` if absent (`term`, crisp `definition`, `[[source]]`, A–Z position); then add a scheduler row to `<state dir>/glossary-queue.md` with `term`, `source`, `direction` = `def→term`. The definition stays only in `Glossary.md`.
+6. **Append captured items** — write out everything captured in Phase 3, by bucket. Skip a bucket if it was empty.
+   - **Meanings → `<state dir>/review-queue.md`** — fill `track`, `topic`, `question`, `answer`; assign `id` = max existing id + 1 (1 if empty), `created` = today, `reviewed` = today, `due` = tomorrow, `interval` = `1`, `streak` = `0`.
+   - **Glossary → `<notes root>/Glossary.md`** — add the term if absent (`term`, crisp `definition`, `[[source]]`, A–Z position). Reference only; no scheduling fields, nothing quizzes it.
 
 ### Present summary
 
@@ -331,7 +294,7 @@ The track name from the Hub MOC determines all paths:
    - What was covered
    - Strengths identified
    - Gaps to work on
-   - What was captured (meanings vs glossary terms, with counts)
+   - What was captured: how many meanings cards went to the review queue, and how many terms were added to `Glossary.md` for reference lookup
    - Recommended next topic/category
 
 ## Creating a New Learning Track
