@@ -38,7 +38,7 @@ anyway, so detail they can regenerate from the code is noise. One screen, tops.
 - **What & why, a few sentences.** Provenance counts ("mirrors the Journey
   endpoint, most code copied from there") — it tells the reviewer what's
   actually new versus borrowed.
-- **Optionally:** what to look at in particular; what this PR is *not*
+- **Optionally:** what to look at in particular; what this PR is _not_
   (deferred, out of scope, known gaps); related PRs / docs / tickets.
 - **Never:** module-by-module change lists, function or file inventories, API
   contract dumps, or a Verification section — CI already says the tests pass.
@@ -90,7 +90,7 @@ report — `ReportFindings`, a workflow result, a subagent's return value — is
 index, not the evidence: it tells me a finding exists, not enough to act on it.
 So after filing one, still write out the snippets and diagrams. If the review
 tooling says not to repeat the findings as text, that means don't duplicate the
-*list*; it does not lift this rule. Open the files and show me the code.
+_list_; it does not lift this rule. Open the files and show me the code.
 
 ## Reviewing diffs (revdiff)
 
@@ -117,9 +117,10 @@ don't build the extraction unless asked.
 ## Context Budget
 
 When you see `Context: X tokens used`, that's your context window filling up.
-Past ~300k quality degrades — so if you're mid-task with real work still ahead
+Past ~350k quality degrades — so if you're mid-task with real work still ahead
 and I didn't ask you to do it all in one pass, stop and check in rather than
-silently pushing on. Any threshold I give you in conversation overrides this.
+silently pushing on. Any threshold I give you in conversation
+overrides this.
 
 ## User Preferences
 
