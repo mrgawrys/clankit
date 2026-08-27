@@ -153,7 +153,8 @@ genuinely prevents progress, or the work complete.
 
 ## The build
 
-Same setup and pre-flight scan. Then one dispatch:
+Same setup and pre-flight scan. Then one dispatch — the whole plan, no
+pre-chunking:
 
 - Record BASE (`git rev-parse HEAD`) — the final review's package needs it.
 - Dispatch ONE implementer. Its brief is the plan or spec itself — pass the
@@ -186,10 +187,18 @@ Template: [implementer-prompt.md](implementer-prompt.md)
 
 ### Oversized plans
 
-A plan that won't fit one builder's context runs as sequential chunk
-dispatches, split at task boundaries. Each brief carries the plan path, its
-chunk's tasks, and the prior chunks' reports (each chunk appends to the same
-`build-report.md`); after each dispatch, append one `chunk N done` line to
+**Chunking is a reaction, never a forecast.** Always dispatch the whole plan to
+one builder first. Chunk only after a builder has actually returned `BLOCKED`
+for context, or `DONE_WITH_CONCERNS` naming tasks it did not reach — never on
+your own estimate that the plan looks big. A plan from `writing-plans` is sized
+for one builder; a scraper, an app and a verification run in one plan is
+normal, not oversized.
+
+When chunking is earned, the rest runs as sequential chunk dispatches split at
+task boundaries, resuming at the first task without a commit. Each brief
+carries the plan path, its chunk's tasks, and the prior builders' reports (each
+chunk appends to the same `build-report.md`); after each dispatch, append one
+`chunk N done` line to
 `<workspace>/chunk-log.md` — the only bookkeeping. Read that log before every
 dispatch and resume at the first chunk without a line: your context can compact
 between chunks, and re-dispatching finished work is the most expensive mistake
@@ -289,3 +298,4 @@ present the options and wait.
 | "This finding is obviously wrong, I'll drop it" | You adjudicate only after the re-review, and every ruling is recorded. |
 | "The fix was small, skip the re-review" | Unreviewed fixes are how regressions land. |
 | "The plan has the code, so a cheap model can do it" | These plans don't have the code. See Model Selection. |
+| "This plan is big, I'll chunk it up front" | You don't know a plan doesn't fit until a builder says so. One dispatch first; chunk only on a BLOCKED-for-context return. |
