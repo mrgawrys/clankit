@@ -35,6 +35,8 @@ only, call commented out. Skip only if I ask for a runnable one-liner.
 The body is for humans deciding how to review — reviewers run AI on the diff
 anyway, so detail they can regenerate from the code is noise. One screen, tops.
 
+- **Open with a TLDR.** 1–2 sentences or up to 4 bullets, before anything else.
+  Enough to understand the PR without reading on.
 - **What & why, a few sentences.** Provenance counts ("mirrors the Journey
   endpoint, most code copied from there") — it tells the reviewer what's
   actually new versus borrowed.
