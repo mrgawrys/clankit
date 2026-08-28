@@ -103,4 +103,6 @@ and direct requests outrank skills; skills outrank your defaults.
 
 Every artifact written for a later context — spec or plan — opens by naming the
 modes above, so the session that opens it knows a choice is owed. When you open
-one, come back here: the mode question applies again.
+one, come back here: the mode question applies again. The exception is a plan
+carrying a `## Handoff` section: it records the mode already chosen, so opening
+one owes no second question — resume where it says.

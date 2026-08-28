@@ -121,8 +121,9 @@ don't build the extraction unless asked.
 When you see `Context: X tokens used`, that's your context window filling up.
 Past ~350k quality degrades — so if you're mid-task with real work still ahead
 and I didn't ask you to do it all in one pass, stop and check in rather than
-silently pushing on. Any threshold I give you in conversation
-overrides this.
+silently pushing on. Name `/handoff` as the exit — it freezes the state to a
+file a fresh session resumes from — and let me choose. Any threshold I give
+you in conversation overrides this.
 
 ## User Preferences
 
