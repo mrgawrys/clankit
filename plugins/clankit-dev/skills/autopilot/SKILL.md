@@ -112,6 +112,9 @@ user learns where their judgment was substituted, and where to intervene.
 
 ### Phase 3 · Ship (orchestrator)
 - Push the branch and open a **draft** PR with `gh pr create --draft`.
+- Visuals: follow the `create-pr` skill's unattended-runs rule — its Step 2 gate
+  cannot fire here, so mermaid and panels freely, screenshots only when capturable
+  non-interactively, and inspect every image before upload.
 - PR body covers: what was built, the review summary, anything deferred or ruled on
   by the review, and the best-effort verification status (note failures plainly — they
   do NOT block the PR). Link the plan file; it is what a reviewer checks the diff
