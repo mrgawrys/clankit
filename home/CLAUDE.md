@@ -12,17 +12,20 @@
 
 ## Code Comments
 
-Comments in code are for humans, not the compiler — write them to be read by a
-person skimming the file later.
+**Default: none.** Make the code say it. A comment is a cost — it goes stale,
+and every future reader pays to skim it.
 
-- **Explain _why_, not _what_.** Skip comments that just restate the code.
-- **Keep them short and plain.** One line unless the reasoning genuinely needs
-  more. Prefer a clear sentence over a dense clause.
-- **No narration, no changelog, no obvious restatement.** If the code says it,
-  the comment shouldn't repeat it.
+Earn one by naming what a competent reader would otherwise get **wrong**: a
+non-obvious constraint, a rejected alternative, a workaround for something
+outside the file. Can't name that mistake? Delete it.
 
-This overrides "match the surrounding comment density" — if nearby comments are
-bloated, write good ones anyway; don't reproduce the bloat.
+- **Why, never what.** One line. Longer reasoning goes in the commit message
+  or the spec, not the file.
+- **Docstrings same bar.** Contract only — arguments, return, errors. Design
+  rationale, provenance and "we chose X over Y" belong in the PR.
+- **Fewer than the neighbours is fine.** Never reproduce surrounding bloat.
+- Cutting a comment is a valid review outcome; "but it explains why" doesn't
+  save one nobody needed.
 
 ## Runnable Scripts (paste-safe by default)
 
