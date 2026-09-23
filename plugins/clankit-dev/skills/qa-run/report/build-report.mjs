@@ -2,8 +2,8 @@
 //
 // Every judgment lives in findings.json; this script holds only arithmetic:
 // pixel->percent conversion for the overlay boxes, base64 inlining, counts, and
-// referential integrity. Section order is array order and every section carries
-// its own prose, so the same script builds any report.
+// referential integrity. The page is issue-first: verdict, issues at a glance,
+// one card per issue, then what was tested section by section, in array order.
 //
 // Usage: node build-report.mjs <run-dir> [outfile]
 //   <run-dir>  holds findings.json and screens/
@@ -76,6 +76,13 @@ for (const scenario of list(spec.scenarios)) {
   scenarios.set(scenario.id, scenario);
 }
 
+const findings = new Map();
+for (const finding of list(spec.findings)) {
+  if (!finding.id) die('a finding has no id');
+  if (findings.has(finding.id)) die(`duplicate finding id: ${finding.id}`);
+  findings.set(finding.id, finding);
+}
+
 const problems = [];
 const checkScreens = (ids, where) => {
   for (const id of list(ids)) if (!screens.has(id)) problems.push(`${where} references unknown screen "${id}"`);
@@ -84,15 +91,28 @@ const checkScenarios = (ids, where) => {
   for (const id of list(ids)) if (!scenarios.has(id)) problems.push(`${where} references unknown scenario "${id}"`);
 };
 
-for (const scenario of scenarios.values()) checkScreens(scenario.evidence, `scenario ${scenario.id}`);
-for (const finding of list(spec.findings)) {
-  checkScreens(finding.evidence, `finding ${finding.id ?? '?'}`);
-  checkScenarios(finding.scenarios, `finding ${finding.id ?? '?'}`);
+for (const scenario of scenarios.values()) {
+  const where = `scenario ${scenario.id}`;
+  checkScreens(scenario.evidence, where);
+  if (scenario.finding && !findings.has(scenario.finding))
+    problems.push(`${where} names unknown finding "${scenario.finding}"`);
+  if (['partial', 'fail'].includes(scenario.result) && !scenario.finding)
+    problems.push(`${where} is ${scenario.result} but names no finding`);
+}
+for (const finding of findings.values()) {
+  const steps = list(finding.steps);
+  steps.forEach((step, i) => {
+    const where = `finding ${finding.id} step ${i + 1}`;
+    if (!step.screen) return;
+    if (!screens.has(step.screen)) return problems.push(`${where} references unknown screen "${step.screen}"`);
+    if (list(step.marks).length && !screens.get(step.screen).width)
+      problems.push(`${where} carries marks but screen "${step.screen}" is not a PNG`);
+  });
+  if (finding.kind === 'defect' && !steps.some((step) => step.screen))
+    problems.push(`defect ${finding.id} has no step with a screen`);
 }
 spec.sections?.forEach((section, i) => {
-  const where = `section ${i + 1} ("${section.title ?? ''}")`;
-  checkScreens(section.screens, where);
-  checkScenarios(section.scenarios, where);
+  checkScenarios(section.scenarios, `section ${i + 1} ("${section.title ?? ''}")`);
 });
 if (problems.length) die(`referential integrity:\n  - ${problems.join('\n  - ')}`);
 
@@ -102,7 +122,8 @@ const by = (items, key) =>
   items.reduce((acc, item) => ((acc[item[key]] = (acc[item[key]] ?? 0) + 1), acc), {});
 
 const results = by([...scenarios.values()], 'result');
-const kinds = by(list(spec.findings), 'kind');
+const kinds = by([...findings.values()], 'kind');
+const KINDS = ['defect', 'gap', 'setup'];
 const KIND_LABEL = { defect: 'defects', gap: 'known gaps', setup: 'setup problems' };
 const KIND_HEADING = {
   defect: 'Defects — the code is wrong',
@@ -133,16 +154,19 @@ const renderLegend = (mark) => `
       </div>
     </li>`;
 
-const renderScreen = (id) => {
+const anchored = new Set();
+const renderScreen = (id, context, marksOverride) => {
   const screen = screens.get(id);
-  const marks = list(screen.marks);
+  const marks = list(marksOverride ?? screen.marks);
   const cap = Math.min(screen.width || 1180, 1180);
   const ratio = screen.width ? `aspect-ratio:${screen.width} / ${screen.height};` : '';
+  const domId = anchored.has(id) ? `screen-${id}--${context}` : `screen-${id}`;
+  anchored.add(id);
 
   return `
-  <figure class="screen" id="screen-${esc(id)}">
+  <figure class="screen" id="${esc(domId)}">
     <div class="shot-scroll">
-      <div class="shot" style="width:min(100%, ${cap}px);${ratio}">
+      <div class="shot" style="width:min(100%, ${cap}px);min-width:${Math.min(cap, 660)}px;${ratio}">
         <img src="${screen.dataUri}" alt="${esc(screen.caption ?? id)}"${screen.width ? ` width="${screen.width}" height="${screen.height}"` : ''}>
         ${marks.length ? `<span class="overlay" aria-hidden="true">${marks.map((mark) => renderMark(mark, screen)).join('')}</span>` : ''}
       </div>
@@ -152,69 +176,166 @@ const renderScreen = (id) => {
   </figure>`;
 };
 
-const evidenceLinks = (ids) =>
-  list(ids)
-    .map((id) => `<a class="ev" href="#screen-${esc(id)}">${esc(id)}</a>`)
-    .join(' ');
+const htmlBlock = (html) => (html ? `<div class="html-block">${html}</div>` : '');
 
-const scenarioRow = (scenario) => `
-      <tr id="scenario-${esc(scenario.id)}">
-        <td class="mono">${esc(scenario.id)}</td>
-        <td>${esc(scenario.did)}</td>
-        <td>${esc(scenario.expected)}</td>
-        <td><span class="result ${esc(scenario.result)}">${esc(scenario.result)}</span></td>
-        <td>${esc(scenario.observed)}${list(scenario.evidence).length ? `<span class="evs">${evidenceLinks(scenario.evidence)}</span>` : ''}</td>
-      </tr>`;
+const technical = (html) =>
+  html
+    ? `<details class="tech"><summary>Technical detail</summary><div class="tech-body">${html}</div></details>`
+    : '';
 
-const scenarioTable = (rows, id) => `
-  <div class="table-scroll">
-    <table${id ? ` id="${id}"` : ''}>
-      <thead><tr><th>#</th><th>Did</th><th>Expected</th><th>Result</th><th>Observed</th></tr></thead>
-      <tbody>${rows.map(scenarioRow).join('')}</tbody>
-    </table>
-  </div>`;
+const sevChip = (finding) =>
+  finding.severity ? `<span class="sev ${esc(finding.severity)}">${esc(finding.severity)}</span>` : '';
+const kindChip = (finding) =>
+  finding.kind === 'defect' ? '' : `<span class="tag">${esc(finding.kind)}</span>`;
+const unreproducedChip = (finding) =>
+  finding.reproduced === false ? '<span class="tag unrepro">not reproduced</span>' : '';
+
+const issueLink = (id) => {
+  const finding = findings.get(id);
+  return `<a class="ev" href="#finding-${esc(id)}" title="${esc(finding.title)}">→ ${esc(id)}</a>`;
+};
+
+const scenarioLink = (scenario) =>
+  `<a class="ev" href="#scenario-${esc(scenario.id)}" title="${esc(scenario.did)}">${esc(scenario.id)}</a>`;
+
+const renderStep = (step, i, finding) => `
+        <li class="step${step.wrong ? ' is-wrong' : ''}">
+          <p class="step-text">${esc(step.text)}${step.wrong ? '<span class="tag bug">goes wrong here</span>' : ''}</p>
+          ${step.screen ? renderScreen(step.screen, `${finding.id}-${i + 1}`, step.marks) : ''}
+          ${htmlBlock(step.html)}
+        </li>`;
+
+const renderIssue = (finding) => {
+  const seenIn = [...scenarios.values()].filter((scenario) => scenario.finding === finding.id);
+  const steps = list(finding.steps);
+  return `
+    <article class="issue ${esc(finding.kind)}" id="finding-${esc(finding.id)}">
+      <header class="issue-head">
+        <span class="finding-id">${esc(finding.id)}</span>
+        <h4>${esc(finding.title)}</h4>
+        <span class="chips">${sevChip(finding)}${kindChip(finding)}${unreproducedChip(finding)}</span>
+      </header>
+      ${finding.area ? `<p class="issue-area">${esc(finding.area)}</p>` : ''}
+      ${
+        finding.summary || finding.impact
+          ? `<dl>
+        ${finding.summary ? `<dt>What's wrong</dt><dd>${esc(finding.summary)}</dd>` : ''}
+        ${finding.impact ? `<dt>Why it matters</dt><dd>${esc(finding.impact)}</dd>` : ''}
+      </dl>`
+          : ''
+      }
+      ${steps.length ? `<p class="label">Steps</p><ol class="steps">${steps.map((step, i) => renderStep(step, i, finding)).join('')}</ol>` : ''}
+      ${
+        finding.expected || finding.actual
+          ? `<dl>
+        ${finding.expected ? `<dt>Expected</dt><dd>${esc(finding.expected)}</dd>` : ''}
+        ${finding.actual ? `<dt>Actual</dt><dd>${esc(finding.actual)}</dd>` : ''}
+      </dl>`
+          : ''
+      }
+      ${seenIn.length ? `<p class="refs"><span class="label">Seen in</span>${seenIn.map(scenarioLink).join(' ')}</p>` : ''}
+      ${technical(finding.technical)}
+      ${htmlBlock(finding.html)}
+      <p class="back"><a href="#issues">↑ back to issues</a></p>
+    </article>`;
+};
+
+const glanceRow = (finding) => `
+        <tr>
+          <td class="mono"><a href="#finding-${esc(finding.id)}">${esc(finding.id)}</a></td>
+          <td>${sevChip(finding)}${kindChip(finding)}${unreproducedChip(finding)}</td>
+          <td>${esc(finding.area)}</td>
+          <td>${esc(finding.summary ?? finding.title)}</td>
+          <td><a href="#finding-${esc(finding.id)}">Read&nbsp;→</a></td>
+        </tr>`;
+
+const renderScenario = (scenario) => {
+  const shots = list(scenario.evidence);
+  const fold = [
+    shots.length && `${shots.length} screenshot${shots.length === 1 ? '' : 's'}`,
+    scenario.technical && 'technical detail',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  return `
+      <article class="scn" id="scenario-${esc(scenario.id)}">
+        <span class="scn-id">${esc(scenario.id)}</span>
+        <div class="scn-did" data-label="Did">${esc(scenario.did)}</div>
+        <div class="scn-exp" data-label="Expected">${esc(scenario.expected)}</div>
+        <div class="scn-res"><span class="result ${esc(scenario.result)}">${esc(scenario.result)}</span>${scenario.finding ? issueLink(scenario.finding) : ''}</div>
+        <div class="scn-obs" data-label="Observed">${esc(scenario.observed)}</div>
+        ${scenario.html ? `<div class="scn-wide html-block">${scenario.html}</div>` : ''}
+        ${
+          fold
+            ? `<details class="fold scn-wide"><summary>${fold}</summary>
+          ${shots.map((id) => renderScreen(id, scenario.id)).join('')}
+          ${scenario.technical ? `<p class="label">Technical detail</p><div class="tech-body">${scenario.technical}</div>` : ''}
+        </details>`
+            : ''
+        }
+      </article>`;
+};
+
+const scenarioList = (rows) => `
+    <div class="scn-list">
+      <div class="scn-cols" aria-hidden="true"><span>#</span><span>Did</span><span>Expected</span><span>Result</span><span>Observed</span></div>
+      ${rows.map(renderScenario).join('')}
+    </div>`;
 
 const renderSection = (section, i) => `
   <section id="sec-${i + 1}">
     <div class="sec-head"><span class="sec-n">§${i + 1}</span><h2>${esc(section.title)}</h2></div>
     ${section.intro ?? ''}
-    ${list(section.scenarios).length ? scenarioTable(section.scenarios.map((id) => scenarios.get(id))) : ''}
-    ${list(section.screens).map(renderScreen).join('\n')}
+    ${list(section.scenarios).length ? scenarioList(section.scenarios.map((id) => scenarios.get(id))) : ''}
+    ${htmlBlock(section.html)}
   </section>`;
 
-const renderFinding = (finding) => `
-    <article class="finding ${esc(finding.kind)}" id="finding-${esc(finding.id)}">
-      <h4><span class="finding-id">${esc(finding.id)}</span>${esc(finding.title)}
-        ${finding.severity ? `<span class="sev ${esc(finding.severity)}">${esc(finding.severity)}</span>` : ''}</h4>
-      ${list(finding.repro).length ? `<ol class="repro">${finding.repro.map((step) => `<li>${esc(step)}</li>`).join('')}</ol>` : ''}
-      <dl>
-        <dt>Expected</dt><dd>${esc(finding.expected)}</dd>
-        <dt>Actual</dt><dd>${esc(finding.actual)}</dd>
-      </dl>
-      <p class="refs">
-        ${list(finding.scenarios).map((id) => `<a class="ev" href="#scenario-${esc(id)}">${esc(id)}</a>`).join(' ')}
-        ${evidenceLinks(finding.evidence)}
-      </p>
-    </article>`;
+const sections = [...list(spec.sections)];
+const sectioned = new Set(sections.flatMap((section) => list(section.scenarios)));
+const loose = [...scenarios.keys()].filter((id) => !sectioned.has(id));
+if (loose.length) sections.push({ title: 'Other scenarios', scenarios: loose });
 
-const findingGroups = ['defect', 'gap', 'setup']
-  .map((kind) => ({ kind, items: list(spec.findings).filter((f) => f.kind === kind) }))
-  .filter((group) => group.items.length);
+const findingGroups = KINDS.map((kind) => ({
+  kind,
+  items: [...findings.values()].filter((finding) => finding.kind === kind),
+})).filter((group) => group.items.length);
+const defects = [...findings.values()].filter((finding) => finding.kind === 'defect');
+const others = [...findings.values()].filter((finding) => finding.kind !== 'defect');
 
-const sections = list(spec.sections);
-const placed = new Set(sections.flatMap((section) => list(section.screens)));
+// Rendered in page order: a screen's first rendering owns the plain #screen-<id> anchor.
+const issuesHtml = findings.size
+  ? `<div class="table-scroll">
+        <table class="glance">
+          <thead><tr><th>#</th><th>Severity</th><th>Area</th><th>What's wrong</th><th></th></tr></thead>
+          <tbody>${defects.map(glanceRow).join('')}
+          ${others.length ? `<tr class="group"><th colspan="5">Setup problems and known gaps</th></tr>${others.map(glanceRow).join('')}` : ''}</tbody>
+        </table>
+      </div>
+      ${findingGroups
+        .map((group) => `<h3>${KIND_HEADING[group.kind]}</h3>${group.items.map(renderIssue).join('\n')}`)
+        .join('\n')}`
+  : '<p>No issues found.</p>';
+const sectionsHtml = sections.map(renderSection).join('\n');
+
+const placed = new Set([
+  ...[...findings.values()].flatMap((finding) => list(finding.steps).map((step) => step.screen)),
+  ...[...scenarios.values()].flatMap((scenario) => list(scenario.evidence)),
+]);
 const unplaced = [...screens.keys()].filter((id) => !placed.has(id));
+const unplacedHtml = unplaced.map((id) => renderScreen(id, 'further')).join('\n');
+
+const run = spec.run ?? {};
+const hasAppendix = [run.underTest, run.environment, run.groundTruth].some((items) => list(items).length);
 
 const railItems = [
-  { href: '#run', label: 'The run', n: '·' },
-  { href: '#scenarios', label: 'Scenarios', n: '·' },
+  { href: '#issues', label: 'Issues', n: '!' },
   ...sections.map((section, i) => ({ href: `#sec-${i + 1}`, label: section.title, n: i + 1 })),
-  ...(findingGroups.length ? [{ href: '#findings', label: 'Findings', n: '→' }] : []),
-  ...(unplaced.length ? [{ href: '#evidence', label: 'Further evidence', n: '→' }] : []),
   ...(list(spec.notCovered).length ? [{ href: '#not-covered', label: 'Not covered', n: '?' }] : []),
+  ...(hasAppendix ? [{ href: '#appendix', label: 'Appendix', n: '·' }] : []),
+  ...(unplaced.length ? [{ href: '#evidence', label: 'Further evidence', n: '→' }] : []),
 ];
 
-const page = `<title>${esc(spec.run?.title ?? 'QA run')}</title>
+const page = `<title>${esc(run.title ?? 'QA run')}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   :root {
@@ -287,7 +408,7 @@ const page = `<title>${esc(spec.run?.title ?? 'QA run')}</title>
   .wrap {
     max-width: 1500px;
     margin: 0 auto;
-    padding: clamp(28px, 5vw, 72px) clamp(18px, 4vw, 56px) 96px;
+    padding: clamp(28px, 5vw, 72px) clamp(16px, 4vw, 56px) 96px;
     display: grid;
     gap: clamp(28px, 4vw, 64px);
   }
@@ -316,15 +437,17 @@ const page = `<title>${esc(spec.run?.title ?? 'QA run')}</title>
     text-wrap: balance;
   }
   .verdict {
-    display: inline-block;
+    max-width: 72ch;
     font-family: var(--sans);
-    font-weight: 700;
-    font-size: clamp(17px, 2vw, 21px);
-    padding: 10px 16px;
+    font-size: clamp(16px, 1.8vw, 19px);
+    line-height: 1.5;
+    padding: 12px 18px;
     border-radius: 4px;
     border-left: 4px solid var(--accent);
     background: var(--accent-soft);
   }
+  .verdict > :first-child { margin-top: 0; }
+  .verdict > :last-child { margin-bottom: 0; }
   .verdict.ok { border-color: var(--ok); background: var(--ok-soft); }
   .verdict.warn { border-color: var(--warn); background: var(--warn-soft); }
   .verdict.fail { border-color: var(--critical); background: var(--critical-soft); }
@@ -373,6 +496,17 @@ const page = `<title>${esc(spec.run?.title ?? 'QA run')}</title>
   /* ---- sections ---- */
   main { display: grid; gap: clamp(44px, 6vw, 88px); min-width: 0; }
   section { min-width: 0; scroll-margin-top: 24px; }
+  .part-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+    padding-top: 18px;
+    border-top: 2px solid var(--ink);
+  }
+  .part-label + section { margin-top: calc(28px - clamp(44px, 6vw, 88px)); }
   .sec-head { display: flex; gap: 16px; align-items: baseline; margin-bottom: 6px; }
   .sec-n { font-family: var(--mono); font-size: 13px; color: var(--muted); padding-top: 6px; }
   h2 {
@@ -399,13 +533,20 @@ const page = `<title>${esc(spec.run?.title ?? 'QA run')}</title>
   section > p, li, dd { max-width: 70ch; }
   ul.plain { padding-left: 22px; margin: 0; display: grid; gap: 9px; }
   ul.plain li::marker { color: var(--accent); }
+  .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
 
   .facts { list-style: none; padding: 0; margin: 22px 0 0; display: grid; gap: 7px; font-family: var(--sans); font-size: 15px; }
   .facts li { display: flex; gap: 10px; flex-wrap: wrap; }
   .facts .src { color: var(--muted); font-family: var(--mono); font-size: 12px; }
 
   /* ---- screens ---- */
-  .screen { margin: 34px 0 0; }
+  .screen { margin: 34px 0 0; min-width: 0; }
   figcaption {
     margin-top: 12px;
     font-family: var(--sans);
@@ -427,7 +568,6 @@ const page = `<title>${esc(spec.run?.title ?? 'QA run')}</title>
   .shot-scroll { overflow-x: auto; padding-bottom: 4px; }
   .shot {
     position: relative;
-    min-width: 660px;
     border: 1px solid var(--line);
     border-radius: 4px;
     overflow: hidden;
@@ -502,6 +642,7 @@ const page = `<title>${esc(spec.run?.title ?? 'QA run')}</title>
   }
   .tag { margin-left: 7px; vertical-align: 1px; }
   .tag.bug, .sev.blocker, .sev.major { background: var(--critical-soft); color: var(--critical); }
+  .tag.unrepro { background: var(--warn-soft); color: var(--warn); }
   .result { font-size: 11px; }
   .result.pass { background: var(--ok-soft); color: var(--ok); }
   .result.fail { background: var(--critical-soft); color: var(--critical); }
@@ -511,6 +652,7 @@ const page = `<title>${esc(spec.run?.title ?? 'QA run')}</title>
   /* ---- tables ---- */
   .table-scroll { overflow-x: auto; margin-top: 18px; }
   table { border-collapse: collapse; width: 100%; min-width: 640px; font-family: var(--sans); font-size: 15px; }
+  table.glance { min-width: 560px; }
   th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
   th {
     font-family: var(--mono);
@@ -520,9 +662,19 @@ const page = `<title>${esc(spec.run?.title ?? 'QA run')}</title>
     color: var(--muted);
     font-weight: 500;
   }
+  tr.group th { padding-top: 24px; }
+  @media (max-width: 640px) {
+    table.glance { min-width: 0; }
+    table.glance thead, table.glance td:last-child { display: none; }
+    table.glance tr { display: grid; grid-template-columns: max-content minmax(0, 1fr); padding: 8px 0; border-bottom: 1px solid var(--line); }
+    table.glance td, table.glance th { border: 0; padding: 2px 8px; }
+    table.glance td:nth-child(3), table.glance td:nth-child(4), table.glance th { grid-column: 1 / -1; }
+    table.glance td:nth-child(3) { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  }
   td.mono { font-family: var(--mono); font-size: 13px; color: var(--muted); white-space: nowrap; }
+  td .tag:first-child { margin-left: 0; }
   a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
-  .ev, .evs a {
+  .ev {
     font-family: var(--mono);
     font-size: 11px;
     text-decoration: none;
@@ -531,35 +683,121 @@ const page = `<title>${esc(spec.run?.title ?? 'QA run')}</title>
     padding: 1px 5px;
     white-space: nowrap;
   }
-  .evs { display: inline-flex; gap: 5px; flex-wrap: wrap; margin-left: 8px; }
 
-  /* ---- findings ---- */
-  .finding {
-    border-left: 3px solid var(--accent);
+  /* ---- issues ---- */
+  .issue {
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
     background: var(--surface);
-    border-radius: 3px;
-    padding: 16px 18px;
-    margin-top: 16px;
+    border-radius: 6px;
+    padding: clamp(16px, 2.6vw, 28px);
+    margin-top: 20px;
     box-shadow: var(--shadow);
     scroll-margin-top: 24px;
-  }
-  .finding.defect { border-left-color: var(--critical); }
-  .finding h4 {
     font-family: var(--sans);
-    font-size: 17px;
-    font-weight: 700;
-    margin: 0 0 10px;
-    line-height: 1.35;
-    text-wrap: balance;
+    font-size: 15.5px;
+    min-width: 0;
   }
-  .finding-id { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-right: 8px; }
-  .sev { margin-left: 8px; vertical-align: 2px; }
-  .repro { margin: 0 0 12px; padding-left: 20px; font-family: var(--sans); font-size: 15px; display: grid; gap: 4px; }
-  .repro li::marker { font-family: var(--mono); color: var(--muted); }
-  .finding dl { margin: 0; font-family: var(--sans); font-size: 15px; display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; }
-  .finding dt { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 4px; }
-  .finding dd { margin: 0; }
-  .refs { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0 0; }
+  .issue.defect { border-left-color: var(--critical); }
+  .issue:target { box-shadow: 0 0 0 2px var(--accent), var(--shadow); }
+  .issue-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
+  .issue-head h4 { flex: 1 1 24ch; margin: 0; font-size: 19px; font-weight: 750; line-height: 1.3; text-wrap: balance; }
+  .issue-head .tag:first-child { margin-left: 0; }
+  .finding-id { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .issue-area { margin: 4px 0 0; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .issue dl { margin: 18px 0 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; }
+  .issue dt { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 4px; }
+  .issue dd { margin: 0; }
+  @media (max-width: 640px) {
+    .issue dl { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+    .issue dd { margin-bottom: 10px; }
+  }
+  .issue > .label { margin: 22px 0 0; }
+  .steps { list-style: none; counter-reset: step; margin: 10px 0 0; padding: 0; display: grid; gap: 22px; }
+  .steps > .step { counter-increment: step; position: relative; padding-left: 38px; max-width: none; min-width: 0; }
+  .step::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 23px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .step.is-wrong::before { background: var(--critical); border-color: var(--critical); color: #fff; }
+  .step-text { margin: 0; max-width: 70ch; }
+  .step .screen { margin-top: 12px; }
+  .refs { display: flex; gap: 6px; flex-wrap: wrap; align-items: baseline; margin: 16px 0 0; }
+  .refs .label { margin-right: 4px; }
+  .back { margin: 20px 0 0; font-family: var(--mono); font-size: 12px; }
+  .back a { text-decoration: none; }
+
+  details.tech, details.fold { margin-top: 16px; }
+  details > summary {
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .04em;
+    color: var(--accent);
+  }
+  .tech-body {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 4px;
+    background: var(--sunken);
+    font-family: var(--sans);
+    font-size: 14.5px;
+    overflow-x: auto;
+    overflow-wrap: anywhere;
+  }
+  .tech-body > :first-child { margin-top: 0; }
+  .tech-body > :last-child { margin-bottom: 0; }
+  .html-block { margin-top: 14px; overflow-x: auto; }
+
+  /* ---- scenario rows ---- */
+  .scn-list { margin-top: 18px; font-family: var(--sans); font-size: 15px; }
+  .scn, .scn-cols {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) minmax(0, 1fr) 110px minmax(0, 1.25fr);
+    gap: 4px 14px;
+    padding: 11px 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  .scn-cols {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .scn { scroll-margin-top: 24px; min-width: 0; }
+  .scn:target { background: var(--accent-soft); }
+  .scn-id { font-family: var(--mono); font-size: 13px; color: var(--muted); padding-top: 2px; }
+  .scn-res { display: flex; flex-wrap: wrap; gap: 5px; align-items: baseline; }
+  .scn-did, .scn-exp, .scn-obs { overflow-wrap: anywhere; }
+  .scn-wide { grid-column: 1 / -1; min-width: 0; }
+  @media (max-width: 760px) {
+    .scn-cols { display: none; }
+    .scn { grid-template-columns: max-content minmax(0, 1fr); gap: 6px 12px; }
+    .scn-id { order: -2; }
+    .scn-res { order: -1; }
+    .scn-did, .scn-exp, .scn-obs { grid-column: 1 / -1; }
+    .scn [data-label]::before {
+      content: attr(data-label);
+      display: block;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+  }
 
   footer {
     border-top: 1px solid var(--line);
@@ -569,13 +807,14 @@ const page = `<title>${esc(spec.run?.title ?? 'QA run')}</title>
     color: var(--muted);
   }
   code { font-family: var(--mono); font-size: .88em; background: var(--sunken); padding: 1px 5px; border-radius: 3px; }
+  pre { overflow-x: auto; }
 </style>
 
 <div class="wrap">
   <header class="masthead">
     <p class="eyebrow">QA run</p>
-    <h1>${esc(spec.run?.title ?? 'QA run')}</h1>
-    <p class="verdict ${esc(spec.run?.verdictTone ?? '')}">${esc(spec.run?.verdict ?? '')}</p>
+    <h1>${esc(run.title ?? 'QA run')}</h1>
+    ${run.verdict ? `<div class="verdict ${esc(run.verdictTone ?? '')}">${run.verdict}</div>` : ''}
     <ul class="tallies">
       <li><b>${scenarios.size}</b><span>scenarios</span></li>
       <li class="is-pass"><b>${results.pass ?? 0}</b><span>passed</span></li>
@@ -583,8 +822,7 @@ const page = `<title>${esc(spec.run?.title ?? 'QA run')}</title>
         .filter((result) => results[result])
         .map((result) => `<li><b>${results[result]}</b><span>${result === 'fail' ? 'failed' : result}</span></li>`)
         .join('')}
-      ${Object.keys(KIND_LABEL)
-        .filter((kind) => kinds[kind])
+      ${KINDS.filter((kind) => kinds[kind])
         .map((kind) => `<li class="is-${kind}"><b>${kinds[kind]}</b><span>${KIND_LABEL[kind]}</span></li>`)
         .join('')}
     </ul>
@@ -598,69 +836,12 @@ const page = `<title>${esc(spec.run?.title ?? 'QA run')}</title>
   </nav>
 
   <main>
-    <section id="run">
-      <div class="sec-head"><span class="sec-n">·</span><h2>The run</h2></div>
-      ${
-        list(spec.run?.underTest).length
-          ? `<h3>Under test</h3>
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Repo</th><th>Branch</th><th>Commit</th></tr></thead>
-          <tbody>${spec.run.underTest
-            .map(
-              (item) =>
-                `<tr><td>${esc(item.repo)}</td><td class="mono">${esc(item.branch)}</td><td class="mono">${esc(item.sha)}</td></tr>`,
-            )
-            .join('')}</tbody>
-        </table>
-      </div>`
-          : ''
-      }
-      ${
-        list(spec.run?.environment).length
-          ? `<h3>Environment</h3>
-      <ul class="plain">${spec.run.environment.map((line) => `<li>${esc(line)}</li>`).join('')}</ul>`
-          : ''
-      }
-      ${
-        list(spec.run?.groundTruth).length
-          ? `<h3>Ground truth — resolved before the run</h3>
-      <ul class="facts">${spec.run.groundTruth
-        .map((item) => `<li>${esc(item.fact)}<span class="src">${esc(item.source)}</span></li>`)
-        .join('')}</ul>`
-          : ''
-      }
+    <section id="issues">
+      <div class="sec-head"><span class="sec-n">!</span><h2>Issues at a glance</h2></div>
+      ${issuesHtml}
     </section>
 
-    <section id="scenarios">
-      <div class="sec-head"><span class="sec-n">·</span><h2>Scenarios</h2></div>
-      ${scenarioTable([...scenarios.values()])}
-    </section>
-
-    ${sections.map(renderSection).join('\n')}
-
-    ${
-      findingGroups.length
-        ? `<section id="findings">
-      <div class="sec-head"><span class="sec-n">→</span><h2>Findings</h2></div>
-      ${findingGroups
-        .map(
-          (group) => `<h3>${KIND_HEADING[group.kind]}</h3>
-      ${group.items.map(renderFinding).join('\n')}`,
-        )
-        .join('\n')}
-    </section>`
-        : ''
-    }
-
-    ${
-      unplaced.length
-        ? `<section id="evidence">
-      <div class="sec-head"><span class="sec-n">→</span><h2>Further evidence</h2></div>
-      ${unplaced.map(renderScreen).join('\n')}
-    </section>`
-        : ''
-    }
+    ${sections.length ? `<p class="part-label" id="tested">What was tested</p>\n${sectionsHtml}` : ''}
 
     ${
       list(spec.notCovered).length
@@ -674,6 +855,53 @@ const page = `<title>${esc(spec.run?.title ?? 'QA run')}</title>
             .join('')}</tbody>
         </table>
       </div>
+    </section>`
+        : ''
+    }
+
+    ${
+      hasAppendix
+        ? `<section id="appendix">
+      <div class="sec-head"><span class="sec-n">·</span><h2>Appendix</h2></div>
+      ${
+        list(run.underTest).length
+          ? `<h3>Under test</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Repo</th><th>Branch</th><th>Commit</th></tr></thead>
+          <tbody>${run.underTest
+            .map(
+              (item) =>
+                `<tr><td>${esc(item.repo)}</td><td class="mono">${esc(item.branch)}</td><td class="mono">${esc(item.sha)}</td></tr>`,
+            )
+            .join('')}</tbody>
+        </table>
+      </div>`
+          : ''
+      }
+      ${
+        list(run.environment).length
+          ? `<h3>Environment</h3>
+      <ul class="plain">${run.environment.map((line) => `<li>${esc(line)}</li>`).join('')}</ul>`
+          : ''
+      }
+      ${
+        list(run.groundTruth).length
+          ? `<h3>Ground truth — resolved before the run</h3>
+      <ul class="facts">${run.groundTruth
+        .map((item) => `<li>${esc(item.fact)}<span class="src">${esc(item.source)}</span></li>`)
+        .join('')}</ul>`
+          : ''
+      }
+    </section>`
+        : ''
+    }
+
+    ${
+      unplaced.length
+        ? `<section id="evidence">
+      <div class="sec-head"><span class="sec-n">→</span><h2>Further evidence</h2></div>
+      ${unplacedHtml}
     </section>`
         : ''
     }
@@ -707,11 +935,25 @@ const page = `<title>${esc(spec.run?.title ?? 'QA run')}</title>
       callout.addEventListener('blur', clear);
     });
   });
+
+  // A link into a folded row has to unfold it, or the jump lands on a closed summary.
+  const reveal = (hash) => {
+    const target = hash.length > 1 && document.getElementById(decodeURIComponent(hash.slice(1)));
+    if (!target) return null;
+    for (let fold = target.closest('details'); fold; fold = fold.parentElement.closest('details')) fold.open = true;
+    return target;
+  };
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('a[href^="#"]');
+    if (link) reveal(link.hash);
+  });
+  window.addEventListener('hashchange', () => reveal(location.hash));
+  reveal(location.hash)?.scrollIntoView();
 </script>
 `;
 
 await writeFile(OUT, page);
 console.log(
   `wrote ${OUT} (${(Buffer.byteLength(page) / 1024 / 1024).toFixed(2)} MB) — ` +
-    `${scenarios.size} scenarios, ${list(spec.findings).length} findings, ${screens.size} screens`,
+    `${scenarios.size} scenarios, ${findings.size} findings, ${screens.size} screens`,
 );
