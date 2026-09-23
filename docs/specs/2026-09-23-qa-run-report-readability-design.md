@@ -166,6 +166,40 @@ Prose and a generator script; no unit tests. Verification is a named run:
   links jump to their cards, "back to issues" returns, folded rows open,
   marks still highlight from callouts.
 
+## Parallel runs (second build, after the report is re-evaluated)
+
+Runs take hours because everything is sequential. Parallelize where the
+work is independent:
+
+- **Repro on discovery.** A tester that hits a defect messages the
+  orchestrator at once; the orchestrator dispatches that defect's repro agent
+  while the main run continues. The end-of-run repro pass only covers
+  defects nobody picked up.
+- **Testers per phase.** Phases with no data dependency run concurrently.
+- **Report writing.** One writer per section or issue; the orchestrator
+  merges their fragments into `findings.json` and builds once.
+
+Constraints that shape it:
+
+- **One browser per agent.** The Playwright MCP browser is shared by every
+  agent in a session, so parallel agents drive their own headless browser
+  through scripts, each with its own copy of the login state.
+- **Assertions scoped to own fixtures.** Global counts ("mailbox 2→3", "the
+  list shows 7 rows") break under concurrency. Each agent names its fixtures
+  after its phase or issue and asserts only on those ("a message for this
+  survey").
+
+## Cleanup log (second build)
+
+- Every agent appends what it creates or changes to a run-level log:
+  fixtures, launches, schedules, edits to existing data, environment fixes.
+- The report gets a *Cleanup* section: what the run left behind, the
+  proposed undo step for each, and what cannot be undone (sent invitations,
+  stored answers).
+- At the end the orchestrator proposes the cleanup and asks; it never
+  deletes on its own. Fixtures worth keeping as evidence for a ticket are
+  marked as such.
+
 ## Not in scope
 
 - Tracker integration — the report stays the deliverable.
