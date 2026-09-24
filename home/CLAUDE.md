@@ -104,6 +104,7 @@ files — or in review-to-approve moments like plan-in-batches task diffs —
 default to the `revdiff` skill (floating pane, my inline annotations come back
 as feedback) instead of inline markdown. Skip it for small changes (a single
 hunk / few lines) or illustrative snippets. Override anytime with "inline".
+Before opening one, brief me in chat: what changed, why, and what to look at.
 
 When I say "open <file>:<line>" (inside Zellij), pop nvim in a floating pane in
 *your* tab, not the one I'm focused on:
