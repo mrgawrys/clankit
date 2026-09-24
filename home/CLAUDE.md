@@ -105,6 +105,10 @@ default to the `revdiff` skill (floating pane, my inline annotations come back
 as feedback) instead of inline markdown. Skip it for small changes (a single
 hunk / few lines) or illustrative snippets. Override anytime with "inline".
 
+When I say "open <file>:<line>" (inside Zellij), pop nvim in a floating pane in
+*your* tab, not the one I'm focused on:
+`zellij run --floating --close-on-exit --width 90% --height 90% --cwd "$PWD" --tab-id "$(zellij action list-panes --json --tab | jq -r ".[] | select(.id == $ZELLIJ_PANE_ID and (.is_plugin // false | not)) | .tab_id")" -- nvim +<line> <file>`
+
 ## Doc Locations
 
 Specs to `docs/specs/`, plans to `docs/plans/`, other docs to
