@@ -114,6 +114,7 @@ not a filing system.
 | `run.groundTruth` | fact + source | What was resolved in step 2, and where each fact came from. A fact with no source is a guess. |
 | `sections[].intro` | raw HTML | **Not escaped** — your prose, with markup. `<p class="lede">` styles the standfirst. |
 | `sections[].scenarios` | scenario ids | The rows under that section, in that order. |
+| `sections[].group` | free text | Optional. Consecutive sections with the same group share one heading in the page and in the contents rail. Default *What was tested*; use another name for sections that aren't test coverage, e.g. *After the run* for a cleanup section. |
 | `scenarios[].result` | `pass` `fail` `partial` `blocked` | `blocked` means the scenario never ran. Don't call that a pass. |
 | `scenarios[].expected` | free text | The value fixed **before** the run. If it reads like it could not fail ("a plausible score appears"), the scenario is theatre. |
 | `scenarios[].finding` | issue id | Required on `partial` and `fail`; allowed on any row. Drives the row's link and the issue's *Seen in*. |

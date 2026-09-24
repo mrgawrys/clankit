@@ -282,9 +282,9 @@ const scenarioList = (rows) => `
       ${rows.map(renderScenario).join('')}
     </div>`;
 
-const renderSection = (section, i) => `
-  <section id="sec-${i + 1}">
-    <div class="sec-head"><span class="sec-n">§${i + 1}</span><h2>${esc(section.title)}</h2></div>
+const renderSection = (section) => `
+  <section id="${section.anchor}">
+    <div class="sec-head"><span class="sec-n">${esc(section.n)}</span><h2>${esc(section.title)}</h2></div>
     ${section.intro ?? ''}
     ${list(section.scenarios).length ? scenarioList(section.scenarios.map((id) => scenarios.get(id))) : ''}
     ${htmlBlock(section.html)}
@@ -294,6 +294,18 @@ const sections = [...list(spec.sections)];
 const sectioned = new Set(sections.flatMap((section) => list(section.scenarios)));
 const loose = [...scenarios.keys()].filter((id) => !sectioned.has(id));
 if (loose.length) sections.push({ title: 'Other scenarios', scenarios: loose });
+
+const DEFAULT_GROUP = 'What was tested';
+const sectionGroups = [];
+let tested = 0;
+sections.forEach((section, i) => {
+  const name = section.group ?? DEFAULT_GROUP;
+  section.anchor = `sec-${i + 1}`;
+  section.n = name === DEFAULT_GROUP ? `§${++tested}` : '·';
+  const last = sectionGroups.at(-1);
+  if (last?.name === name) last.sections.push(section);
+  else sectionGroups.push({ name, anchor: `part-${sectionGroups.length + 1}`, sections: [section] });
+});
 
 const findingGroups = KINDS.map((kind) => ({
   kind,
@@ -315,7 +327,9 @@ const issuesHtml = findings.size
         .map((group) => `<h3>${KIND_HEADING[group.kind]}</h3>${group.items.map(renderIssue).join('\n')}`)
         .join('\n')}`
   : '<p>No issues found.</p>';
-const sectionsHtml = sections.map(renderSection).join('\n');
+const sectionsHtml = sectionGroups
+  .map((group) => `<p class="part-label" id="${group.anchor}">${esc(group.name)}</p>\n${group.sections.map(renderSection).join('\n')}`)
+  .join('\n');
 
 const placed = new Set([
   ...[...findings.values()].flatMap((finding) => list(finding.steps).map((step) => step.screen)),
@@ -327,13 +341,39 @@ const unplacedHtml = unplaced.map((id) => renderScreen(id, 'further')).join('\n'
 const run = spec.run ?? {};
 const hasAppendix = [run.underTest, run.environment, run.groundTruth].some((items) => list(items).length);
 
-const railItems = [
-  { href: '#issues', label: 'Issues', n: '!' },
-  ...sections.map((section, i) => ({ href: `#sec-${i + 1}`, label: section.title, n: i + 1 })),
+const referenceItems = [
   ...(list(spec.notCovered).length ? [{ href: '#not-covered', label: 'Not covered', n: '?' }] : []),
   ...(hasAppendix ? [{ href: '#appendix', label: 'Appendix', n: '·' }] : []),
   ...(unplaced.length ? [{ href: '#evidence', label: 'Further evidence', n: '→' }] : []),
 ];
+
+const railGroups = [
+  {
+    label: 'Issues',
+    href: '#issues',
+    items: [...findings.values()].map((finding) => ({
+      href: `#finding-${finding.id}`,
+      label: finding.area ?? finding.title,
+      n: finding.id,
+    })),
+  },
+  ...sectionGroups.map((group) => ({
+    label: group.name,
+    href: `#${group.anchor}`,
+    items: group.sections.map((section) => ({
+      href: `#${section.anchor}`,
+      label: section.title,
+      n: section.n.replace('§', ''),
+    })),
+  })),
+  ...(referenceItems.length ? [{ label: 'Reference', href: '#reference', items: referenceItems }] : []),
+];
+
+const renderRailGroup = (group) => `
+      <li>
+        <a class="rail-label" href="${group.href}">${esc(group.label)}</a>
+        <ol>${group.items.map((item) => `<li><a href="${item.href}"><i>${esc(item.n)}</i>${esc(item.label)}</a></li>`).join('')}</ol>
+      </li>`;
 
 const page = `<title>${esc(run.title ?? 'QA run')}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -489,6 +529,15 @@ const page = `<title>${esc(run.title ?? 'QA run')}</title>
     margin: 0 0 12px;
   }
   .rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+  .rail .rail-groups { gap: 20px; }
+  .rail .rail-groups > li > ol { margin-top: 9px; padding-left: 12px; border-left: 1px solid var(--line); }
+  .rail a.rail-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
   .rail a { color: var(--ink); text-decoration: none; display: flex; gap: 9px; line-height: 1.35; }
   .rail a:hover { color: var(--accent); }
   .rail a i { font-family: var(--mono); font-style: normal; color: var(--muted); font-size: 12px; padding-top: 2px; }
@@ -830,9 +879,7 @@ const page = `<title>${esc(run.title ?? 'QA run')}</title>
 
   <nav class="rail" aria-label="Contents">
     <p>Contents</p>
-    <ol>${railItems
-      .map((item) => `<li><a href="${item.href}"><i>${item.n}</i>${esc(item.label)}</a></li>`)
-      .join('')}</ol>
+    <ol class="rail-groups">${railGroups.map(renderRailGroup).join('')}</ol>
   </nav>
 
   <main>
@@ -841,7 +888,9 @@ const page = `<title>${esc(run.title ?? 'QA run')}</title>
       ${issuesHtml}
     </section>
 
-    ${sections.length ? `<p class="part-label" id="tested">What was tested</p>\n${sectionsHtml}` : ''}
+    ${sectionsHtml}
+
+    ${referenceItems.length ? '<p class="part-label" id="reference">Reference</p>' : ''}
 
     ${
       list(spec.notCovered).length
