@@ -7,7 +7,7 @@
 
 **Goal:** Build the `mock-interview` skill in `clankit-life` (interview simulation:
 coding / architecture / Q&A rounds + assessment), its `problem-setter` agent, remove
-glossary reviews from `learn`, and wire the user's Obsidian vault to it.
+glossary reviews from `learn`, and wire the user's private notes repo to it.
 
 **Architecture:** A portable prose skill, sibling to `learn`: a small dispatcher
 SKILL.md that lazy-loads one session protocol file per session, a `problem-setter`
@@ -20,11 +20,11 @@ generated test suites.
 
 ## Global Constraints
 
-- All skill/agent content is generic and portable — nothing Michał-specific, no
-  vault paths; user-specific wiring goes only in the vault's own CLAUDE.md (Task 8).
-- Two-repo plan: Tasks 1–7 and 9 act in `/Users/gawrys/Development/clankit`,
-  Task 8 in `/Users/gawrys/Documents/private/Obsidian`. Commit in the repo the task
-  touches.
+- All skill/agent content is generic and portable — nothing user-specific, no
+  notes-repo paths; user-specific wiring goes only in that repo's own CLAUDE.md
+  (Task 8).
+- Two-repo plan: Tasks 1–7 and 9 act in this repo, Task 8 in the user's private
+  notes repo. Commit in the repo the task touches.
 - Skill files follow `learn`'s conventions: frontmatter `name` + `description`,
   Defaults & Overrides table, plain-markdown user-editable state tables.
 - The two postures rule everywhere: solve phase = terse interviewer (no hints, no
@@ -297,10 +297,10 @@ hub MOC; writes the initial `interview-map.md` and one log row.
 **Done when:** read-back — a fresh run would produce a complete map (every
 curriculum unit present) without coding and without teaching. Commit.
 
-### Task 8: Vault wiring (Obsidian repo)
+### Task 8: Notes-repo wiring
 
-**Units:** `/Users/gawrys/Documents/private/Obsidian/CLAUDE.md` — new override
-entry; `.clanker/learning/glossary-queue.md` — deleted.
+**Units:** the notes repo's `CLAUDE.md` — new override entry;
+`.clanker/learning/glossary-queue.md` — deleted.
 
 **Interacts:** the override entry mirrors the existing "### learn" block's style
 under "## Skill Overrides".
@@ -311,10 +311,11 @@ under "## Skill Overrides".
   (notes root `Learning/`, state dir `.clanker/learning/`).
 - `git rm .clanker/learning/glossary-queue.md`. Do not touch `Learning/Glossary.md`
   or the learn overrides' Glossary line (capture into it continues).
-- The vault has unrelated uncommitted changes (draft notes, `.clanker/learning/`
-  edits) — stage only these two paths.
+- The notes repo may have unrelated uncommitted changes — stage only these two
+  paths.
 
-**Done when:** vault commit contains exactly the CLAUDE.md edit and the deletion.
+**Done when:** the notes-repo commit contains exactly the CLAUDE.md edit and
+the deletion.
 
 ### Task 9: End-to-end read-back and smoke run
 

@@ -13,7 +13,7 @@ verbal Q&A — grades them harshly against a written rubric, and tracks per-patt
 confidence over time. `learn` teaches; `mock-interview` simulates and grades, then
 hands discovered gaps back to `learn`'s machinery.
 
-Driving user context (Michał's, but the skill itself stays generic): full-stack
+Driving user context (one user's, but the skill itself stays generic): full-stack
 product engineer preparing over 8–12 weeks (~4–6 h/week) for roles at startups,
 scale-ups, founding-engineer and CTO conversations — **not** big-tech loops. Four
 gaps, in priority order: producing architecture (not just critiquing it), writing
@@ -207,10 +207,11 @@ There is no problem queue and no re-serving — problems are single-use. Repetit
 happens at the pattern level (the map steers fresh problems toward weak patterns)
 and at the concept level (meanings cards in `learn`'s `review-queue.md`).
 
-## Vault integration (Obsidian repo, separate change)
+## Notes-repo integration (separate change)
 
-Add to the vault `CLAUDE.md` a "Skill overrides: mock-interview" entry: state dir
-`.clanker/learning/`, notes/conventions consistent with the `learn` overrides.
+Add to the notes repo's `CLAUDE.md` a "Skill overrides: mock-interview" entry:
+state dir `.clanker/learning/`, notes/conventions consistent with the `learn`
+overrides.
 
 ## Glossary removal from `learn`
 
@@ -218,7 +219,7 @@ Add to the vault `CLAUDE.md` a "Skill overrides: mock-interview" entry: state di
   section, and the queue-writing half of glossary capture (Phase 3 bucket and
   Phase 4 step 6). Teaching mode still adds newly-met terms to `Glossary.md` as a
   lookup reference; nothing quizzes them.
-- Vault: delete `.clanker/learning/glossary-queue.md`. `Learning/Glossary.md`
+- Notes repo: delete `.clanker/learning/glossary-queue.md`. `Learning/Glossary.md`
   stays.
 
 ## Testing / verification

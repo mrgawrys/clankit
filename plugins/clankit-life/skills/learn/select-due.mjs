@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Select a randomized batch of due items from a /learn queue file.
 //
-// Reads a markdown-table queue (review-queue.md or glossary-queue.md), finds all
+// Reads a markdown-table queue (review-queue.md), finds all
 // rows where `due <= today`, shuffles them, and prints up to N. Randomizing the
 // whole due set — rather than taking oldest-first — keeps same-topic items
 // (created together, sharing a due date) from clustering in the same batch and
