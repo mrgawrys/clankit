@@ -76,6 +76,7 @@ building it, write the spec, then ask how the work should be built and reviewed.
 |-------|---------|
 | `brainstorming` | Required before building anything with more than one reasonable shape. One question at a time, then a design for approval |
 | `writing-plans` | Turns an approved design into right-sized tasks that survive a context boundary — a fresh session, a subagent, another person |
+| `handoff` | The mid-flight exit: `/handoff` freezes what this session knows — decided, done, in progress, next — to a file any agent resumes from |
 | `executing-plans` | Builds from a plan or an approved spec; a fresh subagent per task with a review-and-fix loop between them |
 | `vibe` | The other end of the dial: build it now, no plan, no gates — here or handed to one subagent |
 | `autopilot` | The whole route unsupervised, in a git worktree → draft PR |

@@ -1,0 +1,68 @@
+<!doctype html>
+<!-- Starting point for a generated PR visual. Edit the content; keep the CSS.
+     Render:  render-html.sh infographic.html out.png 1200 630
+     Light background on purpose: a raster image cannot follow GitHub's theme,
+     and the border keeps it from bleeding into a dark-mode page. -->
+<meta charset="utf-8">
+<style>
+  :root {
+    --ink: #111827; --muted: #6b7280; --line: #e5e7eb; --bg: #ffffff;
+    --accent: #0f766e; --accent-soft: #ecfdf5;
+    --warn: #b45309; --warn-soft: #fffbeb;
+    --del: #b91c1c; --del-soft: #fef2f2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px; background: var(--bg); color: var(--ink);
+    font: 16px/1.5 ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    border: 1px solid var(--line);
+  }
+  h1 { margin: 0 0 6px; font-size: 30px; letter-spacing: -0.02em; }
+  .sub { margin: 0 0 32px; color: var(--muted); font-size: 17px; }
+
+  .row { display: flex; gap: 16px; align-items: stretch; }
+  .card {
+    flex: 1; padding: 18px 20px; border: 1px solid var(--line);
+    border-radius: 12px; background: #fff;
+  }
+  .card h2 { margin: 0 0 10px; font-size: 13px; font-weight: 700;
+             text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .card p  { margin: 0; font-size: 15px; }
+  .card.accent { background: var(--accent-soft); border-color: #a7f3d0; }
+  .card.warn   { background: var(--warn-soft);   border-color: #fde68a; }
+  .card.del    { background: var(--del-soft);    border-color: #fecaca; }
+
+  .arrow { display: flex; align-items: center; color: var(--muted);
+           font-size: 24px; padding: 0 2px; }
+
+  .stat { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; }
+  .stat small { display: block; font-size: 13px; font-weight: 500; color: var(--muted); }
+
+  code { font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+         background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+  .foot { margin-top: 30px; padding-top: 16px; border-top: 1px solid var(--line);
+          color: var(--muted); font-size: 14px; }
+</style>
+
+<h1>What this PR changes</h1>
+<p class="sub">One line a reviewer can read before opening the diff.</p>
+
+<div class="row">
+  <div class="card">
+    <h2>Before</h2>
+    <p>How it worked, in a sentence.</p>
+  </div>
+  <div class="arrow">→</div>
+  <div class="card accent">
+    <h2>After</h2>
+    <p>What it does now, in a sentence.</p>
+  </div>
+</div>
+
+<div class="row" style="margin-top:16px">
+  <div class="card"><div class="stat">3<small>files touched</small></div></div>
+  <div class="card"><div class="stat">1<small>shared component changed</small></div></div>
+  <div class="card"><div class="stat">0<small>API changes</small></div></div>
+</div>
+
+<p class="foot">Watch out for: <code>path/to/the/risky-file.ts</code> — why it matters.</p>

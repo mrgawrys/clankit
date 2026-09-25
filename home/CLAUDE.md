@@ -12,17 +12,20 @@
 
 ## Code Comments
 
-Comments in code are for humans, not the compiler — write them to be read by a
-person skimming the file later.
+**Default: none.** Make the code say it. A comment is a cost — it goes stale,
+and every future reader pays to skim it.
 
-- **Explain _why_, not _what_.** Skip comments that just restate the code.
-- **Keep them short and plain.** One line unless the reasoning genuinely needs
-  more. Prefer a clear sentence over a dense clause.
-- **No narration, no changelog, no obvious restatement.** If the code says it,
-  the comment shouldn't repeat it.
+Earn one by naming what a competent reader would otherwise get **wrong**: a
+non-obvious constraint, a rejected alternative, a workaround for something
+outside the file. Can't name that mistake? Delete it.
 
-This overrides "match the surrounding comment density" — if nearby comments are
-bloated, write good ones anyway; don't reproduce the bloat.
+- **Why, never what.** One line. Longer reasoning goes in the commit message
+  or the spec, not the file.
+- **Docstrings same bar.** Contract only — arguments, return, errors. Design
+  rationale, provenance and "we chose X over Y" belong in the PR.
+- **Fewer than the neighbours is fine.** Never reproduce surrounding bloat.
+- Cutting a comment is a valid review outcome; "but it explains why" doesn't
+  save one nobody needed.
 
 ## Runnable Scripts (paste-safe by default)
 
@@ -35,10 +38,12 @@ only, call commented out. Skip only if I ask for a runnable one-liner.
 The body is for humans deciding how to review — reviewers run AI on the diff
 anyway, so detail they can regenerate from the code is noise. One screen, tops.
 
+- **Open with a TLDR.** 1–2 sentences or up to 4 bullets, before anything else.
+  Enough to understand the PR without reading on.
 - **What & why, a few sentences.** Provenance counts ("mirrors the Journey
   endpoint, most code copied from there") — it tells the reviewer what's
   actually new versus borrowed.
-- **Optionally:** what to look at in particular; what this PR is *not*
+- **Optionally:** what to look at in particular; what this PR is _not_
   (deferred, out of scope, known gaps); related PRs / docs / tickets.
 - **Never:** module-by-module change lists, function or file inventories, API
   contract dumps, or a Verification section — CI already says the tests pass.
@@ -90,7 +95,7 @@ report — `ReportFindings`, a workflow result, a subagent's return value — is
 index, not the evidence: it tells me a finding exists, not enough to act on it.
 So after filing one, still write out the snippets and diagrams. If the review
 tooling says not to repeat the findings as text, that means don't duplicate the
-*list*; it does not lift this rule. Open the files and show me the code.
+_list_; it does not lift this rule. Open the files and show me the code.
 
 ## Reviewing diffs (revdiff)
 
@@ -99,6 +104,11 @@ files — or in review-to-approve moments like plan-in-batches task diffs —
 default to the `revdiff` skill (floating pane, my inline annotations come back
 as feedback) instead of inline markdown. Skip it for small changes (a single
 hunk / few lines) or illustrative snippets. Override anytime with "inline".
+Before opening one, brief me in chat: what changed, why, and what to look at.
+
+When I say "open <file>:<line>" (inside Zellij), pop nvim in a floating pane in
+*your* tab, not the one I'm focused on:
+`zellij run --floating --close-on-exit --width 90% --height 90% --cwd "$PWD" --tab-id "$(zellij action list-panes --json --tab | jq -r ".[] | select(.id == $ZELLIJ_PANE_ID and (.is_plugin // false | not)) | .tab_id")" -- nvim +<line> <file>`
 
 ## Doc Locations
 
@@ -117,9 +127,11 @@ don't build the extraction unless asked.
 ## Context Budget
 
 When you see `Context: X tokens used`, that's your context window filling up.
-Past ~300k quality degrades — so if you're mid-task with real work still ahead
+Past ~350k quality degrades — so if you're mid-task with real work still ahead
 and I didn't ask you to do it all in one pass, stop and check in rather than
-silently pushing on. Any threshold I give you in conversation overrides this.
+silently pushing on. Name `/handoff` as the exit — it freezes the state to a
+file a fresh session resumes from — and let me choose. Any threshold I give
+you in conversation overrides this.
 
 ## User Preferences
 

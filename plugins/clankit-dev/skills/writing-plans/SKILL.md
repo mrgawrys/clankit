@@ -43,6 +43,22 @@ into sub-project specs during brainstorming. If it wasn't, suggest breaking this
 into separate plans — one per subsystem. Each plan should produce working,
 testable software on its own.
 
+## The Repo Pass
+
+A plan's value over the spec is what you learn by opening the repo. The spec
+was written in a design conversation; the plan is written with the tree open.
+Before drawing tasks, read the files the work touches and the neighbours it
+imitates. Two kinds of fact earn their way in:
+
+- **Anchors** — the existing idiom to copy (`file:line`), the helper that
+  already exists, the seam a test double goes through. Verified by reading,
+  never from memory.
+- **Traps** — anything shaped "the implementer will assume X; it's actually
+  Y". Each one names a plausible wrong implementation and blocks it.
+
+A plan containing no fact that required opening the repo is the spec
+reorganized. Go back.
+
 ## File Structure
 
 Before defining tasks, map out which files will be created or modified and what
@@ -117,8 +133,10 @@ crosses each boundary.
 implementer sees only their own task; this is how they learn the names their
 neighbours use.
 
-**Constraints** — exact values, and the design decisions that are easy to get
-wrong.
+**Constraints** — exact values, design decisions that are easy to get wrong,
+and traps: the assumption a reasonable implementer would make, and why it's
+wrong here. Give the reason when it decides cases you didn't enumerate — a
+bare rule fails at the first case off its table.
 
 **Seams** — the public interfaces this task's tests exercise, carried from the
 spec's Testing section. Omit only where the rigor is a verification run rather
@@ -198,7 +216,9 @@ who cannot see both.
 
 **3. Derivability:** For each task, ask what the implementer could not work out
 alone. If everything in it is derivable from the codebase and the signatures,
-the task is over-specified. If a decision is missing, add it.
+the task is over-specified. If a decision is missing, add it. Then ask the
+sharper question: what would they work out *wrongly*? Each answer is a trap
+line. A plan with none skipped the repo pass.
 
 Fix issues inline. No need to re-review.
 
