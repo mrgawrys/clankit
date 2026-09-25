@@ -46,24 +46,37 @@ Read `curriculum.md` in full — every pattern, every practical theme, every
 architecture domain, every Q&A area. Each unit needs enough signal for one
 confidence level.
 
-**Batch the questions.** Post several per message — four to six is a good size,
-grouped by area — and let the user answer them all in one reply, by number.
-Never one question per message; a 40-unit map asked one turn at a time is a
-session nobody finishes.
+**Batch the questions.** Post three or four per message, grouped by area, and
+let the user answer them all in one reply, by number. Batching is a pacing
+choice only — each question must still read as if an interviewer asked it on
+its own.
 
-The questions are short recognition and reasoning prompts, not problems:
+**Every question is self-contained.** State the problem the way an interviewer
+would say it out loud: the input, what to return, a tiny concrete example. Then
+one clear ask — "how would you approach it, and why does that work?" Never
+refer to a problem by its name alone ("longest substring without repeating
+characters — what makes you shrink?"); the user should not need to know the
+problem to understand the question.
 
-- *Patterns* — the trigger signal and the invariant. "When does a monotonic
-  stack apply, and what does the stack hold?" · "Why is binary search on the
-  answer valid for 'minimum capacity to ship in D days'?" · "What's the
-  invariant that makes two pointers correct on a sorted array?"
-- *Practical themes* — how they'd shape it and what they'd expect to break.
-  "You're substituting `%key%` placeholders — what does your first version get
-  wrong when a value itself contains a placeholder?"
-- *Architecture domains* — one of the domain's recurring hard questions, asked
-  in the abstract rather than as a design exercise. "You're taking webhooks from
-  a payment provider — what makes your handler safe when they retry a delivery
-  you already processed?" A design round is 60 minutes; this is one answer.
+**The curriculum's fields are the answer key, not the question.** Trigger
+signal, invariant, and mechanism are what you grade the answer against. Do not
+ask for them by name ("what's the invariant?", "what does the stack hold?") —
+pose the problem and let them surface. If the answer lands on the right approach
+but skips why it's correct, one follow-up asking why is allowed.
+
+- *Patterns* — a small problem in plain words. "You get a list of daily
+  temperatures, like `[73, 74, 75, 71, 69, 72, 76]`. For each day, return how
+  many days you'd wait for a warmer one — 0 if never. A double loop is too slow
+  for a million days. How would you do it in one pass, and why is it linear?"
+- *Practical themes* — a concrete input and a concrete way it breaks. "You're
+  writing a function that fills `%key%` placeholders in a template from a
+  dictionary: `"Hi %name%"` with `{name: "Ola"}` gives `"Hi Ola"`. How would you
+  structure it, and what happens if a value itself contains `%something%`?"
+- *Architecture domains* — one of the domain's recurring hard questions, set in
+  a one-sentence scenario. "You receive payment webhooks from Stripe; Stripe
+  retries any delivery it isn't sure you got, so you sometimes receive the same
+  event twice. How do you make sure a customer isn't credited twice?" A design
+  round is 60 minutes; this is one answer.
 - *Q&A areas* — one mechanism question each, drawn from `curriculum.md`'s stems.
 
 A unit is covered when the answer shows whether they own the *idea*. Do not
