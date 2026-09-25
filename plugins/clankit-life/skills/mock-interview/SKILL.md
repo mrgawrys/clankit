@@ -42,7 +42,7 @@ mock-interview/
 │   ├── coding.md         ← coding round (~45 min + post-mortem)
 │   ├── architecture.md   ← design conversation (~60 min + post-mortem)
 │   ├── qa.md             ← verbal technical Q&A (~30–45 min + post-mortem)
-│   └── assessment.md     ← first session: seeds interview-map.md
+│   └── assessment.md     ← short sittings that fill interview-map.md
 ├── curriculum.md         ← patterns, practical themes, architecture domains, Q&A topic areas
 └── grading.md            ← rubric, outcome grades, anti-pattern instructions
 ```
@@ -73,13 +73,14 @@ Load lazily and load little — context you don't need is context that leaks.
 | `code` | `sessions/coding.md` |
 | `arch` | `sessions/architecture.md` |
 | `qa` | `sessions/qa.md` |
-| `assess` | `sessions/assessment.md` |
+| `assess` | `sessions/assessment.md` — the next sitting |
 
 ## Opening flow
 
 1. Check for `<state dir>/interview-map.md`.
 2. **No map** → run `sessions/assessment.md`. Say why in one line ("no map yet —
-   starting with the assessment"), then go. This is the only automatic session.
+   starting with a few assessment questions"), then go. This is the only
+   automatic session.
 3. **Map exists, an argument was given** → load that session file and run it.
 4. **Map exists, no argument** → read `interview-map.md` and `interview-log.md`,
    then propose the most valuable next session and **ask**. Rank candidates by
@@ -87,14 +88,18 @@ Load lazily and load little — context you don't need is context that leaks.
    serving what feels comfortable. Present two or three options, each with a
    one-line why ("architecture round on event ingestion & webhooks — `weak`, and
    the log shows two failed designs under load questions"). The user picks. Never start
-   a round without their pick.
+   a round without their pick. While unassessed units remain (see
+   `sessions/assessment.md`), one option is always "continue the assessment",
+   naming the next area and how much of the map is filled.
 
 **There is no cadence.** Never schedule sessions, never propose a frequency,
 never remark on how long it has been since the last one. The map's `last-seen`
 column exists to order proposals, not to nag.
 
-`assess` re-runs the assessment and overwrites the map — `sessions/assessment.md`
-handles the confirmation. Never re-run it on your own initiative.
+`assess` runs the next sitting; it never touches units already mapped.
+Starting the map over happens only when the user asks for it explicitly —
+`sessions/assessment.md` handles the confirmation. Never do it on your own
+initiative.
 
 ## The two postures
 

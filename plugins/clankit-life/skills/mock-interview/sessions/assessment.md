@@ -1,55 +1,69 @@
 # Assessment
 
-~45 minutes. Loaded by `SKILL.md` when no `interview-map.md` exists, or on an
-explicit `/mock-interview assess`. This is the session that seeds the map.
+One short sitting — three or four questions, ~15–20 minutes. Loaded by
+`SKILL.md` when no `interview-map.md` exists, when the user picks "continue the
+assessment" from the opening flow, or on `/mock-interview assess`. Each sitting
+maps a handful of units; the map fills in across sittings.
 
-**No coding.** No problems to solve, no submissions, no test runs, no
-`problem-setter`, no scratchpad. Recognition and reasoning only.
+**Short by design.** A 38-unit questionnaire in one go is a session nobody
+finishes. A sitting should end with the user feeling the map moved, not with
+them out of energy halfway through a batch.
+
+**No coding.** No submissions, no test runs, no `problem-setter`, no scratchpad.
+Reasoning out loud only.
 
 **No teaching.** This session measures; it does not close gaps. When an answer
-is wrong, note it and move to the next question. The gaps found here become map
-rows and future sessions — not a lecture now. `grading.md` is not loaded: this
-session assigns confidence levels, not outcome grades.
+is wrong, note it and move on. `grading.md` is not loaded: this session assigns
+confidence levels, not outcome grades.
 
 This is the only session file that reads `curriculum.md` in full.
 
 ---
 
-## Before overwriting an existing map
+## Unassessed units
 
-If `<state dir>/interview-map.md` already exists, this run was requested
-explicitly. **Say clearly that re-assessing overwrites the current map** — every
-confidence level and note earned across previous sessions is replaced by today's
-answers — and get the user's confirmation before starting. `interview-log.md` is
-untouched either way; it is append-only history.
+A unit is **unassessed** when its map row is `unknown` with `last-seen` `—`.
+Sittings only ever ask about unassessed units; a unit with a real confidence is
+left alone.
 
-If no map exists, start straight away with a one-line framing: what this session
-is, that nothing gets coded, and roughly how long it takes.
+## Re-assessing from scratch
 
-## 1. Seed from `learn`
+Only when the user explicitly asks to start the map over. **Say clearly that
+this overwrites the current map** — every confidence level and note earned
+across previous sessions is replaced — and get confirmation. Then reset every
+row to unassessed and run a normal sitting. `interview-log.md` is untouched; it
+is append-only history.
 
-Read `learn`'s hub MOC, its category MOCs, and `progress.md` via the
-learn-integration locations in `SKILL.md`'s Defaults & Overrides.
+## 1. First sitting only: create the map
 
-Anything `learn` already grades as `advanced` — or `⏭️ skipped`, which is
-`learn`'s way of recording demonstrated mastery — does not need re-proving.
-Map those units directly at `solid`, with a note crediting the source: "credited
-from `learn` — advanced, reviewed 2026-05-02". Say up front which units you are
-crediting, so the user can object if a credit feels generous.
+If no map exists, write `<state dir>/interview-map.md` with **every unit in
+`curriculum.md`** as a row — all patterns, themes, architecture domains, Q&A
+areas, each with the `kind` its section names — at `unknown`, `—`, note "Not
+assessed". A missing row silently removes that unit from every future session.
 
-Everything else gets asked about. `learn` grading a topic `intermediate` is not
-evidence about interview conditions; ask those.
+Then seed from `learn`: read its hub MOC, category MOCs, and `progress.md` via
+the learn-integration locations in `SKILL.md`'s Defaults & Overrides. Anything
+`learn` grades `advanced` — or `⏭️ skipped`, its way of recording demonstrated
+mastery — is set to `solid` with a note crediting the source ("credited from
+`learn` — advanced, reviewed 2026-05-02"). Say which units you credited, so the
+user can object. `intermediate` in `learn` is not evidence about interview
+conditions; those stay unassessed.
 
-## 2. Probe
+Open with one line: what this is, that nothing gets coded, and that it's a few
+questions now with more next time.
 
-Read `curriculum.md` in full — every pattern, every practical theme, every
-architecture domain, every Q&A area. Each unit needs enough signal for one
-confidence level.
+## 2. Pick the sitting's units
 
-**Batch the questions.** Post three or four per message, grouped by area, and
-let the user answer them all in one reply, by number. Batching is a pacing
-choice only — each question must still read as if an interviewer asked it on
-its own.
+Choose three or four unassessed units from **one** area — a sitting that stays
+in one area feels like finishing something. Work through the areas in this
+order, since it matches the curriculum's weighting: architecture domains, Q&A
+areas, practical themes, Tier 1 patterns, Tier 2 patterns. Within an area, take
+units in curriculum order.
+
+## 3. Ask
+
+Post the sitting's questions one or two per message, numbered, and let the user
+answer them together.
 
 **Every question is self-contained.** State the problem the way an interviewer
 would say it out loud: the input, what to return, a tiny concrete example. Then
@@ -79,48 +93,36 @@ but skips why it's correct, one follow-up asking why is allowed.
   round is 60 minutes; this is one answer.
 - *Q&A areas* — one mechanism question each, drawn from `curriculum.md`'s stems.
 
-A unit is covered when the answer shows whether they own the *idea*. Do not
-drill past that point, and do not ask a follow-up to teach — only to
-disambiguate a confidence level.
+Between messages, a terse "got it" and the next question is enough. If the user
+wants to stop early, stop — whatever was answered still gets written.
 
-Between batches, say briefly where you are ("patterns done, moving to the
-practical themes"). Grading commentary can wait for the summary; a terse "got
-it" and the next batch is enough.
+## 4. Update the map
 
-## 3. Write the map
+For each unit asked about, update its row in place:
 
-Write `<state dir>/interview-map.md` with the schema from `SKILL.md`. **Every
-unit in `curriculum.md` gets a row** — all patterns, all practical themes, all
-architecture domains, all Q&A areas, each with the `kind` its curriculum section
-names. A unit you ran out of time to ask about is still a row, at `unknown`
-with a note saying it wasn't assessed. A map with missing rows silently removes
-those units from every future session's selection.
-
-- `confidence` — `unknown` · `weak` · `shaky` · `solid`, from the answers.
+- `confidence` — `weak` · `shaky` · `solid`. A question the user declined
+  leaves its row untouched, so the unit stays unassessed.
   `solid` needs the trigger signal *and* the invariant (or, for a Q&A area or an
-  architecture domain, the mechanism and not just the name). Recognising the name alone is `weak`. Grade
-  strictly: an inflated map stops serving the unit, and the gap survives.
-- `last-seen` — today for units asked about; `—` for unasked ones and for units
-  credited from `learn`.
+  architecture domain, the mechanism and not just the name). Recognising the
+  name alone is `weak`. Grade strictly: an inflated map stops serving the unit,
+  and the gap survives.
+- `last-seen` — today.
 - `note` — one line of what the answer actually showed, specific enough to be
   useful in three weeks. "Names the pattern, can't state the invariant" beats
   "shaky on this".
 
-Append one row to `<state dir>/interview-log.md` for the session: round
-`assess`, a one-line summary in `problem`, and the shape of the result in
-`what went wrong`. `unit` and `outcome` are both `—`, per the assessment
-carve-out in `SKILL.md`'s log schema.
+Append one row to `<state dir>/interview-log.md`: round `assess`, the area and
+units covered in `problem`, the shape of the result in `what went wrong`. `unit`
+and `outcome` are both `—`, per the assessment carve-out in `SKILL.md`'s log
+schema.
 
-## 4. Closing summary
+## 5. Close
 
-Tell the user:
+Keep it short:
 
-- The distribution — how many units at each confidence level.
-- The weakest units by name, and what specifically was missing in each.
-- What was credited from `learn` without being asked.
-- What went unasked, if anything.
-- **A proposed session order** that front-loads the weak units: the next three
-  or four sessions, each with a round type and a one-line why ("coding round on
-  monotonic stack — `weak`, couldn't say what the stack holds"). A proposal, not
-  a schedule: no dates, no cadence, no frequency. The user picks when they
-  invoke `/mock-interview` next.
+- **Progress** — "14 of 38 units mapped", and which area is now complete, if
+  one is.
+- **Today's units** — one line each: the confidence and what was missing.
+- **What's next** — the next unassessed area, and one real round worth doing on
+  a weak unit found today. Both are options for the next `/mock-interview`, not
+  a schedule.
