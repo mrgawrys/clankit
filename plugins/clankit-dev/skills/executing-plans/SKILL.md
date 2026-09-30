@@ -231,6 +231,10 @@ on the most capable model available:
 - **The standards axis** — is it well built: code quality, design, tests.
   Template: [standards-reviewer-prompt.md](standards-reviewer-prompt.md)
 
+If `review-package` refuses the range (exit 3: no commits, or HEAD does not
+descend from BASE), the work was committed somewhere else. Find it before
+dispatching anyone — a review of an empty package passes.
+
 Hand each reviewer the package as a file — the output never enters your
 context. Reviewer inputs: the plan or spec path, the build report, the review
 package, and the Global Constraints copied verbatim. Do not add open-ended
