@@ -51,6 +51,11 @@ Subagent (general-purpose):
     Your review is read-only on this checkout. Do not mutate the working
     tree, the index, HEAD, or branch state in any way.
 
+    Do all of this review yourself. Never spawn a subagent to review part
+    of the diff or to give a second opinion: this process already provides
+    every review seat the work gets. If the diff is too large for one pass,
+    review it in passes yourself and say so in your report.
+
     ## Do Not Trust the Report
 
     Treat the builder's report as unverified claims about the code. Verify
@@ -114,6 +119,9 @@ Subagent (general-purpose):
     a merge over — verbatim duplication of a logic block, swallowed errors,
     tests that assert nothing. "Coverage could be broader" and polish
     suggestions are Minor.
+    Grade a defect by its effect on the person using the software, not by
+    whether the plan names the input that triggers it: a crash on an input
+    the plan never mentioned is still a crash.
     If the plan explicitly mandates something this rubric calls a defect,
     that IS a finding — report it as Important, labeled plan-mandated. The
     plan's authorship does not grade its own work; the human decides.

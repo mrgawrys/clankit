@@ -51,6 +51,11 @@ Subagent (general-purpose):
       final report.
     - If you encounter something unexpected or unclear, **ask questions**.
       It's always OK to pause and clarify. Don't guess or make assumptions.
+    - Do the work yourself. Never spawn a subagent to build part of the plan,
+      and never spawn a reviewer to check it: independent reviewers are
+      dispatched after you report, so one you spawn duplicates that seat at
+      full cost and its approval counts for nothing. The advisor call below
+      is the only dispatch you make.
 
     ## Code Organization
 

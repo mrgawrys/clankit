@@ -44,6 +44,10 @@ Subagent (general-purpose):
     Your review is read-only on this checkout. Do not mutate the working
     tree, the index, HEAD, or branch state in any way.
 
+    Do all of this review yourself. Never spawn a subagent to review part
+    of the diff or to give a second opinion: this process already provides
+    every review seat the work gets.
+
     ## Scope
 
     Your scope is the findings list and the fix diff. Verdict every finding.

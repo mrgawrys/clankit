@@ -106,12 +106,6 @@ before assuming that means cheap.
 interactions, signatures, constraints and an acceptance bar; the implementer
 writes the code and designs the tests. That is creative work, not transcription.
 
-> **Intent, for anyone re-syncing this skill with upstream:** upstream directs
-> implementers to the cheapest tier *because its plans contain the complete code
-> to write*. That premise is false here and the guidance inverts. If a future
-> merge reintroduces "use the cheapest tier for transcription," it is wrong for
-> this plan format — delete it.
-
 - **The builder** → the most capable tier by default; a whole plan nearly
   always carries design judgment. Mid-tier only for a genuinely mechanical
   plan with nothing to decide.
@@ -237,6 +231,10 @@ on the most capable model available:
 - **The standards axis** — is it well built: code quality, design, tests.
   Template: [standards-reviewer-prompt.md](standards-reviewer-prompt.md)
 
+If `review-package` refuses the range (exit 3: no commits, or HEAD does not
+descend from BASE), the work was committed somewhere else. Find it before
+dispatching anyone — a review of an empty package passes.
+
 Hand each reviewer the package as a file — the output never enters your
 context. Reviewer inputs: the plan or spec path, the build report, the review
 package, and the Global Constraints copied verbatim. Do not add open-ended
@@ -251,6 +249,12 @@ axis must not mask the other.
 A reviewer may report "⚠️ Cannot verify from diff" items — requirements living
 in unchanged code. Resolve each yourself before the fix wave; you hold context
 the reviewer lacks. A confirmed gap joins the findings.
+
+The spec axis also returns a "Declined to judge" list: behavior it noticed and
+set aside as outside the plan. Rule on each line before the fix wave, by what
+a reasonable person using the software gets if it ships as it is. A line that
+would bite them joins the findings; the rest go in your final report with the
+reason. The plan's silence on an input is not permission for it to break.
 
 **One fix wave.** If the reviews return findings, dispatch **ONE** fix
 subagent with the complete combined list — not one fixer per finding.

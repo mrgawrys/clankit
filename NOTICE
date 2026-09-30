@@ -23,8 +23,6 @@ Vendored with modifications:
 - `executing-plans` — merged with `subagent-driven-development`; its prompt
   templates and the `review-package` / workspace scripts are vendored with it
 
-See `MAINTENANCE.md` for what each modification changes and why.
-
 Original license:
 
 ```
