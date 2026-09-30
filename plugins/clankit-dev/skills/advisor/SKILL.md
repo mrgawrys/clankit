@@ -128,6 +128,6 @@ Every advisor call leaves one line — question, ruling, confidence:
 
 | Caller | Record |
 |---|---|
-| Planner | In the plan, as a Constraint on the task it governs, with its reason; under autopilot, in the decision report as well |
-| Builder | An `## Advisor rulings` section in `build-report.md`; the controller carries it forward |
+| Planner | In the plan, as a Constraint on the task it governs, marked `advisor ruling, <confidence>`, with its reason; under autopilot, the orchestrator lifts the marked Constraints into the decision report |
+| Builder | An `## Advisor rulings` section in `build-report.md`; the controller reads it before the workspace is deleted and carries it into its final report |
 | Controller, autopilot | The final report or the decision report, `unclear` rulings first |

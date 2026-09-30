@@ -106,8 +106,8 @@ user learns where their judgment was substituted, and where to intervene.
   review; this skill owns the envelope around it — worktree, plan, PR, and the
   decision that nobody will be asked.
 - Carry its outcome forward: what was built, findings deferred or adjudicated,
-  the verification status it observed — and every adjudication into the decision
-  report.
+  the verification status it observed — and every adjudication and every
+  advisor ruling its report lists into the decision report.
 - `executing-plans` ends by presenting integration options and waiting for a human.
   **You are that human.** Take its report and go to Phase 3 — don't stall, and don't
   ask the user.
@@ -121,6 +121,8 @@ user learns where their judgment was substituted, and where to intervene.
   by the review, and the best-effort verification status (note failures plainly — they
   do NOT block the PR). Link the plan file; it is what a reviewer checks the diff
   against.
+- Lift the planner's rulings from the plan file into the decision report: they
+  are the Constraints marked `advisor ruling`, each with its confidence.
 - Report back to the user: the **PR link**, the **worktree path**, and the
   **decision report** — every choice made on their behalf, per the section above.
   Stop.

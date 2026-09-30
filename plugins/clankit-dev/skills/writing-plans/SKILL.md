@@ -95,7 +95,9 @@ The repo pass and task design turn up forks the spec left open. Picking one
 and writing it into the plan makes it look decided to everyone downstream.
 When one of the `advisor` skill's triggers holds, invoke that skill and ask
 the advisor before the choice reaches a task. Record the ruling as a
-Constraint on the task it governs, with its reason.
+Constraint on the task it governs, marked `advisor ruling, <confidence>`, with
+its reason. The marker is how a later reader tells the advisor's rulings from
+the plan's other Constraints.
 
 ## Plan Document Header
 

@@ -289,12 +289,14 @@ a different name.
 
 ## Finish
 
-When the final review is clean — or every residual carries a ruling — delete
-this plan's workspace (`rm -rf <workspace>`) — git history is the record now.
-Sibling directories belong to other plans.
+When the final review is clean — or every residual carries a ruling — read
+`## Advisor rulings` from the build report: the builder's reply carried only
+their count, and the next step deletes the file. Then delete this plan's
+workspace (`rm -rf <workspace>`) — git history is the record now. Sibling
+directories belong to other plans.
 
-Then report: what was built, the verification status, anything deferred with
-its ruling, and the branch. Integration is your human partner's decision —
+Then report: what was built, the verification status, the advisor's rulings
+with `unclear` first, anything deferred with its ruling, and the branch. Integration is your human partner's decision —
 present the options and wait.
 
 ## Common Rationalizations

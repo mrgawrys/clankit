@@ -147,8 +147,8 @@ confidence:
 
 | Caller | Record |
 |---|---|
-| Planner | In the plan, as a Constraint on the task it governs, with its reason; under autopilot, in the decision report as well |
-| Builder | An `## Advisor rulings` section in `build-report.md`; the controller carries it forward |
+| Planner | In the plan, as a Constraint on the task it governs, marked `advisor ruling, <confidence>`, with its reason; under autopilot, the orchestrator lifts the marked Constraints into the decision report |
+| Builder | An `## Advisor rulings` section in `build-report.md`; the controller reads it before the workspace is deleted and carries it into its final report |
 | Controller, autopilot | The final report or the decision report, `unclear` rulings first |
 
 ### Edits to existing files
@@ -156,10 +156,10 @@ confidence:
 | File | Change |
 |---|---|
 | `plugins/clankit-dev/bootstrap.md` | "Gates are questions" gains the away stance: once the user says they will not be answering, and until their next message, gates go to the `advisor` skill's away tier. The bootstrap loads in every session, so this is the stance's only session-wide home. |
-| `skills/writing-plans/SKILL.md` | A short "Hard decisions" passage: when a trigger holds during the repo pass or task design, ask the advisor, and record the ruling as a Constraint. |
-| `skills/executing-plans/SKILL.md` | Three spots. In "Handle the return", a `BLOCKED` for a reasoning problem gets an advisor ruling before any re-dispatch. The two "your human partner's call" passages — a wrong plan, and plan-mandated findings — go through the tiers. "Running inline" gains the own-call triggers. Integration at "Finish" stays the user's decision, unchanged. |
+| `skills/writing-plans/SKILL.md` | A short "Hard decisions" passage: when a trigger holds during the repo pass or task design, ask the advisor, and record the ruling as a Constraint marked `advisor ruling, <confidence>`. |
+| `skills/executing-plans/SKILL.md` | Four spots. "Finish" reads `## Advisor rulings` from the build report before deleting the workspace and lists the rulings in its report. In "Handle the return", a `BLOCKED` for a reasoning problem gets an advisor ruling before any re-dispatch. The two "your human partner's call" passages — a wrong plan, and plan-mandated findings — go through the tiers. "Running inline" gains the own-call triggers. Integration at "Finish" stays the user's decision, unchanged. |
 | `skills/executing-plans/implementer-prompt.md` | "STOP and escalate" on an unsettled architectural decision becomes "ask the advisor first": invoke the `advisor` skill, call the advisor, record the ruling, carry on. A failed call, or a question that was the user's, still returns `BLOCKED` or `NEEDS_CONTEXT`. The report format gains `## Advisor rulings`. |
-| `skills/autopilot/SKILL.md` | Its would-be-user questions go to the advisor. The decision report lists the advisor's rulings with their confidence, `unclear` first. The claim that subagents cannot spawn subagents is removed — see Decisions. |
+| `skills/autopilot/SKILL.md` | Its would-be-user questions go to the advisor. The decision report lists the advisor's rulings with their confidence, `unclear` first — the builder's from the `executing-plans` report, the planner's lifted from the plan's marked Constraints. The claim that subagents cannot spawn subagents is removed — see Decisions. |
 
 Documentation: a row each for the `advisor` skill and the `advisor` agent in the root
 `README.md` skills table; a line in `plugins/clankit-dev/README.md` naming
