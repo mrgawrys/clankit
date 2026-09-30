@@ -70,9 +70,14 @@ Subagent (general-purpose):
     It is always OK to stop and say "this is too hard for me." Bad work is worse than
     no work. You will not be penalized for escalating.
 
+    **Ask the advisor first when** a task requires an architectural decision
+    with multiple valid approaches the plan doesn't settle. Invoke the
+    `advisor` skill and follow its builder section: call the advisor, wait
+    for the ruling, record it in your report, carry on. If the call fails, or
+    the question was the user's to answer, return BLOCKED or NEEDS_CONTEXT
+    as below.
+
     **STOP and escalate when:**
-    - A task requires architectural decisions with multiple valid approaches
-      the plan doesn't settle
     - You need to understand code beyond what was provided and can't find clarity
     - You feel uncertain about whether your approach is correct
     - The work involves restructuring existing code in ways the plan didn't anticipate
@@ -119,6 +124,8 @@ Subagent (general-purpose):
     - Files changed
     - Self-review findings (if any)
     - Any issues or concerns
+    - `## Advisor rulings` — one line per advisor call: question, ruling,
+      confidence. Omit the section if you made none.
 
     Then report back with ONLY (under 15 lines — the detail lives in the
     report file):
@@ -127,6 +134,7 @@ Subagent (general-purpose):
     - One-line test summary: results ("full suite 214/214 passing, output
       pristine") or the verification you ran and what you observed
     - Your concerns, if any
+    - How many advisor rulings the report records, if any
     - The report file path
 
     If BLOCKED or NEEDS_CONTEXT, put the specifics in the final message
