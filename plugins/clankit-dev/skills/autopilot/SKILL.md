@@ -131,8 +131,9 @@ user learns where their judgment was substituted, and where to intervene.
 
 `executing-plans` owns tier selection for everything inside the build — follow its
 Model Selection section, which scales the builder, reviewers, and fix subagent to the
-work rather than fixing a tier per phase. The one call this skill makes directly is
-Phase 1's planning, which is design work and takes the most capable model available.
+work rather than fixing a tier per phase. This skill makes two calls directly: Phase 1's
+planning, which is design work and takes the most capable model available, and the
+advisor, which takes no model — its agent definition sets one.
 
 ## Verification policy
 

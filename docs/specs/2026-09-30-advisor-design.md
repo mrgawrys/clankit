@@ -117,7 +117,7 @@ on design and scope. It never grants permission:
   posting comments.
 - Existing stop conditions are untouched. A load-bearing review finding still
   stops `executing-plans`; autopilot's abort list still applies.
-- Questions about the user's own involvement — which mode, which gates — are
+- Questions about the user's own involvement — which mode, which gates —
   never go to the advisor. A user who says they are away before choosing a mode gets
   a *review at the end* build.
 
