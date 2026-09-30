@@ -72,10 +72,10 @@ Subagent (general-purpose):
 
     **Ask the advisor first when** a task requires an architectural decision
     with multiple valid approaches the plan doesn't settle. Invoke the
-    `advisor` skill and follow its builder section: call the advisor, wait
-    for the ruling, record it in your report, carry on. If the call fails, or
-    the question was the user's to answer, return BLOCKED or NEEDS_CONTEXT
-    as below.
+    `advisor` skill for the rules, then follow its builder section: dispatch
+    the advisor agent, wait for the ruling, record it in your report, carry
+    on. If the call fails, or the question was the user's to answer, return
+    BLOCKED or NEEDS_CONTEXT as below.
 
     **STOP and escalate when:**
     - You need to understand code beyond what was provided and can't find clarity

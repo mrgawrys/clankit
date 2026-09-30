@@ -15,6 +15,11 @@ Every rule below follows from that.
 
 ## When to ask
 
+Two kinds of decision reach this skill, and they route differently. An own
+call is one you would have made without asking anyone: it goes to the advisor
+wherever the user is. A question that was the user's is one you would have
+stopped to ask: who answers it depends on where the user is.
+
 ### Your own calls
 
 Ask the advisor when one of these holds; otherwise decide alone:
@@ -59,22 +64,25 @@ grants permission, and a ruling — however `clear` — is not one:
 
 ## The brief
 
-Dispatch with the `Agent` tool, `subagent_type: clankit-dev:advisor`. Pass no
-`model`: the agent's definition sets its model and effort, and a model given
-per call would override it — this holds even inside a skill that tells you to
-name a model on every dispatch. One question per call.
+Invoking this skill loaded the rules; it rules on nothing. The ruling comes
+from the agent, and the agent is dispatched with the `Agent` tool — not the
+Skill tool — with `subagent_type: clankit-dev:advisor` and the brief as its
+prompt. Pass no `model`: the agent's definition sets its model and effort, and
+a model given per call would override it — this holds even inside a skill that
+tells you to name a model on every dispatch. One question per call.
 
 Write:
 
 - the question, in one sentence
-- the options, stated neutrally
+- the options, stated neutrally — what each one is, not what it is good for
 - the paths to read — spec, plan, code; the advisor reads them itself
 - what is already decided
 - what depends on the answer
 
 **Withhold your own lean.** An advisor handed a preferred answer tends to
-return it confirmed. If the brief lets a reader tell which option you favour,
-rewrite it.
+return it confirmed. A lean leaks through more than "I prefer": an advantage
+listed for one option and not the others is one. If a reader of the brief
+could tell which option you favour, rewrite it.
 
 ## The ruling
 
@@ -102,6 +110,11 @@ A nested call returns in the background. **Wait for the ruling before acting
 on the decision** — do not build on either option while the call is out. If
 the call fails, return `BLOCKED` with the question, and the controller asks
 the advisor.
+
+An `unclear` ruling is read by tier, and you do not know the tier. Proceed on
+the lean only where every tier would: the choice is cheap to undo, and the
+missing fact is not one only the user can supply. Otherwise return `BLOCKED`
+with the question and the ruling, and the controller applies the tier.
 
 ## If the controller's own call fails
 
