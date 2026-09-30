@@ -51,6 +51,11 @@ Subagent (general-purpose):
     Your review is read-only on this checkout. Do not mutate the working
     tree, the index, HEAD, or branch state in any way.
 
+    Do all of this review yourself. Never spawn a subagent to review part
+    of the diff or to give a second opinion: this process already provides
+    every review seat the work gets. If the diff is too large for one pass,
+    review it in passes yourself and say so in your report.
+
     ## Do Not Trust the Report
 
     Treat the builder's report as unverified claims about the code. Verify
