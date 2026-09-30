@@ -1,4 +1,4 @@
-# Consulting — Design
+# Advisor — Design
 
 > **To act on this design:** pick a mode — *vibe* (inline, no machinery),
 > *review each task* (per-task diffs), *review at the end* (one subagent
@@ -18,7 +18,7 @@ opinion is worth most.
   one and writes it into the plan. A builder at the same fork must stop and
   return `BLOCKED`, because its brief forbids guessing.
 
-Consulting gives both a way out: dispatch one high-effort agent on the most
+The advisor gives both a way out: dispatch one high-effort agent on the most
 capable model, hand it the question, and get a ruling back.
 
 ## What gets built
@@ -73,10 +73,11 @@ answer and carry no signal.
 
 ### The protocol
 
-`plugins/clankit-dev/skills/consulting/SKILL.md` holds the rules every caller
-shares. The other skills point at it and restate none of it.
+`plugins/clankit-dev/skills/advisor/SKILL.md` holds the rules every caller
+shares. The skill and the agent share a name; one loads through the Skill tool,
+the other dispatches through the `Agent` tool. The other skills point at it and restate none of it.
 
-**The agent's own calls.** Consult when one of these holds; otherwise decide
+**The agent's own calls.** Ask the advisor when one of these holds; otherwise decide
 alone:
 
 - Two or more viable approaches that the spec or plan does not settle and that
@@ -85,15 +86,15 @@ alone:
 - A builder blocked on a reasoning or architecture problem.
 
 Taste, naming, and anything a quick read of the code answers are not triggers.
-There is no cap on consultations per run.
+There is no cap on advisor calls per run.
 
 **Questions that were the user's.** The bar is unchanged — a question the agent
 would have asked the user. Who answers depends on where the user is:
 
 | The user is | Meaning | What happens |
 |---|---|---|
-| **Present** | Any session not covered below | Ask the user. Never consult in place of asking. |
-| **Reachable** | A delegated build with no gates (*review at the end*), outside autopilot | Consult first. A `clear` ruling proceeds. |
+| **Present** | Any session not covered below | Ask the user. The advisor never answers in the user's place. |
+| **Reachable** | A delegated build with no gates (*review at the end*), outside autopilot | Ask the advisor first. A `clear` ruling proceeds. |
 | **Away** | The whole of an `/autopilot` run; or from the moment the user says they will not be answering until their next message | The advisor stands in. A `clear` ruling proceeds. |
 
 Away is never inferred from silence, elapsed time, or a mode other than
@@ -117,7 +118,7 @@ on design and scope. It never grants permission:
 - Existing stop conditions are untouched. A load-bearing review finding still
   stops `executing-plans`; autopilot's abort list still applies.
 - Questions about the user's own involvement — which mode, which gates — are
-  never consultable. A user who says they are away before choosing a mode gets
+  never go to the advisor. A user who says they are away before choosing a mode gets
   a *review at the end* build.
 
 **The brief.** The caller writes:
@@ -135,32 +136,32 @@ to return it confirmed.
 cannot know where the user is, so a question that was the user's goes back to
 the controller as `BLOCKED` or `NEEDS_CONTEXT`, as today. A nested call returns
 in the background: wait for the ruling before acting on the decision. If the
-call fails, return `BLOCKED` with the question and the controller consults.
+call fails, return `BLOCKED` with the question and the controller asks the advisor.
 
 **If the controller's own call fails**, treat it as an `unclear` ruling with no
 lean: present or reachable, ask the user; away, decide alone if the choice is
 cheap to undo and record "advisor unavailable", otherwise stop.
 
-**Recording.** Every consultation leaves one line — question, ruling,
+**Recording.** Every advisor call leaves one line — question, ruling,
 confidence:
 
 | Caller | Record |
 |---|---|
 | Planner | In the plan, as a Constraint on the task it governs, with its reason; under autopilot, in the decision report as well |
-| Builder | A `## Consultations` section in `build-report.md`; the controller carries it forward |
+| Builder | An `## Advisor rulings` section in `build-report.md`; the controller carries it forward |
 | Controller, autopilot | The final report or the decision report, `unclear` rulings first |
 
 ### Edits to existing files
 
 | File | Change |
 |---|---|
-| `plugins/clankit-dev/bootstrap.md` | "Gates are questions" gains the away stance: once the user says they will not be answering, and until their next message, gates go to `consulting`'s away tier. The bootstrap loads in every session, so this is the stance's only session-wide home. |
-| `skills/writing-plans/SKILL.md` | A short "Hard decisions" passage: when a trigger holds during the repo pass or task design, consult, and record the ruling as a Constraint. |
-| `skills/executing-plans/SKILL.md` | Three spots. In "Handle the return", a `BLOCKED` for a reasoning problem gets a consultation before any re-dispatch. The two "your human partner's call" passages — a wrong plan, and plan-mandated findings — go through the tiers. "Running inline" gains the own-call triggers. Integration at "Finish" stays the user's decision, unchanged. |
-| `skills/executing-plans/implementer-prompt.md` | "STOP and escalate" on an unsettled architectural decision becomes "consult first": invoke the `consulting` skill, call the advisor, record the ruling, carry on. A failed call, or a question that was the user's, still returns `BLOCKED` or `NEEDS_CONTEXT`. The report format gains `## Consultations`. |
-| `skills/autopilot/SKILL.md` | Its would-be-user questions go to the advisor. The decision report lists consulted rulings with their confidence, `unclear` first. The claim that subagents cannot spawn subagents is removed — see Decisions. |
+| `plugins/clankit-dev/bootstrap.md` | "Gates are questions" gains the away stance: once the user says they will not be answering, and until their next message, gates go to the `advisor` skill's away tier. The bootstrap loads in every session, so this is the stance's only session-wide home. |
+| `skills/writing-plans/SKILL.md` | A short "Hard decisions" passage: when a trigger holds during the repo pass or task design, ask the advisor, and record the ruling as a Constraint. |
+| `skills/executing-plans/SKILL.md` | Three spots. In "Handle the return", a `BLOCKED` for a reasoning problem gets an advisor ruling before any re-dispatch. The two "your human partner's call" passages — a wrong plan, and plan-mandated findings — go through the tiers. "Running inline" gains the own-call triggers. Integration at "Finish" stays the user's decision, unchanged. |
+| `skills/executing-plans/implementer-prompt.md` | "STOP and escalate" on an unsettled architectural decision becomes "ask the advisor first": invoke the `advisor` skill, call the advisor, record the ruling, carry on. A failed call, or a question that was the user's, still returns `BLOCKED` or `NEEDS_CONTEXT`. The report format gains `## Advisor rulings`. |
+| `skills/autopilot/SKILL.md` | Its would-be-user questions go to the advisor. The decision report lists the advisor's rulings with their confidence, `unclear` first. The claim that subagents cannot spawn subagents is removed — see Decisions. |
 
-Documentation: a row each for `consulting` and the advisor in the root
+Documentation: a row each for the `advisor` skill and the `advisor` agent in the root
 `README.md` skills table; a line in `plugins/clankit-dev/README.md` naming
 `agents/advisor.md` as the file to edit for a different model or effort;
 and an intent note in `MAINTENANCE.md` for the patches to the vendored
@@ -170,8 +171,8 @@ and an intent note in `MAINTENANCE.md` for the patches to the vendored
 
 - **The builder calls the advisor itself.** A probe on 2026-09-30 confirmed
   a subagent holds the `Agent` tool and a nested call returns. The alternative
-  — only the controller consults, the builder stops with a new return status
-  and is resumed — costs a round trip per consultation, adds a status and a
+  — only the controller calls the advisor, the builder stops with a new return status
+  and is resumed — costs a round trip per call, adds a status and a
   continuation step to `executing-plans`, and tempts a builder to guess
   instead of stopping. It survives as the fallback, through the existing
   `BLOCKED` path.
@@ -189,7 +190,7 @@ and an intent note in `MAINTENANCE.md` for the patches to the vendored
 
 - `vibe`: its premise is no machinery.
 - `brainstorming`: a conversation with the user by definition.
-- A cap or budget on consultations.
+- A cap or budget on advisor calls.
 
 ## Verification
 
@@ -199,9 +200,10 @@ build.
 **The advisor works as defined.**
 
 - After the plugin reloads, `clankit-dev:advisor` appears in the agent
-  list.
+  list, and the `advisor` skill in the skill list: the shared name resolves
+  in both.
 - A sample brief returns all five reply fields.
-- A builder-shaped subagent invokes `consulting`, calls the advisor by
+- A builder-shaped subagent invokes the `advisor` skill, calls the advisor by
   nested call, waits, and receives the ruling.
 
 **The rules hold.** Five scenarios, each against a fresh subagent holding the
@@ -209,8 +211,8 @@ edited skills, run as `writing-skills` prescribes:
 
 | Scenario | Expected |
 |---|---|
-| The user is present and the question was theirs | Asks the user; does not consult |
-| An own-call trigger holds | Consults; the brief carries no lean |
+| The user is present and the question was theirs | Asks the user; does not call the advisor |
+| An own-call trigger holds | Calls the advisor; the brief carries no lean |
 | A naming choice | Decides alone |
 | Away, ruling `unclear`, choice hard to reverse | Stops |
 | Away, ruling `clear`, action needs the user's confirmation | Does not act |
