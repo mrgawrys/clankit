@@ -106,12 +106,6 @@ before assuming that means cheap.
 interactions, signatures, constraints and an acceptance bar; the implementer
 writes the code and designs the tests. That is creative work, not transcription.
 
-> **Intent, for anyone re-syncing this skill with upstream:** upstream directs
-> implementers to the cheapest tier *because its plans contain the complete code
-> to write*. That premise is false here and the guidance inverts. If a future
-> merge reintroduces "use the cheapest tier for transcription," it is wrong for
-> this plan format — delete it.
-
 - **The builder** → the most capable tier by default; a whole plan nearly
   always carries design judgment. Mid-tier only for a genuinely mechanical
   plan with nothing to decide.
