@@ -32,10 +32,10 @@ This keeps autopilot portable across repos.
 
 ## The orchestrator runs in the main conversation
 
-You (the main loop) are the orchestrator. Subagents cannot reliably spawn their own
-subagents, so YOU dispatch every phase as a separate `Agent` call, own the worktree
-lifecycle, and pass each phase's output forward as the next phase's input. Per the global
-rule, say "clank, clank" before launching each subagent.
+You (the main loop) are the orchestrator. You own the worktree lifecycle and pass each
+phase's output forward as the next phase's input, so YOU dispatch every phase as a
+separate `Agent` call. Per the global rule, say "clank, clank" before launching each
+subagent.
 
 ## The plan file is not optional
 
@@ -54,12 +54,14 @@ A "short build brief" cannot do either. Don't substitute one.
 
 ## The decision report
 
-Nobody is present to answer the questions the attended flow would ask, so every
-phase answers them itself. That debt is repaid at the end: **throughout the run,
-collect every decision a gate would normally have put to the user** — approaches
-chosen between and why, trade-offs taken, ambiguities in the ask or the spec and
-how they were resolved, findings adjudicated after review. Carry the list
-forward from phase to phase and report it in your **final chat message**,
+Nobody is present to answer the questions the attended flow would ask, so they
+go to the advisor: the whole run is the `advisor` skill's away tier, and that
+skill says what a ruling lets a phase do. The debt is repaid at the end:
+**throughout the run, collect every decision a gate would normally have put to
+the user** — approaches chosen between and why, trade-offs taken, ambiguities in
+the ask or the spec and how they were resolved, findings adjudicated after
+review. List the advisor's rulings with their confidence, `unclear` first. Carry
+the list forward from phase to phase and report it in your **final chat message**,
 alongside the PR link. Nothing is written elsewhere — no decision log in the
 repo or the PR body beyond its normal summary. The final message is where the
 user learns where their judgment was substituted, and where to intervene.
@@ -158,6 +160,7 @@ Stop and report instead of opening a PR when:
 - The build produced no usable changes, or could not implement the feature at all.
 - `executing-plans` stops on a load-bearing finding. Its adjudication exists to
   stop work shipping on a structural failure; pushing past it defeats the point.
+- The `advisor` skill's away tier says stop.
 
 A draft PR with *failing tests* is a valid outcome (flag it). A draft PR with *nothing
 meaningful built* is not — report the failure instead. An abort still owes the
