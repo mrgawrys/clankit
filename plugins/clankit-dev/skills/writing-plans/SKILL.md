@@ -89,6 +89,14 @@ Each task ends with an independently testable deliverable and a commit. Prefer
 more, smaller commits over one at the end — a task that can't be committed on
 its own is either two tasks or none.
 
+## Hard Decisions
+
+The repo pass and task design turn up forks the spec left open. Picking one
+and writing it into the plan makes it look decided to everyone downstream.
+When one of the `advisor` skill's triggers holds, invoke that skill and ask
+the advisor before the choice reaches a task. Record the ruling as a
+Constraint on the task it governs, with its reason.
+
 ## Plan Document Header
 
 **Every plan MUST start with this header:**
