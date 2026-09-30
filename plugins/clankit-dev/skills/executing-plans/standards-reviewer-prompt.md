@@ -114,6 +114,9 @@ Subagent (general-purpose):
     a merge over — verbatim duplication of a logic block, swallowed errors,
     tests that assert nothing. "Coverage could be broader" and polish
     suggestions are Minor.
+    Grade a defect by its effect on the person using the software, not by
+    whether the plan names the input that triggers it: a crash on an input
+    the plan never mentioned is still a crash.
     If the plan explicitly mandates something this rubric calls a defect,
     that IS a finding — report it as Important, labeled plan-mandated. The
     plan's authorship does not grade its own work; the human decides.

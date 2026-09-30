@@ -74,6 +74,14 @@ Subagent (general-purpose):
     unchanged code the plan assumed), report it as a ⚠️ item instead of
     broadening your search.
 
+    **The requirements do not list everything the software will meet.** They
+    say what it must do, not every input, environment or condition it will
+    run into. Where they are silent, judge by what a reasonable person using
+    this software would expect: that expectation is a requirement, and
+    silence is not permission to break. Report such a gap as Missing. If the
+    plan has a Review Focus section, check each of its lines deliberately —
+    they are the unnamed cases its author thought most likely to bite.
+
     The builder already ran the tests and reported results. Do not re-run
     the suite to confirm their report. Run a test only when reading the code
     raises a specific doubt that no existing run answers — and then a focused
@@ -88,6 +96,8 @@ Subagent (general-purpose):
     different reasonable reading of an ambiguous line" is worth reporting at
     the severity the ambiguity deserves — flag it, don't assume your reading
     is the requirement.
+    Grade a gap the requirements never named by its effect on the person
+    using the software, not by whether the plan mentions what triggers it.
     If the plan itself mandates something a reviewer would treat as a defect,
     that IS a finding — report it as Important, labeled plan-mandated. The
     plan's authorship does not grade its own work; the human decides.
@@ -111,8 +121,16 @@ Subagent (general-purpose):
     #### Important (Should Fix)
     #### Minor (Nice to Have)
 
-    For each: the requirement (quote the plan line), what the diff does
-    instead, file:line, and how to close the gap (if not obvious).
+    For each: the requirement (quote the plan line, or name the expectation
+    the plan left unstated), what the diff does instead, file:line, and how
+    to close the gap (if not obvious).
+
+    ### Declined to judge
+
+    Every behavior you considered and set aside as outside the plan or spec,
+    one line each, with the reason. The controller rules on each line;
+    nothing you set aside is dropped silently. "None" if you set nothing
+    aside.
 ```
 
 **Placeholders:**
@@ -129,5 +147,6 @@ Subagent (general-purpose):
 - `[DIFF_FILE]` — REQUIRED: the path `scripts/review-package PLAN_FILE BASE
   HEAD` printed (the package never enters the controller's context)
 
-**Reviewer returns:** Spec Compliance verdict (✅/❌/⚠️) and findings
-(Critical/Important/Minor), each tied to a quoted requirement.
+**Reviewer returns:** Spec Compliance verdict (✅/❌/⚠️), findings
+(Critical/Important/Minor), each tied to a quoted requirement or a named
+expectation, and the Declined to judge list.

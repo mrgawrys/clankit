@@ -250,6 +250,12 @@ A reviewer may report "⚠️ Cannot verify from diff" items — requirements li
 in unchanged code. Resolve each yourself before the fix wave; you hold context
 the reviewer lacks. A confirmed gap joins the findings.
 
+The spec axis also returns a "Declined to judge" list: behavior it noticed and
+set aside as outside the plan. Rule on each line before the fix wave, by what
+a reasonable person using the software gets if it ships as it is. A line that
+would bite them joins the findings; the rest go in your final report with the
+reason. The plan's silence on an input is not permission for it to break.
+
 **One fix wave.** If the reviews return findings, dispatch **ONE** fix
 subagent with the complete combined list — not one fixer per finding.
 Per-finding fixers each rebuild context and re-run suites; a real session's

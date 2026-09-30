@@ -124,6 +124,14 @@ naming and copy rules, platform requirements — one line each, with exact
 values copied verbatim from the spec. Every task's requirements implicitly
 include this section.]
 
+## Review Focus
+
+[Up to five inputs or failure modes the spec implies but never names, most
+likely to bite first — one line each: the input or condition, and what a
+reasonable person using this would expect to happen. Each line is also
+written into the Done when of the task that owns the code. "None found" if
+you looked and found none.]
+
 ---
 ```
 
@@ -229,6 +237,15 @@ alone. If everything in it is derivable from the codebase and the signatures,
 the task is over-specified. If a decision is missing, add it. Then ask the
 sharper question: what would they work out *wrongly*? Each answer is a trap
 line. A plan with none skipped the repo pass.
+
+**4. Review focus:** A spec says what the software must do, not everything it
+will meet, and its silence on an input is not permission for that input to
+break the program. Which inputs or failure modes does the spec imply that no
+task's Done when covers — the empty file, the second concurrent caller, the
+value one past the limit? Put the five most likely to bite someone in Review
+Focus, and add each to the Done when of the task that owns the code, so the
+builder tests it and the reviewer looks for it. An empty section has to mean
+you checked: write "None found", never omit it.
 
 Fix issues inline. No need to re-review.
 
