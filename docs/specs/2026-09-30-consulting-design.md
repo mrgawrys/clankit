@@ -26,13 +26,13 @@ capable model, hand it the question, and get a ruling back.
 Two new files, five short edits to existing skills, and documentation updates
 in three files.
 
-### The consultant
+### The advisor
 
-`plugins/clankit-dev/agents/consultant.md`, dispatched as
-`clankit-dev:consultant`. Its frontmatter, exactly:
+`plugins/clankit-dev/agents/advisor.md`, dispatched as
+`clankit-dev:advisor`. Its frontmatter, exactly:
 
 ```yaml
-name: consultant
+name: advisor
 model: fable
 effort: high
 tools: Read, Grep, Glob, Bash
@@ -45,7 +45,7 @@ This file is the only place the change names a model or an effort. `effort` is
 settable only in an agent definition — the `Agent` tool takes a model per call
 but no effort — so a definition file is the only way to deliver "high".
 
-The body instructs the consultant to:
+The body instructs the advisor to:
 
 - Rule on exactly one question per call.
 - Read the paths the brief names — spec, plan, code — itself, and not rely on
@@ -94,7 +94,7 @@ would have asked the user. Who answers depends on where the user is:
 |---|---|---|
 | **Present** | Any session not covered below | Ask the user. Never consult in place of asking. |
 | **Reachable** | A delegated build with no gates (*review at the end*), outside autopilot | Consult first. A `clear` ruling proceeds. |
-| **Away** | The whole of an `/autopilot` run; or from the moment the user says they will not be answering until their next message | The consultant stands in. A `clear` ruling proceeds. |
+| **Away** | The whole of an `/autopilot` run; or from the moment the user says they will not be answering until their next message | The advisor stands in. A `clear` ruling proceeds. |
 
 Away is never inferred from silence, elapsed time, or a mode other than
 autopilot. When a user who is away also has a reachable-tier build running,
@@ -108,7 +108,7 @@ away governs.
   first in the decision report as decided without confidence. Stop when the
   choice is hard to reverse or outward-facing.
 
-**Judgment, not authority.** The consultant stands in for the user's judgment
+**Judgment, not authority.** The advisor stands in for the user's judgment
 on design and scope. It never grants permission:
 
 - Anything the user's standing instructions put behind confirmation stays
@@ -128,7 +128,7 @@ on design and scope. It never grants permission:
 - what is already decided
 - what depends on the answer
 
-The caller withholds its own lean. A consultant handed a preferred answer tends
+The caller withholds its own lean. An advisor handed a preferred answer tends
 to return it confirmed.
 
 **If you are a builder subagent.** Only the own-call triggers apply. A builder
@@ -139,7 +139,7 @@ call fails, return `BLOCKED` with the question and the controller consults.
 
 **If the controller's own call fails**, treat it as an `unclear` ruling with no
 lean: present or reachable, ask the user; away, decide alone if the choice is
-cheap to undo and record "consultant unavailable", otherwise stop.
+cheap to undo and record "advisor unavailable", otherwise stop.
 
 **Recording.** Every consultation leaves one line — question, ruling,
 confidence:
@@ -157,18 +157,18 @@ confidence:
 | `plugins/clankit-dev/bootstrap.md` | "Gates are questions" gains the away stance: once the user says they will not be answering, and until their next message, gates go to `consulting`'s away tier. The bootstrap loads in every session, so this is the stance's only session-wide home. |
 | `skills/writing-plans/SKILL.md` | A short "Hard decisions" passage: when a trigger holds during the repo pass or task design, consult, and record the ruling as a Constraint. |
 | `skills/executing-plans/SKILL.md` | Three spots. In "Handle the return", a `BLOCKED` for a reasoning problem gets a consultation before any re-dispatch. The two "your human partner's call" passages — a wrong plan, and plan-mandated findings — go through the tiers. "Running inline" gains the own-call triggers. Integration at "Finish" stays the user's decision, unchanged. |
-| `skills/executing-plans/implementer-prompt.md` | "STOP and escalate" on an unsettled architectural decision becomes "consult first": invoke the `consulting` skill, call the consultant, record the ruling, carry on. A failed call, or a question that was the user's, still returns `BLOCKED` or `NEEDS_CONTEXT`. The report format gains `## Consultations`. |
-| `skills/autopilot/SKILL.md` | Its would-be-user questions go to the consultant. The decision report lists consulted rulings with their confidence, `unclear` first. The claim that subagents cannot spawn subagents is removed — see Decisions. |
+| `skills/executing-plans/implementer-prompt.md` | "STOP and escalate" on an unsettled architectural decision becomes "consult first": invoke the `consulting` skill, call the advisor, record the ruling, carry on. A failed call, or a question that was the user's, still returns `BLOCKED` or `NEEDS_CONTEXT`. The report format gains `## Consultations`. |
+| `skills/autopilot/SKILL.md` | Its would-be-user questions go to the advisor. The decision report lists consulted rulings with their confidence, `unclear` first. The claim that subagents cannot spawn subagents is removed — see Decisions. |
 
-Documentation: a row each for `consulting` and the consultant in the root
+Documentation: a row each for `consulting` and the advisor in the root
 `README.md` skills table; a line in `plugins/clankit-dev/README.md` naming
-`agents/consultant.md` as the file to edit for a different model or effort;
+`agents/advisor.md` as the file to edit for a different model or effort;
 and an intent note in `MAINTENANCE.md` for the patches to the vendored
 `writing-plans` and `executing-plans`, so a future re-sync re-applies them.
 
 ## Decisions
 
-- **The builder calls the consultant itself.** A probe on 2026-09-30 confirmed
+- **The builder calls the advisor itself.** A probe on 2026-09-30 confirmed
   a subagent holds the `Agent` tool and a nested call returns. The alternative
   — only the controller consults, the builder stops with a new return status
   and is resumed — costs a round trip per consultation, adds a status and a
@@ -179,7 +179,7 @@ and an intent note in `MAINTENANCE.md` for the patches to the vendored
   reason changes: it owns the worktree and passes each phase's output forward.
 - **The builder loads the protocol by invoking the skill.** Pasting it into
   the implementer prompt would make two copies to keep in sync.
-- **`Bash` for the consultant**, so it can read history itself. The cost is
+- **`Bash` for the advisor**, so it can read history itself. The cost is
   that read-only is an instruction, not a guarantee.
 - **Prose-only was rejected** — a paragraph per skill telling the agent to
   dispatch the most capable model. It cannot set effort and repeats the
@@ -196,12 +196,12 @@ and an intent note in `MAINTENANCE.md` for the patches to the vendored
 Prose and configuration: behavior checks, no tests. Run each once during the
 build.
 
-**The consultant works as defined.**
+**The advisor works as defined.**
 
-- After the plugin reloads, `clankit-dev:consultant` appears in the agent
+- After the plugin reloads, `clankit-dev:advisor` appears in the agent
   list.
 - A sample brief returns all five reply fields.
-- A builder-shaped subagent invokes `consulting`, calls the consultant by
+- A builder-shaped subagent invokes `consulting`, calls the advisor by
   nested call, waits, and receives the ruling.
 
 **The rules hold.** Five scenarios, each against a fresh subagent holding the
@@ -216,7 +216,7 @@ edited skills, run as `writing-skills` prescribes:
 | Away, ruling `clear`, action needs the user's confirmation | Does not act |
 
 **One constraint.** Outside this spec, the change names a model only in
-`agents/consultant.md`.
+`agents/advisor.md`.
 
 ## Known gaps
 
