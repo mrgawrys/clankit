@@ -25,3 +25,7 @@ couple of Bash-call observability hooks.
   decisions (`arm` / `disarm` / `fire` / `expire`, with tool and session ids).
   Off unless set. Set it when notifications don't add up — the log answers
   which session armed what, and why a ping did or didn't happen.
+- `agents/advisor.md` — the advisor's model and effort are pinned in its
+  frontmatter, and nowhere else. Edit that file to run the advisor on a
+  different model or effort — for instance when the pinned model isn't
+  available to your account.

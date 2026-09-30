@@ -80,6 +80,8 @@ building it, write the spec, then ask how the work should be built and reviewed.
 | `executing-plans` | Builds from a plan or an approved spec; a fresh subagent per task with a review-and-fix loop between them |
 | `vibe` | The other end of the dial: build it now, no plan, no gates — here or handed to one subagent |
 | `autopilot` | The whole route unsupervised, in a git worktree → draft PR |
+| `advisor` | A second opinion where a planner or builder would decide alone: when to ask, who answers while the user is away, what a ruling does and does not license |
+| `advisor` (agent) | Dispatched as `clankit-dev:advisor` by the skill of the same name — reads the spec, plan and code itself and rules on one hard decision per call |
 
 **Craft**
 

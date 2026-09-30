@@ -180,10 +180,14 @@ Template: [implementer-prompt.md](implementer-prompt.md)
   note them and carry them into the final review.
 - **NEEDS_CONTEXT** → provide what was missing and re-dispatch.
 - **BLOCKED** → assess. A context problem gets more context and the same
-  model. A reasoning problem gets a more capable model. A plan too large for
-  one context gets the chunking below. A wrong plan gets escalated to your
-  human partner. Never ignore an escalation or force the same model to retry
-  without changes, and never let an implementer guess through a plan defect.
+  model. A reasoning problem gets an advisor ruling before any re-dispatch —
+  invoke the `advisor` skill — and the new brief carries the ruling; a more
+  capable model as well if the builder's tier was the problem. A plan too
+  large for one context gets the chunking below. A wrong plan is your human
+  partner's call: the `advisor` skill's tiers say who answers it, them or
+  the advisor in their place. Never ignore an escalation or force the same
+  model to retry without changes, and never let an implementer guess through
+  a plan defect.
 
 ### Oversized plans
 
@@ -216,6 +220,10 @@ write the code is not an independent gate.
 Stop and ask when you hit a blocker, a critical gap in the plan, an instruction
 you don't understand, or a verification that fails repeatedly. Don't force
 through blockers.
+
+A decision the plan leaves open is not yours to settle quietly either. When
+one of the `advisor` skill's own-call triggers holds, ask the advisor before
+you build on the choice.
 
 ## Final review
 
@@ -251,9 +259,10 @@ fix wave cost more than all its build work combined. Two rules before
 dispatching:
 
 - **Plan-mandated findings** — anything conflicting with what the plan
-  requires — are your human partner's call. Present the finding and the plan
-  text, ask which governs. Do not dismiss the finding, and do not dispatch a
-  fix that contradicts the plan without asking.
+  requires — are your human partner's call. Put the finding beside the plan
+  text and ask which governs; the `advisor` skill's tiers say who that
+  question goes to. Do not dismiss the finding, and do not dispatch a fix
+  that contradicts the plan without an answer.
 - **Never fix findings yourself.** Controller fixes pollute your context and
   skip review.
 
@@ -280,12 +289,14 @@ a different name.
 
 ## Finish
 
-When the final review is clean — or every residual carries a ruling — delete
-this plan's workspace (`rm -rf <workspace>`) — git history is the record now.
-Sibling directories belong to other plans.
+When the final review is clean — or every residual carries a ruling — read
+`## Advisor rulings` from the build report: the builder's reply carried only
+their count, and the next step deletes the file. Then delete this plan's
+workspace (`rm -rf <workspace>`) — git history is the record now. Sibling
+directories belong to other plans.
 
-Then report: what was built, the verification status, anything deferred with
-its ruling, and the branch. Integration is your human partner's decision —
+Then report: what was built, the verification status, the advisor's rulings
+with `unclear` first, anything deferred with its ruling, and the branch. Integration is your human partner's decision —
 present the options and wait.
 
 ## Common Rationalizations

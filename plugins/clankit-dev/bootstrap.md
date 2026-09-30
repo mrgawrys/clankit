@@ -86,6 +86,11 @@ holds a plan file worth handing over. `executing-plans` asks when it holds a
 spec or plan that no menu answer stands behind, and offers no hand-off:
 reaching it means the work gets built.
 
+**A user who says they won't be answering is away.** From that moment until
+their next message, a gate has nobody to ask. It goes to the `advisor` skill's
+away tier, which says what may proceed in their absence and what waits for
+them. Only their saying so starts it.
+
 ## Rigor — infer it, never ask
 
 - Code, in a repo with tests → tests, in the repo's idiom

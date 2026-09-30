@@ -32,10 +32,10 @@ This keeps autopilot portable across repos.
 
 ## The orchestrator runs in the main conversation
 
-You (the main loop) are the orchestrator. Subagents cannot reliably spawn their own
-subagents, so YOU dispatch every phase as a separate `Agent` call, own the worktree
-lifecycle, and pass each phase's output forward as the next phase's input. Per the global
-rule, say "clank, clank" before launching each subagent.
+You (the main loop) are the orchestrator. You own the worktree lifecycle and pass each
+phase's output forward as the next phase's input, so YOU dispatch every phase as a
+separate `Agent` call. Per the global rule, say "clank, clank" before launching each
+subagent.
 
 ## The plan file is not optional
 
@@ -54,12 +54,14 @@ A "short build brief" cannot do either. Don't substitute one.
 
 ## The decision report
 
-Nobody is present to answer the questions the attended flow would ask, so every
-phase answers them itself. That debt is repaid at the end: **throughout the run,
-collect every decision a gate would normally have put to the user** — approaches
-chosen between and why, trade-offs taken, ambiguities in the ask or the spec and
-how they were resolved, findings adjudicated after review. Carry the list
-forward from phase to phase and report it in your **final chat message**,
+Nobody is present to answer the questions the attended flow would ask, so they
+go to the advisor: the whole run is the `advisor` skill's away tier, and that
+skill says what a ruling lets a phase do. The debt is repaid at the end:
+**throughout the run, collect every decision a gate would normally have put to
+the user** — approaches chosen between and why, trade-offs taken, ambiguities in
+the ask or the spec and how they were resolved, findings adjudicated after
+review. List the advisor's rulings with their confidence, `unclear` first. Carry
+the list forward from phase to phase and report it in your **final chat message**,
 alongside the PR link. Nothing is written elsewhere — no decision log in the
 repo or the PR body beyond its normal summary. The final message is where the
 user learns where their judgment was substituted, and where to intervene.
@@ -104,8 +106,8 @@ user learns where their judgment was substituted, and where to intervene.
   review; this skill owns the envelope around it — worktree, plan, PR, and the
   decision that nobody will be asked.
 - Carry its outcome forward: what was built, findings deferred or adjudicated,
-  the verification status it observed — and every adjudication into the decision
-  report.
+  the verification status it observed — and every adjudication and every
+  advisor ruling its report lists into the decision report.
 - `executing-plans` ends by presenting integration options and waiting for a human.
   **You are that human.** Take its report and go to Phase 3 — don't stall, and don't
   ask the user.
@@ -119,6 +121,8 @@ user learns where their judgment was substituted, and where to intervene.
   by the review, and the best-effort verification status (note failures plainly — they
   do NOT block the PR). Link the plan file; it is what a reviewer checks the diff
   against.
+- Lift the planner's rulings from the plan file into the decision report: they
+  are the Constraints marked `advisor ruling`, each with its confidence.
 - Report back to the user: the **PR link**, the **worktree path**, and the
   **decision report** — every choice made on their behalf, per the section above.
   Stop.
@@ -127,8 +131,9 @@ user learns where their judgment was substituted, and where to intervene.
 
 `executing-plans` owns tier selection for everything inside the build — follow its
 Model Selection section, which scales the builder, reviewers, and fix subagent to the
-work rather than fixing a tier per phase. The one call this skill makes directly is
-Phase 1's planning, which is design work and takes the most capable model available.
+work rather than fixing a tier per phase. This skill makes two calls directly: Phase 1's
+planning, which is design work and takes the most capable model available, and the
+advisor, which takes no model — its agent definition sets one.
 
 ## Verification policy
 
@@ -149,6 +154,8 @@ against, only taste.
 - **Outbound hygiene.** PR title and body must not leak private planning-workspace paths,
   filenames, or internal task numbers. External tracker IDs (Jira, ClickUp, etc.) are fine.
 - **Worktrees are pre-authorized** for this skill — create and use them without asking.
+- **The push and the draft PR are pre-authorized** by invoking this skill — they are
+  not a permission question under the `advisor` skill's tiers.
 - **Leave the worktree in place** so the user can `cd` in and inspect. Removal is manual.
 
 ## Aborting (don't ship junk)
@@ -158,6 +165,7 @@ Stop and report instead of opening a PR when:
 - The build produced no usable changes, or could not implement the feature at all.
 - `executing-plans` stops on a load-bearing finding. Its adjudication exists to
   stop work shipping on a structural failure; pushing past it defeats the point.
+- The `advisor` skill's away tier says stop.
 
 A draft PR with *failing tests* is a valid outcome (flag it). A draft PR with *nothing
 meaningful built* is not — report the failure instead. An abort still owes the
