@@ -153,6 +153,8 @@ against, only taste.
 - **Outbound hygiene.** PR title and body must not leak private planning-workspace paths,
   filenames, or internal task numbers. External tracker IDs (Jira, ClickUp, etc.) are fine.
 - **Worktrees are pre-authorized** for this skill — create and use them without asking.
+- **The push and the draft PR are pre-authorized** by invoking this skill — they are
+  not a permission question under the `advisor` skill's tiers.
 - **Leave the worktree in place** so the user can `cd` in and inspect. Removal is manual.
 
 ## Aborting (don't ship junk)
