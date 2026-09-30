@@ -235,8 +235,10 @@ work over is `writing-plans`' answer to give, because there a plan file exists.
 and escalates on any architectural decision the plan leaves open, and a
 reasoning block is answered with a more capable model. Ours points at the
 `advisor` skill in the places below and restates it in none. In the implementer
-prompt, the unsettled architectural decision moved out of the "STOP and
-escalate" list: the builder invokes the skill, asks the advisor itself by nested
+prompt, the unsettled architectural decision and the reasoning block ("uncertain
+about whether your approach is correct") moved out of the "STOP and escalate"
+list, which now holds only what the controller answers with context or a plan
+decision: the builder invokes the skill, asks the advisor itself by nested
 call, waits for the ruling, records it under `## Advisor rulings` in the build
 report, and carries on — a failed call, or a question that was the user's, still
 returns `BLOCKED` or `NEEDS_CONTEXT`. In "Handle the return", a `BLOCKED` for a

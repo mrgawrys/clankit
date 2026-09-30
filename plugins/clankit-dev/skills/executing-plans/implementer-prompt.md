@@ -71,7 +71,8 @@ Subagent (general-purpose):
     no work. You will not be penalized for escalating.
 
     **Ask the advisor first when** a task requires an architectural decision
-    with multiple valid approaches the plan doesn't settle. Invoke the
+    with multiple valid approaches the plan doesn't settle, or you are blocked
+    on a reasoning problem — unsure whether your approach is correct. Invoke the
     `advisor` skill for the rules, then follow its builder section: dispatch
     the advisor agent, wait for the ruling, record it in your report, carry
     on. If the call fails, or the question was the user's to answer, return
@@ -79,7 +80,6 @@ Subagent (general-purpose):
 
     **STOP and escalate when:**
     - You need to understand code beyond what was provided and can't find clarity
-    - You feel uncertain about whether your approach is correct
     - The work involves restructuring existing code in ways the plan didn't anticipate
     - You've been reading file after file trying to understand the system without progress
 
