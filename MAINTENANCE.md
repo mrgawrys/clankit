@@ -143,6 +143,15 @@ breaks without it.
 re-runs; a verification is a one-time check. Work that cannot be tested gets a
 named verification run, not tests that assert nothing.
 
+**Hard decisions go to the advisor.** Upstream has no advisor: a planner at a
+fork the spec leaves open picks one and writes it into the plan, where it reads
+as decided. Ours carries a short "Hard Decisions" passage: when a trigger holds
+during the repo pass or task design, the planner asks the advisor and records
+the ruling as a Constraint on the task it governs. The passage points at the
+`advisor` skill and restates none of it — triggers, tiers and the brief live
+there, in one copy. A re-sync that drops the passage puts the planner back to
+deciding alone; one that inlines the protocol makes a second copy to drift.
+
 ### `executing-plans`
 
 **It absorbed `subagent-driven-development`.** Upstream split execution in two:
@@ -221,6 +230,25 @@ invocation. It also has nothing to hand over on the spec path: the derived task
 list is deliberately never written to disk, so a session that stopped there
 would leave the next one re-deriving different tasks from the same spec. Handing
 work over is `writing-plans`' answer to give, because there a plan file exists.
+
+**Hard calls go through the advisor.** Upstream has no advisor: a builder stops
+and escalates on any architectural decision the plan leaves open, and a
+reasoning block is answered with a more capable model. Ours points at the
+`advisor` skill in the places below and restates it in none. In the implementer
+prompt, the unsettled architectural decision moved out of the "STOP and
+escalate" list: the builder invokes the skill, asks the advisor itself by nested
+call, waits for the ruling, records it under `## Advisor rulings` in the build
+report, and carries on — a failed call, or a question that was the user's, still
+returns `BLOCKED` or `NEEDS_CONTEXT`. In "Handle the return", a `BLOCKED` for a
+reasoning problem gets an advisor ruling before any re-dispatch. The two "your
+human partner's call" passages — a wrong plan, and plan-mandated findings — go
+through the skill's tiers, which say whether the user answers or the advisor
+stands in. "Running inline" gained the own-call triggers. Integration at
+"Finish" is deliberately untouched: the advisor stands in for judgment, never
+for permission. If a re-sync restores "STOP and escalate" for the architectural
+decision, the builder is back to a round trip per fork; if a later edit routes
+integration, merging or any confirmation through the advisor, it regresses this
+intent.
 
 Ported close to verbatim, and worth keeping that way: the adjudication rules —
 they encode real failures. (The per-task fix loop and its five-round breaker
