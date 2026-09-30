@@ -53,8 +53,8 @@ other flows. The flow:
    and for real or personal data. Uploads are irreversible (no delete API).
    Then upload with `gh-upload.sh`.
 5. **Compose the body**: what & why in a few sentences, hero image above
-   the fold, before/after as a two-column table of width-constrained
-   `<img>` tags, supporting shots in `<details>`, a caption on every image.
+   the fold, every image inline at `width="100%"`, one per row (no
+   side-by-side tables, no `<details>`), a caption on every image.
    Write the body to a file, never a long `--body` string.
 6. **Attach.** New PR → `gh pr create --draft`, base branch auto-detected.
    Existing PR → show the user the full body and wait for approval before
@@ -67,7 +67,7 @@ other flows. The flow:
 
 | The change is | Show |
 | --- | --- |
-| A visual change to existing UI | Before/after, two-column table |
+| A visual change to existing UI | Before/after, stacked |
 | A new screen, flow or feature | A short tour — 1–4 captioned shots |
 | An interaction or multi-step flow | An animated GIF (≤ ~6 s, ≤ 10 MB) |
 | Architecture, data flow, state machine | A mermaid diagram (no upload) |

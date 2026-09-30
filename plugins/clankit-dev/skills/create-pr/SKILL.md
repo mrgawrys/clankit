@@ -30,7 +30,7 @@ Read the diff first, then choose. Most PRs need exactly one of these:
 
 | The change is | Show | Notes |
 | --- | --- | --- |
-| A visual change to existing UI | **Before / after**, two-column table | Before comes from the base branch — see Step 3. No cheap "before"? Ship the after states as a tour |
+| A visual change to existing UI | **Before / after**, stacked | Before comes from the base branch — see Step 3. No cheap "before"? Ship the after states as a tour |
 | A new screen, flow or feature | **A short tour** — 1–4 shots of the states that matter, captioned | Not every state. Empty, filled and error usually suffice |
 | An interaction, animation or multi-step flow | **An animated GIF** | Keep under ~6 s and 10 MB; GIFs animate inline |
 | Architecture, data flow, state machine | **A mermaid diagram** — Step 4 | Node-and-edge structure; no image, no upload |
@@ -159,23 +159,31 @@ If it exits non-zero, stop. Never put an unverified URL in a PR body.
 ## Step 6 — Compose the body
 
 What & why in a few sentences — the prose still carries the PR; images
-support it. Constrain widths; a raw screenshot renders enormous:
+support it.
+
+**Every image inline, full width, one per row.** Reviewers read screenshots
+at the size the body renders them — few click through, and on private repos
+the click-through link expires within minutes. Side-by-side tables, pixel
+widths and `<details>` shrink or hide screenshots until they are unreadable:
 
 ```markdown
-| Before | After |
-| --- | --- |
-| <img src="$BEFORE" width="380"> | <img src="$AFTER" width="380"> |
+<img src="$BEFORE" width="100%">
+
+*Before: …*
+
+<img src="$AFTER" width="100%">
+
+*After: …*
 ```
 
-`<details><summary>…</summary>` is the right home for supporting shots so the
-description stays scannable. **Caption every image** with what the reviewer
-should notice — an uncaptioned screenshot is decoration.
+Use `width="100%"`, not a bare `<img>` — without it, a screenshot narrower
+than the column stays at its natural size. **Caption every image** with what
+the reviewer should notice — an uncaptioned screenshot is decoration.
 
 For a full showcase, this order reads well — skip any section you have no
 material for, never pad: what changed (with the hero image **above the
-fold**), before/after table, a mermaid of how it fits together, other states
-in `<details>`. Six screenshots of the same component is not a showcase, it
-is noise.
+fold**), before/after, a mermaid of how it fits together, other states.
+Six screenshots of the same component is not a showcase, it is noise.
 
 Write the body to a file; long `--body` strings get mangled by the shell.
 
