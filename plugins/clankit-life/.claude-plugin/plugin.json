@@ -1,6 +1,6 @@
 {
   "name": "clankit-life",
-  "description": "Personal-life skills: learn (adaptive learning companion with spaced repetition), writing-companion (listening-first journaling companion), mock-interview (simulated coding, architecture, and Q&A interview rounds), compress-text (glance-read prose), one-at-a-time (one topic per reply on request)",
+  "description": "Personal-life skills: learn (adaptive learning companion with spaced repetition), writing-companion (listening-first journaling companion), mock-interview (simulated coding, architecture, and Q&A interview rounds), compress-text (glance-read prose), one-at-a-time (one topic per reply on request), bake (a mode for working stoned: two options, no recommendations, riffing)",
   "author": {
     "name": "Michal Gawrys"
   }
