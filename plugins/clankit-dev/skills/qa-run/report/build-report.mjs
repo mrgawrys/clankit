@@ -347,35 +347,47 @@ const referenceItems = [
   ...(unplaced.length ? [{ href: '#evidence', label: 'Further evidence', n: '→' }] : []),
 ];
 
+const findingLink = (finding) => ({
+  href: `#finding-${finding.id}`,
+  label: finding.area ?? finding.title,
+  n: finding.id,
+});
+const capitalize = (text) => text[0].toUpperCase() + text.slice(1);
+
+// A rail entry with `items` renders as a fold; the rest are links.
 const railGroups = [
   {
     label: 'Issues',
-    href: '#issues',
-    items: [...findings.values()].map((finding) => ({
-      href: `#finding-${finding.id}`,
-      label: finding.area ?? finding.title,
-      n: finding.id,
-    })),
+    count: findings.size,
+    items: [
+      { href: '#issues', label: 'At a glance', n: '!' },
+      ...(findingGroups.length > 1
+        ? findingGroups.map((group) => ({ label: capitalize(KIND_LABEL[group.kind]), items: group.items.map(findingLink) }))
+        : [...findings.values()].map(findingLink)),
+    ],
   },
   ...sectionGroups.map((group) => ({
     label: group.name,
-    href: `#${group.anchor}`,
     items: group.sections.map((section) => ({
       href: `#${section.anchor}`,
       label: section.title,
       n: section.n.replace('§', ''),
     })),
   })),
-  ...(referenceItems.length ? [{ label: 'Reference', href: '#reference', items: referenceItems }] : []),
+  ...(referenceItems.length ? [{ label: 'Reference', items: referenceItems }] : []),
 ];
 
-const renderRailGroup = (group) => `
-      <li>
-        <a class="rail-label" href="${group.href}">${esc(group.label)}</a>
-        <ol>${group.items.map((item) => `<li><a href="${item.href}"><i>${esc(item.n)}</i>${esc(item.label)}</a></li>`).join('')}</ol>
-      </li>`;
+const renderRailItem = (item) =>
+  item.items
+    ? `
+      <li><details>
+        <summary><span class="rail-label">${esc(item.label)}</span><span class="rail-count">${item.count ?? item.items.length}</span></summary>
+        <ol>${item.items.map(renderRailItem).join('')}</ol>
+      </details></li>`
+    : `<li><a href="${item.href}"><i>${esc(item.n)}</i>${esc(item.label)}</a></li>`;
 
-const page = `<title>${esc(run.title ?? 'QA run')}</title>
+const page = `<meta charset="utf-8">
+<title>${esc(run.title ?? 'QA run')}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   :root {
@@ -519,7 +531,18 @@ const page = `<title>${esc(run.title ?? 'QA run')}</title>
 
   /* ---- contents rail ---- */
   .rail { font-family: var(--sans); font-size: 14px; }
-  @media (min-width: 1100px) { .rail { position: sticky; top: 32px; } }
+  @media (min-width: 1100px) {
+    .rail {
+      position: sticky;
+      top: 32px;
+      max-height: calc(100vh - 64px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      padding: 2px 10px 2px 4px;
+      margin-left: -4px;
+    }
+  }
   .rail p {
     font-family: var(--mono);
     font-size: 11px;
@@ -529,18 +552,39 @@ const page = `<title>${esc(run.title ?? 'QA run')}</title>
     margin: 0 0 12px;
   }
   .rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
-  .rail .rail-groups { gap: 20px; }
-  .rail .rail-groups > li > ol { margin-top: 9px; padding-left: 12px; border-left: 1px solid var(--line); }
-  .rail a.rail-label {
+  .rail .rail-groups { gap: 16px; }
+  .rail details > ol { margin-top: 9px; padding-left: 12px; border-left: 1px solid var(--line); }
+  .rail summary {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    list-style: none;
     font-family: var(--mono);
     font-size: 11px;
     letter-spacing: .1em;
     text-transform: uppercase;
-    font-weight: 600;
+    color: var(--muted);
+    border-radius: 3px;
   }
-  .rail a { color: var(--ink); text-decoration: none; display: flex; gap: 9px; line-height: 1.35; }
-  .rail a:hover { color: var(--accent); }
+  .rail summary::-webkit-details-marker { display: none; }
+  .rail summary::before { content: '\\25B8'; flex: 0 0 auto; letter-spacing: 0; }
+  .rail details[open] > summary::before { transform: rotate(90deg); }
+  .rail summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .rail-groups > li > details > summary { color: var(--ink); font-weight: 600; }
+  .rail .rail-groups summary:hover { color: var(--accent); }
+  .rail-count { margin-left: auto; font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .rail a { position: relative; color: var(--ink); text-decoration: none; display: flex; gap: 9px; line-height: 1.35; }
+  .rail a:hover, .rail a[aria-current] { color: var(--accent); }
   .rail a i { font-family: var(--mono); font-style: normal; color: var(--muted); font-size: 12px; padding-top: 2px; }
+  .rail a[aria-current]::before {
+    content: '';
+    position: absolute;
+    left: -13px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--accent);
+  }
 
   /* ---- sections ---- */
   main { display: grid; gap: clamp(44px, 6vw, 88px); min-width: 0; }
@@ -879,7 +923,7 @@ const page = `<title>${esc(run.title ?? 'QA run')}</title>
 
   <nav class="rail" aria-label="Contents">
     <p>Contents</p>
-    <ol class="rail-groups">${railGroups.map(renderRailGroup).join('')}</ol>
+    <ol class="rail-groups">${railGroups.map(renderRailItem).join('')}</ol>
   </nav>
 
   <main>
@@ -998,6 +1042,73 @@ const page = `<title>${esc(run.title ?? 'QA run')}</title>
   });
   window.addEventListener('hashchange', () => reveal(location.hash));
   reveal(location.hash)?.scrollIntoView();
+
+  // The rail marks what is being read. Folds open only on the wide layout: there the rail
+  // scrolls by itself, while above the content an unfolding group would shove the page.
+  const rail = document.querySelector('.rail');
+  const wide = matchMedia('(min-width: 1100px)');
+  const entries = [...rail.querySelectorAll('a[href^="#"]')]
+    .map((link) => ({ link, target: document.getElementById(decodeURIComponent(link.hash.slice(1))) }))
+    .filter((entry) => entry.target);
+  let current = null;
+  let unfolded = null;
+
+  const follow = () => {
+    const line = innerHeight / 4;
+    let link = null;
+    let best = -Infinity;
+    entries.forEach((entry) => {
+      const top = entry.target.getBoundingClientRect().top;
+      if (top <= line && top > best) [link, best] = [entry.link, top];
+    });
+    let moved = link !== current;
+    if (moved) {
+      current?.removeAttribute('aria-current');
+      link?.setAttribute('aria-current', 'location');
+      current = link;
+    }
+    if (!current || !wide.matches) return;
+
+    const folds = [];
+    for (let fold = current.closest('details'); fold; fold = fold.parentElement.closest('details')) folds.push(fold);
+    // Re-folding is reserved for folds the rail opened itself, so a group the reader opened stays open.
+    if (folds[0] !== unfolded) {
+      unfolded = folds[0];
+      rail.querySelectorAll('details[data-auto]').forEach((fold) => {
+        if (folds.includes(fold)) return;
+        fold.open = false;
+        delete fold.dataset.auto;
+      });
+      folds.filter((fold) => !fold.open).forEach((fold) => {
+        fold.open = true;
+        fold.dataset.auto = '';
+      });
+      moved = true;
+    }
+    if (!moved || !current.offsetParent) return;
+    const box = rail.getBoundingClientRect();
+    const at = current.getBoundingClientRect();
+    if (at.top < box.top + 32 || at.bottom > box.bottom - 32) rail.scrollTop += at.top - box.top - box.height / 3;
+  };
+
+  rail.addEventListener('click', (event) => {
+    const fold = event.target.closest('summary')?.parentElement;
+    if (fold) delete fold.dataset.auto;
+  });
+  let queued = false;
+  addEventListener('scroll', () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      follow();
+    });
+  }, { passive: true });
+  wide.addEventListener('change', () => {
+    unfolded = null;
+    follow();
+  });
+  follow();
 </script>
 `;
 
