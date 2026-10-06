@@ -204,6 +204,6 @@ say that in one line rather than padding the description.
 ## Unattended runs
 
 When invoked from an autonomous flow (e.g. `autopilot`) with no human to
-answer the Step 2 gate: skip the gate, act conservatively. Mermaid and panels
-freely; screenshots only when capturable non-interactively; the
-inspect-before-upload rule holds in full.
+answer the Step 2 gate: skip the gate, not the work — start Storybook or the
+dev server and capture as usual. Skip a shot only if it needs the user, and
+say why. The inspect-before-upload rule holds in full.
