@@ -124,6 +124,12 @@ out. One or two sentences are enough: what could be extracted and where it could
 live (open source, e.g. clankit, or the company's shared repo). Just flag it;
 don't build the extraction unless asked.
 
+## Heavy Commands
+
+Test suites, typechecks and builds run one at a time — never backgrounded
+alongside each other. Narrowest scope first: one test file before a whole suite.
+Parallel jest + an 8 GB `tsc` once ran the Mac out of memory.
+
 ## Context Budget
 
 When you see `Context: X tokens used`, that's your context window filling up.
