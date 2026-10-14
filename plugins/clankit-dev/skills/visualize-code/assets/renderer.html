@@ -66,7 +66,7 @@
   .view { position: relative; height: 100%; overflow: auto; }
   /* The canvas is an unbounded plane: the stage is translated and scaled, not
      scrolled, so panning never hits an edge the way scrollLeft >= 0 would. */
-  #canvas { overflow: hidden; cursor: grab; }
+  #canvas { overflow: hidden; cursor: grab; -webkit-user-select: none; user-select: none; }
   .stage { position: relative; transform-origin: 0 0; }
   #canvas.panning { cursor: grabbing; }
   #canvas.panning .mod { pointer-events: none; }
