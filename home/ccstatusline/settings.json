@@ -1,0 +1,84 @@
+{
+  "version": 3,
+  "lines": [
+    [
+      {
+        "id": "63b6b66f-e202-4f02-b2be-f2aed3638f51",
+        "type": "context-length",
+        "color": "brightGreen"
+      },
+      {
+        "id": "d0cddaec-4738-43a8-9938-e1a335766711",
+        "type": "separator"
+      },
+      {
+        "id": "811ddf1d-eb9e-4d7c-ae9b-453edea1c638",
+        "type": "session-cost",
+        "color": "brightRed",
+        "rawValue": false
+      },
+      {
+        "id": "6",
+        "type": "separator"
+      },
+      {
+        "id": "fb07e6b5-37da-4594-bd25-4d7091865700",
+        "type": "session-usage",
+        "rawValue": true
+      },
+      {
+        "id": "31c6b878-84ec-4511-8f77-9b1eb1b4bccf",
+        "type": "separator"
+      },
+      {
+        "id": "77734e83-2960-4bcd-8751-5e46e59abdd0",
+        "type": "git-root-dir",
+        "color": "brightGreen"
+      },
+      {
+        "id": "2",
+        "type": "separator",
+        "color": "white"
+      },
+      {
+        "id": "5",
+        "type": "git-branch",
+        "color": "brightYellow"
+      },
+      {
+        "id": "tomito-separator",
+        "type": "separator"
+      },
+      {
+        "id": "tomito",
+        "type": "custom-command",
+        "commandPath": "\"$HOME/.config/ccstatusline/tomito-status\"",
+        "timeout": 1000,
+        "color": "brightRed"
+      }
+    ],
+    [],
+    []
+  ],
+  "flexMode": "full-minus-40",
+  "compactThreshold": 60,
+  "colorLevel": 2,
+  "defaultPaddingSide": "both",
+  "inheritSeparatorColors": false,
+  "globalBold": false,
+  "gitCacheTtlSeconds": 5,
+  "minimalistMode": false,
+  "powerline": {
+    "enabled": false,
+    "separators": [
+      ""
+    ],
+    "separatorInvertBackground": [
+      false
+    ],
+    "startCaps": [],
+    "endCaps": [],
+    "autoAlign": false,
+    "continueThemeAcrossLines": false
+  }
+}

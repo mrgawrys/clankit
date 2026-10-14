@@ -2,3 +2,6 @@
 
 # Skill scratch space: brainstorm sessions and plan workspaces.
 .clankit/
+
+# Types the engine lays beside a mod it hot-reloads.
+plugins/*/.claude-plugin/types/

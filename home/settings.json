@@ -36,7 +36,8 @@
   "statusLine": {
     "type": "command",
     "command": "ccstatusline",
-    "padding": 0
+    "padding": 0,
+    "refreshInterval": 1
   },
   "enabledPlugins": {
     "code-review@claude-plugins-official": true,

@@ -16,6 +16,12 @@
       "description": "Personal-life skills: learn, writing-companion",
       "source": "./plugins/clankit-life",
       "category": "productivity"
+    },
+    {
+      "name": "tomito",
+      "description": "Tomito pomodoro (macOS): asks to start focus when you type, a band when focus ends, resets daily, /pomo controls",
+      "source": "./plugins/tomito",
+      "category": "productivity"
     }
   ]
 }

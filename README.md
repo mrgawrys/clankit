@@ -6,12 +6,13 @@ global `~/.claude` config needed to bootstrap a fresh machine.
 
 Two layers:
 
-- **`plugins/`** — a personal Claude Code plugin marketplace with two plugins:
+- **`plugins/`** — a personal Claude Code plugin marketplace:
   `clankit-dev` (dev/work skills, hooks, and the session bootstrap that routes
-  between them) and `clankit-life` (personal-life skills), installable
-  independently per machine.
-- **`home/`** — the `~/.claude` layer: global `CLAUDE.md` and a `settings.json`
-  bootstrap template. Installed by `install.sh` as symlinks, so this repo stays
+  between them), `clankit-life` (personal-life skills) and `tomito` (a mod
+  driving the Tomito pomodoro app), installable independently per machine.
+- **`home/`** — the `~/.claude` layer: global `CLAUDE.md`, a `settings.json`
+  bootstrap template, and the [ccstatusline](https://github.com/sirmalloc/ccstatusline)
+  status bar layout. Installed by `install.sh` as symlinks, so this repo stays
   the source of truth.
 
 Shell config lives elsewhere: if Claude Code reads it, it belongs here; if the
@@ -27,6 +28,7 @@ The two layers install separately and update differently.
 /plugin marketplace add mrgawrys/clankit
 /plugin install clankit-dev@clankit
 /plugin install clankit-life@clankit   # optional — personal-life skills
+/plugin install tomito@clankit         # optional — macOS + the Tomito app
 ```
 
 **The `~/.claude` layer** — needs a checkout, since `install.sh` symlinks into it:
@@ -114,6 +116,23 @@ are in [`plugins/clankit-dev/README.md`](plugins/clankit-dev/README.md).
 |-------|---------|
 | `learn` | Adaptive learning companion with spaced repetition; notes + review queues under `.learn/` by default, paths overridable via project CLAUDE.md |
 | `writing-companion` | Listening-first journaling companion; surfaces connected notes using whatever search tools the project declares |
+
+### tomito — the Tomito pomodoro, from Claude Code
+
+A mod (function hooks) for the Tomito macOS app, through
+its AppleScript commands:
+
+- Typing while a focus session is idle or paused raises a band above the
+  prompt: **Start** or **Not now**, which quiets every window for 5 minutes.
+  Breaks never start on their own.
+- The first check on a new day relaunches an idle or paused Tomito, back to a
+  full session with none counted (it has no reset command).
+- When focus ends, a band above the prompt offers **Start break** / **Skip break**.
+- `/pomo start|pause|resume|stop|skip`, or `/pomo` for the time left.
+
+The countdown itself sits in the status bar: `home/ccstatusline/tomito-status`
+is a custom-command widget, refreshed every second by the template's
+`statusLine.refreshInterval`.
 
 ## Two accounts on one machine
 

@@ -1,0 +1,9 @@
+{
+  "name": "tomito",
+  "version": "0.1.0",
+  "description": "Drives the Tomito pomodoro app (macOS): asks above the prompt to start or resume focus when you type (5-min snooze), a band when focus ends, a fresh timer each day, and /pomo to start, pause, stop or skip",
+  "author": {
+    "name": "Michal Gawrys"
+  },
+  "types": "./types/index.d.ts"
+}

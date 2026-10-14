@@ -22,6 +22,10 @@ link() {
 
 link "$KIT_DIR/home/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
 
+# The status bar's widget layout, shared by every config store; its custom-command widgets live beside it.
+mkdir -p "$HOME/.config"
+link "$KIT_DIR/home/ccstatusline" "$HOME/.config/ccstatusline"
+
 # settings.json is a bootstrap template, not a symlink — live settings accrue
 # machine-specific state (granted permissions, hooks added by installed tools).
 if [ ! -f "$CLAUDE_DIR/settings.json" ]; then
@@ -37,4 +41,5 @@ Done. Next, inside Claude Code:
   /plugin marketplace add $KIT_DIR
   /plugin install clankit-dev@clankit
   /plugin install clankit-life@clankit
+  /plugin install tomito@clankit        # optional: macOS + the Tomito app
 EOF
