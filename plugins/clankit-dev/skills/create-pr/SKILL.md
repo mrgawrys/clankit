@@ -158,8 +158,22 @@ If it exits non-zero, stop. Never put an unverified URL in a PR body.
 
 ## Step 6 — Compose the body
 
-What & why in a few sentences — the prose still carries the PR; images
-support it.
+The body is for humans deciding how to review. Reviewers run AI on the diff
+anyway, so detail they can regenerate from the code is noise. One screen,
+tops.
+
+- **Open with a TLDR** — 1–2 sentences or up to 4 bullets, before anything
+  else. Enough to understand the PR without reading on.
+- **What & why, a few sentences.** Provenance counts ("mirrors the existing
+  export endpoint, most code copied from there") — it tells the reviewer what
+  is actually new versus borrowed. The prose carries the PR; images support it.
+- **Optionally:** what to look at in particular; what this PR is *not*
+  (deferred, out of scope, known gaps); related PRs, docs, tickets.
+- **Never:** module-by-module change lists, function or file inventories, API
+  contract dumps, or a Verification section — CI already says the tests pass.
+  Verification earns a mention only when it reports real manual or usability
+  testing. Detail genuinely worth keeping goes in a collapsed `<details>`
+  appendix at the bottom, a follow-up comment, or a linked doc.
 
 **Every image inline, full width, one per row.** Reviewers read screenshots
 at the size the body renders them — few click through, and on private repos
@@ -181,8 +195,8 @@ than the column stays at its natural size. **Caption every image** with what
 the reviewer should notice — an uncaptioned screenshot is decoration.
 
 For a full showcase, this order reads well — skip any section you have no
-material for, never pad: what changed (with the hero image **above the
-fold**), before/after, a mermaid of how it fits together, other states.
+material for, never pad: the TLDR, what changed (with the hero image **above
+the fold**), before/after, a mermaid of how it fits together, other states.
 Six screenshots of the same component is not a showcase, it is noise.
 
 Write the body to a file; long `--body` strings get mangled by the shell.
