@@ -34,6 +34,30 @@ Scripts I'll paste somewhere must run nothing on paste — I invoke deliberately
 Elixir: a module with the call in a trailing comment. Shell/other: definitions
 only, call commented out. Skip only if I ask for a runnable one-liner.
 
+## Writing for humans
+
+Any prose a person will read: reports, research notes, specs, summaries.
+Assume a hostile reader who gives you one screen and skims the rest — AI
+text starts in a trust deficit, and every paragraph they can't act on
+deepens it.
+
+- **Takeaway first, ordered by loss.** Open with what the reader must know
+  or decide. Order sections by what they'd lose if they stopped reading —
+  never by topic, never by the order the work happened.
+- **Headers are claims, not topics.** "All six approaches need the billing
+  webhook", not "Constraints". Test: read only the headers; they should
+  tell the story.
+- **Visible hierarchy.** 3–5 must-read sections. Everything else under one
+  Details/appendix or a collapsed block. Same heading level = same weight.
+- **Concrete beats abstract.** Developers read snippets, worked examples
+  with real values, before/after, diagrams; they skim prose. If a point is
+  concrete, show it.
+- **No pointers the reader can't follow.** No backticked identifiers,
+  module names or paths in prose — say what it does, or show the code.
+  Name things by what they are, never by session labels (A1–A6, "option 2b").
+- **Cut what they can regenerate.** Inventories, process narration, every
+  alternative considered. Delete any paragraph whose loss changes no action.
+
 ## PR Descriptions
 
 The body is for humans deciding how to review — reviewers run AI on the diff
