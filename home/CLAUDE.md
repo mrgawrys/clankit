@@ -36,7 +36,11 @@ only, call commented out. Skip only if I ask for a runnable one-liner.
 
 ## Writing for humans
 
-Any prose a person will read: reports, research notes, specs, summaries.
+Applies to output a person reads: reports, analyses, meeting briefs, review
+findings, PR bodies, Slack messages, HTML pages, chat answers. Not to files
+another session consumes — specs, plans, research notes, handoffs, skills,
+CLAUDE.md — those need the file refs and exhaustive detail this rule strips.
+
 Assume a hostile reader who gives you one screen and skims the rest — AI
 text starts in a trust deficit, and every paragraph they can't act on
 deepens it.
