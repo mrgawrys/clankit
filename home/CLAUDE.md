@@ -50,7 +50,8 @@ deepens it.
   never by topic, never by the order the work happened.
 - **Headers are claims, not topics.** "All six approaches need the billing
   webhook", not "Constraints". Test: read only the headers; they should
-  tell the story.
+  tell the story. Not for issue or PR titles — those name the change
+  ("Make search shareable as a link"), and the problem goes in the body.
 - **Visible hierarchy.** 3–5 must-read sections. Everything else under one
   Details/appendix or a collapsed block. Same heading level = same weight.
 - **Concrete beats abstract.** Developers read snippets, worked examples
