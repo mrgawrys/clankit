@@ -144,7 +144,8 @@ When I say "open <file>:<line>" (inside Zellij), pop nvim in a floating pane in
 
 Specs to `docs/specs/`, plans to `docs/plans/`, other docs to
 `docs/<category>/`. A design document goes to `docs/specs/` even if a repo
-keeps other things elsewhere.
+keeps other things elsewhere — unless the repo's checked-in CLAUDE.md defines
+its own doc layout.
 
 ## Suggest Reusable Extraction
 
