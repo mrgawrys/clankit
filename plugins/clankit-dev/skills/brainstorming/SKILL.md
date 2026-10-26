@@ -38,8 +38,8 @@ You MUST complete these in order.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write the spec** — to `docs/specs/`, by default always. Self-review it, then ask the user to review it (see below)
-7. **Ask which mode** — one `AskUserQuestion` call, the four modes from the session bootstrap. Not a yes/no on a mode you already picked
+6. **Write the spec** — to `docs/specs/`, by default always. Self-review it, then ask the user to review it (see below). If the user chose an overview, write that instead (see Overviews below)
+7. **Ask which mode** — one `AskUserQuestion` call, the four modes from the session bootstrap. Not a yes/no on a mode you already picked. After an overview, ask the starting-a-part question instead
 
 **Every gate here is a question you ask.** Steps 3, 4, 5 and 7 each end with the
 user answering something. The failure mode is converting one into an
@@ -66,8 +66,10 @@ digraph brainstorming {
     "Write spec doc" [shape=box];
     "Spec self-review\n(fix inline)" [shape=box];
     "User reviews spec?" [shape=diamond];
+    "An overview?" [shape=diamond];
     "Anything to build?" [shape=diamond];
     "Ask which mode\n(four named answers)" [shape=doublecircle];
+    "Ask about the first part\n(brainstorm / build / stop)" [shape=doublecircle];
     "Suggest next steps, stop" [shape=doublecircle];
 
     "Explore project context" -> "Ask clarifying questions";
@@ -79,7 +81,9 @@ digraph brainstorming {
     "Write spec doc" -> "Spec self-review\n(fix inline)";
     "Spec self-review\n(fix inline)" -> "User reviews spec?";
     "User reviews spec?" -> "Write spec doc" [label="changes requested"];
-    "User reviews spec?" -> "Anything to build?" [label="approved"];
+    "User reviews spec?" -> "An overview?" [label="approved"];
+    "An overview?" -> "Ask about the first part\n(brainstorm / build / stop)" [label="yes"];
+    "An overview?" -> "Anything to build?" [label="no"];
     "Anything to build?" -> "Ask which mode\n(four named answers)" [label="yes"];
     "Anything to build?" -> "Suggest next steps, stop" [label="no — the spec was the deliverable"];
 }
@@ -94,8 +98,7 @@ If the user already said where the work happens — a worktree, a branch, a repo
 **Understanding the idea:**
 
 - Check out the current project state first (files, docs, recent commits)
-- Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
-- If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec → plan → implementation cycle.
+- Before asking detailed questions, assess scope: if the request has several parts that each need their own design (e.g., "build a platform with chat, file storage, billing, and analytics"), say so and ask: one design, or an overview now with each part designed later? Never switch to an overview unasked, and don't spend questions refining details of a part before that's answered. See Overviews below.
 - For appropriately-scoped projects, ask questions one at a time to refine the idea
 - Prefer multiple choice questions when possible, but open-ended is fine too
 - Only one question per message - if a topic needs more exploration, break it into multiple questions
@@ -205,6 +208,48 @@ a sentence ending in "shall I proceed?".
 
 If there is nothing to build — the design was an essay, a decision, a document —
 the spec is the deliverable. Skip the menu and suggest what could come next.
+
+## Overviews
+
+When the user chose an overview over one design, the checklist runs at a higher
+altitude: clarifying questions settle the goal, the parts and their order, and
+what holds across all parts. A question that belongs to one part goes to
+Deferred, tagged with its part, unanswered. **The overview brainstorm designs no
+part** — that is each part's own brainstorm, later.
+
+Write it to `docs/specs/YYYY-MM-DD-<topic>-overview.md`, opening with this
+header instead of the spec header:
+
+```markdown
+# [Topic] — Overview
+
+> **This is an overview, not a design to build from.** Each part below gets
+> designed when work on it starts. Starting a part is a new ask: size it,
+> recommend brainstorming it or going straight to the build menu, and ask
+> which. Never build from this file.
+```
+
+Then four sections:
+
+| Section | Holds |
+|---|---|
+| **Goal** | One paragraph: what the whole effort delivers, and why. |
+| **Parts** | Table: # · part · scope (1–2 lines) · depends on · spec. The spec cell stays empty until that part's spec exists, then links to it. |
+| **Decisions that hold across parts** | Choices settled here for every part. A part's brainstorm takes them as given. |
+| **Deferred** | Questions left for a part's own brainstorm, each tagged with its part number. |
+
+Self-review as for a spec, plus one check: each part is small enough for a
+single spec. One that isn't becomes two parts. Commit, and ask the user to
+review it.
+
+**The terminal state is the session bootstrap's starting-a-part question** for
+the first part in order — *Brainstorm it / Build it / Stop here* — not the mode
+menu. There is nothing to build from an overview.
+
+**Brainstorming a part** takes the overview's cross-part decisions as given and
+its Deferred items for that part as the first questions. The part's spec carries
+the normal spec header plus a line `Part N of [overview](path)`, and gets linked
+in the overview's Parts table when it is committed.
 
 ## Visual Companion
 
