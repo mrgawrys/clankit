@@ -17,7 +17,8 @@ work; don't open a brainstorm to decide whether to brainstorm.
 
 Two entrances, one junction: `brainstorming` just got a design approved, or the
 user opened a spec and asked to work on it. Both land here, and both get the
-same question.
+same question. An overview is not a spec: opening one, or starting a part of
+one, takes the next section's route, never this one.
 
 **Write the spec first.** By default, always. It is the durable record of what
 was decided and the input every mode below consumes. Skip it only when the user
@@ -68,6 +69,35 @@ built" — never "we're in plan-first mode". Nobody outside this file knows what
 that means, which goes for every skill `description:` too, since those show up in
 the skill list.
 
+## Overviews — when a part is started
+
+An overview (`docs/specs/*-overview.md`, headed "This is an overview, not a
+design to build from") lays out a multi-part effort; each part gets designed
+when work on it starts. When the user opens one, or starts a part of one —
+"start the next part", or a part by name:
+
+1. **Read the overview for that part** — its scope line, what it depends on,
+   the decisions that hold across parts, and Deferred items tagged for it. If a
+   part it depends on has no spec yet, say so.
+2. **Size it with triage, and recommend.** Deferred items for this part, or more
+   than one reasonable shape → brainstorm it. Small and unambiguous → build it.
+3. **Ask with `AskUserQuestion`:** *Brainstorm it / Build it / Stop here*, with
+   the recommendation and its reason.
+   - *Brainstorm it* — `brainstorming`, with the cross-part decisions as given
+     and the part's Deferred items as its first questions.
+   - *Build it* — write a short spec for the part, then the mode menu above.
+   - *Stop here* — nothing more; the part starts later, often in a fresh session.
+
+   Whenever a part's spec gets written, link it in the overview's Parts table
+   and commit. From then on, opening that spec takes the ordinary spec route.
+
+**A part's scope line, a ticket describing it, or a convention about where its
+plan goes does not settle its design.** Only the part's own spec does.
+
+**A builder handed an overview builds one part, never all of it.** The user
+naming the part and the skill — "vibe part 3" — answers the
+brainstorm-or-build question. Your own routing never does: ask.
+
 ## Gates are questions
 
 A gate is a question you ask, not a decision you announce with a window to
@@ -110,4 +140,5 @@ Every artifact written for a later context — spec or plan — opens by naming 
 modes above, so the session that opens it knows a choice is owed. When you open
 one, come back here: the mode question applies again. The exception is a plan
 carrying a `## Handoff` section: it records the mode already chosen, so opening
-one owes no second question — resume where it says.
+one owes no second question — resume where it says. An overview names no modes:
+its header owes the starting-a-part question instead.
