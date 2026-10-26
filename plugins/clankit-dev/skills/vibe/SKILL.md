@@ -10,7 +10,12 @@ Build it now and stop when it works.
 
 ## First — here or elsewhere?
 
-Ask this before anything else, every time, with one `AskUserQuestion`:
+The context budget decides whether to ask: the turn carries a
+`Context: X tokens used` line.
+
+- **Below ~100K** — build here. No question; announce and start.
+- **Past ~100K** — ask, with one `AskUserQuestion`, and recommend a handoff: the
+  alternative is spending a degrading window on file reading.
 
 | Answer | What happens |
 |---|---|
@@ -18,15 +23,11 @@ Ask this before anything else, every time, with one `AskUserQuestion`:
 | **Hand off — capable** | one subagent, most capable model, high effort |
 | **Hand off — cheap** | one subagent, mid-tier model, standard effort |
 
-Recommend from the context budget, don't gate on it: the turn carries a
-`Context: X tokens used` line, and past ~100K a handoff is the recommended
-answer — the alternative is spending a degrading window on file reading. Below
-that, building here is recommended. Either way the user picks.
+A user who already said where — "hand it off", "do it here" — has answered;
+follow that at any budget. This holds for every route into vibe — typed
+`/vibe`, "just build it", or the menu's vibe answer.
 
-Every route into vibe gets this question — typed `/vibe`, "just build it", or
-the menu's vibe answer.
-
-**Announce after the answer:** "Vibing it — inline, no machinery" if building
+**Announce before starting:** "Vibing it — inline, no machinery" if building
 here, "Vibing it — handed to a subagent, no machinery" if not.
 
 ## What this means

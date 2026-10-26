@@ -28,7 +28,7 @@ says to.
 
 | Mode | Plan file | Gates | Runs as |
 |---|---|---|---|
-| **Vibe** | no | none — you eyeball the result | `vibe` — here, or one subagent; it asks |
+| **Vibe** | no | none — you eyeball the result | `vibe` — here, or one subagent; it asks only past ~100K context |
 | **Review each task** | no | per-task diff | `executing-plans` inline |
 | **Review at the end** | no | none | `executing-plans` from the spec |
 | **Plan first** | yes | asked once the plan exists | `writing-plans`, then the build question |
