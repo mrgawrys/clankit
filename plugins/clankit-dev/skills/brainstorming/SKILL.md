@@ -226,7 +226,8 @@ header instead of the spec header:
 > **This is an overview, not a design to build from.** Each part below gets
 > designed when work on it starts. Starting a part is a new ask: size it,
 > recommend brainstorming it or going straight to the build menu, and ask
-> which. Never build from this file.
+> which. Only a part the user names gets built straight from here, never
+> the whole file.
 ```
 
 Then four sections:
