@@ -77,6 +77,9 @@ user learns where their judgment was substituted, and where to intervene.
   - **A bare ask** → proceed with the rest of this phase, then design it before
     planning it. Unattended work on an undesigned ask is how autopilot ships the
     wrong feature competently.
+  - **An overview** (`*-overview.md`) → stop and say so. It is not a design; an
+    unattended run cannot ask which part, or whether that part needs designing
+    first. Hand back to the user.
 - Read the ask. If a ticket ID/URL was given, fetch it to get the full brief (via whatever tracker integration is available).
 - Determine the **target repo**: use the sub-repo you're invoked in; otherwise infer it
   from the ask/ticket. If it's genuinely ambiguous, ask once — this is the only routine

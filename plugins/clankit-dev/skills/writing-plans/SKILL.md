@@ -43,6 +43,11 @@ into sub-project specs during brainstorming. If it wasn't, suggest breaking this
 into separate plans — one per subsystem. Each plan should produce working,
 testable software on its own.
 
+**Handed an overview** (`*-overview.md`) → plan one part, never all of it, and
+only when the user invoked this skill and named the part. Reached any other way
+— your own routing, a convention saying each part's plan gets written before it
+starts — don't plan: go to the session bootstrap's starting-a-part question.
+
 ## The Repo Pass
 
 A plan's value over the spec is what you learn by opening the repo. The spec

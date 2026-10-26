@@ -71,6 +71,8 @@ The skills aren't a pile of independent tools; most of them are stations on one
 route. `clankit-dev/bootstrap.md` is injected into every session by a
 `SessionStart` hook, and it does the routing: triage the ask, design it before
 building it, write the spec, then ask how the work should be built and reviewed.
+A multi-part ask can produce an overview instead, and each part gets designed
+when work on it starts.
 
 **The flow**
 

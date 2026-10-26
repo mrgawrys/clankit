@@ -34,6 +34,9 @@ here, "Vibing it — handed to a subagent, no machinery" if not.
 
 - Work straight from whatever you hold — a spec, a plan, or the ask itself.
   Enough is decided to start; start.
+- **Handed an overview** (`*-overview.md`), build one part, never all of it.
+  Named ("vibe part 3") → build it from that part's row and the decisions that
+  hold across parts, no further question. Not named → ask which.
 - **No machinery.** No plan workspace, no derived task list shown for
   approval, no dispatched reviews. The user reviews by
   looking at the result. A handoff is one subagent doing all of the above work,

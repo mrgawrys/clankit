@@ -29,6 +29,9 @@ What you hold depends on the route that sent you here:
   the task file when they want the detail. That approved list is your task
   sequence — it is not a document, and it does not get written to
   `docs/plans/`.
+- **An overview** (`*-overview.md`) → build one part, never all of it. Ask
+  which part if the user didn't name one, write that part's short spec, link it
+  in the overview's Parts table, then treat it as the spec above.
 - **Neither — just an ask** → you are in the wrong skill. Go design it first
   with `brainstorming`.
 
