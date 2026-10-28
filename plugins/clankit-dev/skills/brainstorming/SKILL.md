@@ -101,7 +101,7 @@ If the user already said where the work happens — a worktree, a branch, a repo
 - Before asking detailed questions, assess scope: if the request has several parts that each need their own design (e.g., "build a platform with chat, file storage, billing, and analytics"), say so and ask: one design, or an overview now with each part designed later? Never switch to an overview unasked, and don't spend questions refining details of a part before that's answered. See Overviews below.
 - For appropriately-scoped projects, ask questions one at a time to refine the idea
 - Prefer multiple choice questions when possible, but open-ended is fine too
-- A question that needs explaining first is asked in plain text at the end of the explanation, never as a dialog under it — the dialog hides the turn's prose (see the session bootstrap)
+- A question that needs explaining first is asked in plain text at the end of the explanation, never as a dialog under it — prose before a tool call can reach the user only as a summary (see the session bootstrap)
 - Only one question per message - if a topic needs more exploration, break it into multiple questions
 - Focus on understanding: purpose, constraints, success criteria
 
@@ -116,7 +116,7 @@ If the user already said where the work happens — a worktree, a branch, a repo
 
 - Once you believe you understand what you're building, present the design
 - Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced
-- Ask after each section whether it looks right so far — in plain text, ending the message; a dialog would hide the section it asks about
+- Ask after each section whether it looks right so far — in plain text, ending the turn; a dialog would hide the section it asks about
 - Cover what the thing actually has. For software: architecture, components, data flow, error handling, testing — including the test seams, the public interfaces the tests will exercise. For anything else, the equivalent — the parts, how they fit together, what happens when it goes wrong
 - Be ready to go back and clarify if something doesn't make sense
 
