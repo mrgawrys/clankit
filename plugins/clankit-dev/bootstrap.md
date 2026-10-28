@@ -109,6 +109,14 @@ An answer to one question does not close another. A preference about *where* the
 work happens — a worktree, a branch, a repo — says nothing about which mode, and
 nothing about gates.
 
+**A question dialog hides the prose around it.** While `AskUserQuestion` is
+open the user sees only the dialog, and once answered the turn collapses — text
+written above it in the same turn goes unread. A dialog carries everything
+needed to answer it in its question, option descriptions and previews. When the
+answer needs more than fits there — an explanation, a table, a design section —
+write it, then end the turn with the question in plain text: numbered options,
+your recommendation, no dialog.
+
 **Gates belong to whoever is about to build.** A build with no gate decision
 behind it asks for one before task 1: *Review at the end* or *Review each task*.
 `writing-plans` asks when its plan is finished, and adds *Hand it off* — it
