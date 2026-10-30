@@ -147,6 +147,9 @@ Specs to `docs/specs/`, plans to `docs/plans/`, other docs to
 keeps other things elsewhere — unless the repo's checked-in CLAUDE.md defines
 its own doc layout.
 
+Plans are scaffolding, never committed: the code is their result. Specs are
+committed — they hold the decisions. Delete a plan once it's built.
+
 ## Suggest Reusable Extraction
 
 When work produces something useful beyond its original context — a script,
