@@ -3,9 +3,11 @@ import type { EngineInterface, RenderElement, RenderInput } from 'claude-code'
 import type { Diagram } from '../types'
 
 export const ALT = "This terminal can't draw images — open full size ↗"
+export const GONE = 'The rendered PNG is gone from the temp directory — ask for the diagram again.'
 const MAX_INLINE_BYTES = 2 * 1024 * 1024
 // A terminal cell is about twice as tall as it is wide.
 const CELL_ASPECT = 2
+const sizes = new Map<string, { width: number; height: number } | undefined>()
 
 export type PaneView = {
   list: readonly Diagram[]
@@ -41,6 +43,12 @@ export function fitCells(
   return { columns, rows }
 }
 
+// A PNG's path is its source's hash, so the size read once holds.
+async function headerSize($: EngineInterface, path: string) {
+  if (!sizes.has(path)) sizes.set(path, pngSize((await $.fs.read(path, { as: 'bytes' })).base64))
+  return sizes.get(path)
+}
+
 export async function drawPane(
   $: EngineInterface,
   e: RenderInput<'Pane'>,
@@ -60,15 +68,14 @@ export async function drawPane(
     </Box>
   )
 
+  const errorLine = (text: string) => (
+    <Box flexDirection="column">
+      {pager}
+      <Text color="red">{text}</Text>
+    </Box>
+  )
   const diagram = list[shown]
-  if (!diagram || 'error' in diagram) {
-    return (
-      <Box flexDirection="column">
-        {pager}
-        <Text color="red">{diagram?.error ?? 'Diagram missing.'}</Text>
-      </Box>
-    )
-  }
+  if (!diagram || 'error' in diagram) return errorLine(diagram?.error ?? 'Diagram missing.')
 
   const full = <Button key="open" label="open full size ↗" plain onPress={() => view.onOpen(diagram.path)} />
   if (e.surface !== 'terminal') {
@@ -80,12 +87,22 @@ export async function drawPane(
     )
   }
 
+  const stat = await $.fs.stat(diagram.path).catch(() => undefined)
+  if (stat?.kind !== 'file') return errorLine(GONE)
+
   const { Image } = $.ui.resolve(e)
-  const { base64 } = await $.fs.read(diagram.path, { as: 'bytes' })
+  let source: { png: string } | { file: string; format: 'png' }
+  let size: { width: number; height: number } | undefined
+  if (stat.size <= MAX_INLINE_BYTES) {
+    const { base64 } = await $.fs.read(diagram.path, { as: 'bytes' })
+    source = { png: base64 }
+    size = pngSize(base64)
+  } else {
+    source = { file: diagram.path, format: 'png' }
+    size = await headerSize($, diagram.path)
+  }
   const room = { columns: e.props.bodyColumns, rows: Math.max(1, e.props.scroll.bodyRows - 3) }
-  const cells = fitCells(pngSize(base64) ?? { width: 4, height: 3 }, room)
-  const source =
-    (base64.length * 3) / 4 <= MAX_INLINE_BYTES ? { png: base64 } : { file: diagram.path, format: 'png' as const }
+  const cells = fitCells(size ?? { width: 4, height: 3 }, room)
 
   return (
     <Box flexDirection="column">

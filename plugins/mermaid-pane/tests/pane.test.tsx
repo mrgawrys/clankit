@@ -34,11 +34,15 @@ function seed(on: On, values: { diagrams?: Diagram[]; isRendering?: boolean }) {
   })
 }
 
-function fakeHost(on: On, opened: string[][]) {
+function fakeHost(on: On, opened: string[][], disk: { size?: number; reads?: string[] } = {}) {
   mock.env(on, { SHELL: '/bin/sh', PATH: '/usr/bin' })
-  on('fs.read', () => ({ value: { base64: PNG_400x100 } }))
-  on('fs.stat', () => {
-    throw new Error('ENOENT')
+  on('fs.read', ($, e) => {
+    disk.reads?.push(e.path)
+    return { value: { base64: PNG_400x100 } }
+  })
+  on('fs.stat', ($, e) => {
+    if (e.path !== '/tmp/mermaid-pane/a.png' || disk.size === undefined) throw new Error(`ENOENT: ${e.path}`)
+    return { value: { kind: 'file', size: disk.size, mtimeMs: 0, isLink: false } }
   })
   on('process.run', ($, e) => {
     if (e.argv[0] === 'open') opened.push([...e.argv])
@@ -57,7 +61,7 @@ test('the pane says Rendering… while diagrams are on their way', async ($, on)
 
 test('the pane pages through the diagrams, the broken one showing its error line', async ($, on) => {
   seed(on, { diagrams: TWO })
-  fakeHost(on, [])
+  fakeHost(on, [], { size: 300 })
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
 
   expect(await ui.find({ type: 'Text', text: /1\/2/ })).toBeDefined()
@@ -77,7 +81,7 @@ test('the pane pages through the diagrams, the broken one showing its error line
 
 test('the image fills the pane width with its aspect kept, and carries the alt text', async ($, on) => {
   seed(on, { diagrams: TWO })
-  fakeHost(on, [])
+  fakeHost(on, [], { size: 300 })
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
 
   const image = await ui.find({ type: 'Image' })
@@ -91,10 +95,38 @@ test('the image fills the pane width with its aspect kept, and carries the alt t
   await ui.unmount()
 })
 
+test('a PNG past the inline cap is drawn from its file, its header read once across repaints', async ($, on) => {
+  const reads: string[] = []
+  seed(on, { diagrams: TWO })
+  fakeHost(on, [], { size: 3 * 1024 * 1024, reads })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+
+  await ui.press({ key: 'next' })
+  await ui.press({ key: 'next' })
+
+  expect((await ui.find({ type: 'Image' }))?.props).toMatchObject({
+    columns: 40,
+    rows: 5,
+    source: { file: '/tmp/mermaid-pane/a.png', format: 'png' },
+  })
+  expect(reads).toEqual(['/tmp/mermaid-pane/a.png'])
+  await ui.unmount()
+})
+
+test('a PNG the OS cleaned out of the temp directory says so instead of drawing', async ($, on) => {
+  seed(on, { diagrams: TWO })
+  fakeHost(on, [])
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+
+  expect(await ui.find({ type: 'Image' })).toBeUndefined()
+  expect(await ui.find({ type: 'Text', text: /gone from the temp directory/ })).toBeDefined()
+  await ui.unmount()
+})
+
 test('open full size hands the PNG to the OS viewer', async ($, on) => {
   const opened: string[][] = []
   seed(on, { diagrams: TWO })
-  fakeHost(on, opened)
+  fakeHost(on, opened, { size: 300 })
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
 
   await ui.press({ key: 'open' })
