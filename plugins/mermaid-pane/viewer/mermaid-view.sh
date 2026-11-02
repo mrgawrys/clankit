@@ -29,10 +29,13 @@ draw() {
   drawn=$(stty size)
   rows=${drawn% *}
   cols=${drawn#* }
+  height=$((rows - 2))
+  [ "$height" -gt 0 ] || height=1
+  [ "$cols" -gt 0 ] || cols=1
   printf '\033_Ga=d\033\\\033[2J\033[H'
   printf '\033[1mmermaid %d/%d\033[0m   \033[2m← → page · o open · q quit\033[0m\n' "$i" "$n"
   case $current in
-    png:*) "$chafa" -f kitty --probe off --size "${cols}x$((rows - 2))" "${current#png:}" ;;
+    png:*) "$chafa" -f kitty --probe off --size "${cols}x${height}" "${current#png:}" ;;
     error:*) printf '\nDiagram %d could not be rendered:\n\033[31m%s\033[0m\n' "$i" "${current#error:}" ;;
   esac
 }
