@@ -23,12 +23,13 @@ type Host = {
   closes: string[]
   panes: string[]
   waiting: string[]
+  system: string
 }
 
 // Stands for the engine and the machine. Nothing here answers for mmdc: a test that
 // would reach the renderer has no business here, so a call to it fails the test.
 function fakeHost(on: On, over: Partial<Host> = {}): Host {
-  const host: Host = { env: {}, files: [], toasts: [], runs: [], paths: [], opens: [], closes: [], panes: [], waiting: [], ...over }
+  const host: Host = { env: {}, files: [], toasts: [], runs: [], paths: [], opens: [], closes: [], panes: [], waiting: [], system: 'Darwin', ...over }
   mock.env(on, { SHELL: '/bin/sh', PATH: '/usr/bin', ...host.env })
   on('fs.stat', ($, e) => {
     if (!host.files.includes(e.path)) throw new Error(`ENOENT: ${e.path}`)
@@ -40,7 +41,9 @@ function fakeHost(on: On, over: Partial<Host> = {}): Host {
     host.runs.push(argv)
     host.paths.push(e.init?.env?.PATH)
     let stdout = ''
-    if (argv[0] === '/bin/sh') stdout = '/opt/tools/bin'
+    // A login profile that prints a banner must not leak into PATH.
+    if (argv[0] === '/bin/sh') stdout = 'Welcome back\n\n__mermaid_pane_path__/opt/tools/bin'
+    if (argv[0]?.endsWith('uname')) stdout = host.system
     if (argv[1] === 'action' && argv[2] === 'list-panes') {
       stdout = JSON.stringify([{ id: 4, is_plugin: false, tab_id: 1 }, { id: 4, is_plugin: true, tab_id: 0 }])
     }
@@ -142,7 +145,7 @@ test('/mermaid under Zellij reopens the last diagrams in a floating viewer in ou
   expect(runs[0]?.slice(-2)).toEqual(['png:/t/a.png', 'error:Error: Parse error on line 2:'])
   // The second open replaces the first: one viewer at a time.
   expect(host.runs).toContainEqual(['/opt/tools/bin/zellij', 'action', 'close-pane', '--pane-id', 'terminal_9'])
-  expect(host.runs[0]).toEqual(['/bin/sh', '-lc', 'printf %s "$PATH"'])
+  expect(host.runs[0]?.slice(0, 2)).toEqual(['/bin/sh', '-lc'])
   expect(new Set(host.paths.slice(1))).toEqual(new Set(['/opt/tools/bin']))
   expect(host.opens).toEqual([])
 })
@@ -158,4 +161,33 @@ test('/mermaid under Zellij without chafa says so and opens the PNGs in the OS v
     'mermaid-pane: chafa not found — install chafa to view diagrams inside Zellij; opening them in the OS viewer',
   ])
   expect(host.runs).toContainEqual(['open', '/t/a.png', '/t/c.png'])
+})
+
+test('the OS viewer is `open` on macOS even with xdg-open installed', async ($, on) => {
+  const host = fakeHost(on, {
+    env: { ZELLIJ: '0' },
+    files: ['/opt/tools/bin/zellij', '/opt/tools/bin/xdg-open', '/opt/tools/bin/open'],
+  })
+  seed(on, [{ path: '/t/a.png' }, { path: '/t/b.png' }])
+  await $.session.start(START)
+
+  await $.command.run(MERMAID)
+
+  expect(host.runs).toContainEqual(['/opt/tools/bin/open', '/t/a.png', '/t/b.png'])
+})
+
+// Some Linux distributions ship an unrelated `open` (openvt).
+test('the OS viewer is xdg-open elsewhere, one file at a time, even with an `open` installed', async ($, on) => {
+  const host = fakeHost(on, {
+    env: { ZELLIJ: '0' },
+    files: ['/opt/tools/bin/zellij', '/opt/tools/bin/open', '/opt/tools/bin/xdg-open'],
+    system: 'Linux',
+  })
+  seed(on, [{ path: '/t/a.png' }, { path: '/t/b.png' }])
+  await $.session.start(START)
+
+  await $.command.run(MERMAID)
+
+  const opened = host.runs.filter(argv => argv[0]?.endsWith('open'))
+  expect(opened).toEqual([['/opt/tools/bin/xdg-open', '/t/a.png'], ['/opt/tools/bin/xdg-open', '/t/b.png']])
 })

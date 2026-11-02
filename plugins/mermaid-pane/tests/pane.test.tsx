@@ -42,7 +42,7 @@ function fakeHost(on: On, opened: string[][]) {
   })
   on('process.run', ($, e) => {
     if (e.argv[0] === 'open') opened.push([...e.argv])
-    const stdout = e.argv[0] === '/bin/sh' ? '/usr/bin' : ''
+    const stdout = e.argv[0]?.endsWith('uname') ? 'Darwin' : ''
     return { value: { exitCode: 0, stdout, stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }
   })
 }
