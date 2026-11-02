@@ -8,8 +8,10 @@ Two layers:
 
 - **`plugins/`** — a personal Claude Code plugin marketplace:
   `clankit-dev` (dev/work skills, hooks, and the session bootstrap that routes
-  between them), `clankit-life` (personal-life skills) and `tomito` (a mod
-  driving the Tomito pomodoro app), installable independently per machine.
+  between them), `clankit-life` (personal-life skills), `tomito` (a mod
+  driving the Tomito pomodoro app) and `mermaid-pane` (a mod showing the
+  Mermaid diagrams in Claude's replies as images), installable independently
+  per machine.
 - **`home/`** — the `~/.claude` layer: global `CLAUDE.md`, a `settings.json`
   bootstrap template, and the [ccstatusline](https://github.com/sirmalloc/ccstatusline)
   status bar layout. Installed by `install.sh` as symlinks, so this repo stays
@@ -29,6 +31,7 @@ The two layers install separately and update differently.
 /plugin install clankit-dev@clankit
 /plugin install clankit-life@clankit   # optional — personal-life skills
 /plugin install tomito@clankit         # optional — macOS + the Tomito app
+/plugin install mermaid-pane@clankit   # optional — needs mmdc; chafa inside Zellij
 ```
 
 **The `~/.claude` layer** — needs a checkout, since `install.sh` symlinks into it:
@@ -135,6 +138,13 @@ its AppleScript commands:
 The countdown itself sits in the status bar: `home/ccstatusline/tomito-status`
 is a custom-command widget, refreshed every second by the template's
 `statusLine.refreshInterval`.
+
+### mermaid-pane — Mermaid diagrams as images
+
+A mod that renders the ```` ```mermaid ```` blocks in Claude's replies with
+`mmdc` and shows them: a floating pane inside Zellij (drawn by `chafa`), a pane
+beside the chat elsewhere. `/mermaid` shows the last reply's diagrams again.
+Details and requirements: [plugins/mermaid-pane/README.md](plugins/mermaid-pane/README.md).
 
 ## Two accounts on one machine
 
