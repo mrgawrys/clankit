@@ -22,6 +22,12 @@
       "description": "Tomito pomodoro (macOS): asks to start focus when you type, a band when focus ends, resets daily, /pomo controls",
       "source": "./plugins/tomito",
       "category": "productivity"
+    },
+    {
+      "name": "mermaid-pane",
+      "description": "Mermaid diagrams in Claude's replies shown as real images: a Zellij floating pane, or a pane beside the chat; /mermaid reopens them",
+      "source": "./plugins/mermaid-pane",
+      "category": "productivity"
     }
   ]
 }

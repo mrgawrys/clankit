@@ -1,0 +1,17 @@
+{
+  "name": "mermaid-pane",
+  "version": "0.1.0",
+  "description": "Renders the Mermaid diagrams in Claude's replies as real images: a floating pane under Zellij, a pane beside the chat elsewhere, /mermaid to reopen",
+  "author": {
+    "name": "Michal Gawrys"
+  },
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "mmdcPath": {
+      "type": "string",
+      "title": "mmdc path",
+      "description": "Absolute path to the Mermaid CLI (mmdc). Empty finds it on your login shell's PATH.",
+      "default": ""
+    }
+  }
+}
