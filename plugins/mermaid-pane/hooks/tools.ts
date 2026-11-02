@@ -1,6 +1,6 @@
 import type { EngineInterface } from 'claude-code'
 
-export type Tools = { path: string; mmdc?: string; chafa?: string; zellij?: string }
+export type Tools = { path: string; opener: string; mmdc?: string; chafa?: string; zellij?: string }
 
 // Claude Code's own PATH often lacks what a version manager adds in the login shell, `node` included.
 async function loginPath($: EngineInterface): Promise<string> {
@@ -26,10 +26,12 @@ async function find($: EngineInterface, path: string, name: string): Promise<str
 
 export async function resolveTools($: EngineInterface, mmdcOverride: string): Promise<Tools> {
   const path = await loginPath($)
-  const [mmdc, chafa, zellij] = await Promise.all([
+  const [mmdc, chafa, zellij, xdgOpen] = await Promise.all([
     mmdcOverride !== '' ? mmdcOverride : find($, path, 'mmdc'),
     find($, path, 'chafa'),
     find($, path, 'zellij'),
+    find($, path, 'xdg-open'),
   ])
-  return { path, mmdc, chafa, zellij }
+  // Some Linux distributions ship an unrelated `open` (openvt), so xdg-open wins where present.
+  return { path, opener: xdgOpen ?? 'open', mmdc, chafa, zellij }
 }

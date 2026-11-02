@@ -6,6 +6,7 @@ declare module 'claude-code' {
       diagrams: Shaped<Diagram[]>
       index: number
       isRendering: boolean
+      zellijPane: string
     }
   }
 }
