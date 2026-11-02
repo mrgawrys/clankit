@@ -22,12 +22,13 @@ type Host = {
   opens: string[]
   closes: string[]
   panes: string[]
+  waiting: string[]
 }
 
 // Stands for the engine and the machine. Nothing here answers for mmdc: a test that
 // would reach the renderer has no business here, so a call to it fails the test.
 function fakeHost(on: On, over: Partial<Host> = {}): Host {
-  const host: Host = { env: {}, files: [], toasts: [], runs: [], paths: [], opens: [], closes: [], panes: [], ...over }
+  const host: Host = { env: {}, files: [], toasts: [], runs: [], paths: [], opens: [], closes: [], panes: [], waiting: [], ...over }
   mock.env(on, { SHELL: '/bin/sh', PATH: '/usr/bin', ...host.env })
   on('fs.stat', ($, e) => {
     if (!host.files.includes(e.path)) throw new Error(`ENOENT: ${e.path}`)
@@ -59,7 +60,10 @@ function fakeHost(on: On, over: Partial<Host> = {}): Host {
     return { value: undefined }
   })
   on('ui.panes', () => ({
-    value: host.panes.map(id => ({ id, title: 'Diagrams', isShown: true, isFocused: false, isPlaced: true })),
+    value: [
+      ...host.panes.map(id => ({ id, title: 'Diagrams', isShown: true, isFocused: false, isPlaced: true })),
+      ...host.waiting.map(id => ({ id, title: 'Diagrams', isShown: false, isFocused: false, isPlaced: false })),
+    ],
   }))
   on('command.register', ($, e) => ({ value: { command: e.name } }))
   on('session.start', ($, e) => ({ cwd: e.cwd }))
@@ -109,6 +113,15 @@ test('/mermaid opens the pane when closed and closes it when open', async ($, on
   host.panes.push('mermaid')
   await $.command.run(MERMAID)
   expect(host.closes).toEqual(['mermaid'])
+})
+
+test('/mermaid opens a pane that waits undrawn on a narrow terminal, rather than closing it', async ($, on) => {
+  const host = fakeHost(on, { waiting: ['mermaid'] })
+  await $.session.start(START)
+
+  await $.command.run(MERMAID)
+  expect(host.opens).toEqual(['mermaid'])
+  expect(host.closes).toEqual([])
 })
 
 // chafa and zellij sit only on the login shell's PATH (/opt/tools/bin), not on Claude Code's own (/usr/bin).

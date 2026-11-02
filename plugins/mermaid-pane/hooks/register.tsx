@@ -87,7 +87,8 @@ async function onReplyLogged($: EngineInterface, sources: string[]) {
 async function runCommand($: EngineInterface) {
   const viewer = await activeViewer($)
   if (viewer === 'pane') {
-    const isOpen = (await $.ui.panes()).some(p => p.id === PANE)
+    // An unasked pane on a narrow terminal is open but undrawn: that one this opens, not closes.
+    const isOpen = (await $.ui.panes()).some(p => p.id === PANE && p.isPlaced)
     if (isOpen) {
       await $.ui.close({ id: PANE })
       return { text: 'Closed the diagrams pane.' }
