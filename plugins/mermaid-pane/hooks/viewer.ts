@@ -4,9 +4,9 @@ import type { Tools } from './tools'
 
 export type Viewer = 'zellij' | 'pane' | 'os'
 
-export function chooseViewer(isInZellij: boolean, tools: Pick<Tools, 'chafa'>): Viewer {
+export function chooseViewer(isInZellij: boolean, tools: Pick<Tools, 'chafa' | 'zellij'>): Viewer {
   if (!isInZellij) return 'pane'
-  return tools.chafa ? 'zellij' : 'os'
+  return tools.chafa && tools.zellij ? 'zellij' : 'os'
 }
 
 export async function openInOs($: EngineInterface, tools: Tools, paths: readonly string[]) {

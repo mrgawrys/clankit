@@ -14,10 +14,12 @@ import { launchViewer } from './zellij'
 export const MISSING_MMDC = 'mermaid-pane: mmdc not found — install @mermaid-js/mermaid-cli'
 export const MISSING_CHAFA =
   'mermaid-pane: chafa not found — install chafa to view diagrams inside Zellij; opening them in the OS viewer'
+export const MISSING_ZELLIJ = 'mermaid-pane: zellij not found on the login PATH — opening diagrams in the OS viewer'
 const PANE = 'mermaid'
 const TITLE = 'Diagrams'
 
-export const narrowToast = (n: number) => `${n} diagram${n === 1 ? '' : 's'} — /mermaid to view`
+const diagramCount = (n: number) => `${n} diagram${n === 1 ? '' : 's'}`
+export const narrowToast = (n: number) => `${diagramCount(n)} — /mermaid to view`
 
 const diagrams = atom({ plugin: 'mermaid-pane', key: 'diagrams' } as const, [] as Diagram[], {
   shape: 'diagrams-1',
@@ -25,10 +27,12 @@ const diagrams = atom({ plugin: 'mermaid-pane', key: 'diagrams' } as const, [] a
 const index = atom({ plugin: 'mermaid-pane', key: 'index' } as const, 0)
 const isRendering = atom({ plugin: 'mermaid-pane', key: 'isRendering' } as const, false)
 const zellijPane = atom({ plugin: 'mermaid-pane', key: 'zellijPane' } as const, '')
+const zellijSession = atom({ plugin: 'mermaid-pane', key: 'zellijSession' } as const, '')
 
 let mmdcOverride = ''
 let tools: Promise<Tools> | undefined
 let generation = 0
+const warned = new Set<string>()
 
 function getTools($: EngineInterface): Promise<Tools> {
   tools ??= resolveTools($, mmdcOverride)
@@ -43,14 +47,33 @@ async function openFull($: EngineInterface, path: string) {
   await openInOs($, await getTools($), [path])
 }
 
+function failure($: EngineInterface, error: unknown): string {
+  const text = `mermaid-pane: ${error instanceof Error ? error.message : String(error)}`
+  $.ui.log(text)
+  $.ui.toast(text)
+  return text
+}
+
+async function warnFallback($: EngineInterface) {
+  const t = await getTools($)
+  const missing = [...(t.chafa ? [] : [MISSING_CHAFA]), ...(t.zellij ? [] : [MISSING_ZELLIJ])]
+  for (const text of missing.filter(m => !warned.has(m))) {
+    warned.add(text)
+    $.ui.toast(text)
+  }
+}
+
 async function present($: EngineInterface, viewer: Viewer, list: readonly Diagram[]) {
   const t = await getTools($)
   if (viewer === 'os') return openInOs($, t, list.flatMap(d => ('path' in d ? [d.path] : [])))
-  if (viewer === 'zellij' && t.zellij && t.chafa) {
-    const previous = (await read($, zellijPane)) || undefined
-    const opened = await launchViewer($, { ...t, zellij: t.zellij, chafa: t.chafa }, list, previous)
-    await update($, zellijPane, () => opened ?? '')
-  }
+  if (viewer !== 'zellij' || !t.zellij || !t.chafa) return
+  const session = (await $.env.get('ZELLIJ_SESSION_NAME')) ?? ''
+  // State can outlive the Zellij session it was written in.
+  const isSameSession = (await read($, zellijSession)) === session
+  const previous = (isSameSession && (await read($, zellijPane))) || undefined
+  const opened = await launchViewer($, { ...t, zellij: t.zellij, chafa: t.chafa }, list, previous)
+  await update($, zellijPane, () => opened ?? '')
+  await update($, zellijSession, () => session)
 }
 
 async function onReply($: EngineInterface, sources: string[]) {
@@ -58,7 +81,7 @@ async function onReply($: EngineInterface, sources: string[]) {
   if (!t.mmdc) return $.ui.toast(MISSING_MMDC)
   const mmdc = t.mmdc
   const viewer = await activeViewer($)
-  if (viewer === 'os') $.ui.toast(MISSING_CHAFA)
+  if (viewer === 'os') await warnFallback($)
   const mine = ++generation
 
   if (viewer === 'pane') {
@@ -81,15 +104,15 @@ async function onReply($: EngineInterface, sources: string[]) {
 }
 
 async function onReplyLogged($: EngineInterface, sources: string[]) {
-  await onReply($, sources).catch(error => $.ui.log(`mermaid-pane: ${String(error)}`))
+  await onReply($, sources).catch((error: unknown) => failure($, error))
 }
 
 async function runCommand($: EngineInterface) {
   const viewer = await activeViewer($)
   if (viewer === 'pane') {
-    // An unasked pane on a narrow terminal is open but undrawn: that one this opens, not closes.
-    const isOpen = (await $.ui.panes()).some(p => p.id === PANE && p.isPlaced)
-    if (isOpen) {
+    // A pane opened unasked on a narrow terminal is listed but undrawn; show it rather than close it.
+    const isDrawn = (await $.ui.panes()).some(p => p.id === PANE && p.isPlaced)
+    if (isDrawn) {
       await $.ui.close({ id: PANE })
       return { text: 'Closed the diagrams pane.' }
     }
@@ -98,15 +121,19 @@ async function runCommand($: EngineInterface) {
   }
   const list = await read($, diagrams)
   if (list.length === 0) return { text: 'No diagrams in a reply yet.' }
-  if (viewer === 'os') $.ui.toast(MISSING_CHAFA)
-  await present($, viewer, list)
-  return { text: `Showing ${list.length} diagram${list.length === 1 ? '' : 's'}.` }
+  if (viewer === 'os') await warnFallback($)
+  const failed = await present($, viewer, list).then(
+    () => undefined,
+    (error: unknown) => failure($, error),
+  )
+  return { text: failed ?? `Showing ${diagramCount(list.length)}.` }
 }
 
 export const register: Register = (on, options) => {
   mmdcOverride = typeof options.mmdcPath === 'string' ? options.mmdcPath.trim() : ''
 
   on('session.start', async ($, e, next) => {
+    warned.clear()
     await $.command.register({
       name: 'mermaid',
       description: "Show the last reply's Mermaid diagrams again (in the pane, closes it when open)",

@@ -7,6 +7,7 @@ declare module 'claude-code' {
       index: number
       isRendering: boolean
       zellijPane: string
+      zellijSession: string
     }
   }
 }
