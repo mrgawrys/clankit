@@ -218,6 +218,51 @@ test('the OS viewer is xdg-open elsewhere, one file at a time, even with an `ope
 })
 
 // A PNG already on disk for the source is the render cache, so these reach no mmdc.
+test('a reply opens the pane as Rendering…, toasts when it cannot seat, then lands its diagrams', async ($, on) => {
+  const png = await pngOf('graph TD; A-->B')
+  const host = fakeHost(on, { env: { TMPDIR: '/t/' }, files: ['/opt/tools/bin/mmdc', png] })
+  const clock = mock.clock(on)
+  await $.session.start(START)
+
+  await $.turn.complete(TURN)
+  await clock.advance(1)
+  await settle()
+
+  expect(host.timeline).toEqual([
+    'set isRendering true',
+    'open mermaid',
+    'toast 1 diagram — /mermaid to view',
+    `set diagrams ${JSON.stringify({ shape: 'diagrams-1', value: [{ path: png }] })}`,
+    'set index 0',
+    'set isRendering false',
+  ])
+})
+
+test('a slower earlier reply never overwrites the diagrams of the one after it', async ($, on) => {
+  const first = await pngOf('graph TD; A-->B')
+  const second = await pngOf('graph LR; C-->D')
+  let release = () => {}
+  const host = fakeHost(on, {
+    env: { TMPDIR: '/t' },
+    files: ['/opt/tools/bin/mmdc', first, second],
+    holds: { [first]: new Promise<void>(resolve => (release = resolve)) },
+  })
+  const clock = mock.clock(on)
+  await $.session.start(START)
+
+  await $.turn.complete(TURN)
+  await $.turn.complete({ ...TURN, turnId: 't2', answer: '```mermaid\ngraph LR; C-->D\n```' })
+  await clock.advance(1)
+  await settle()
+  release()
+  await settle()
+
+  const landed = host.timeline.filter(line => line.startsWith('set diagrams'))
+  expect(landed).toEqual([`set diagrams ${JSON.stringify({ shape: 'diagrams-1', value: [{ path: second }] })}`])
+  expect(host.toasts).toEqual(['1 diagram — /mermaid to view', '1 diagram — /mermaid to view'])
+  expect(host.timeline.at(-1)).toBe('set isRendering false')
+})
+
 test('the missing-chafa toast shows once a session, not on every reply', async ($, on) => {
   const png = await pngOf('graph TD; A-->B')
   const host = fakeHost(on, {
