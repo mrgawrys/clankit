@@ -4,7 +4,6 @@ import type { Diagram } from '../types'
 import type { Tools } from './tools'
 
 const MMDC_TIMEOUT_MS = 60_000
-const done = new Map<string, Diagram>()
 
 async function sha256(text: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
@@ -27,14 +26,9 @@ export async function render(
   dir: string,
 ): Promise<Diagram> {
   const hash = await sha256(source)
-  const cached = done.get(hash)
-  if (cached) return cached
-
   const png = `${dir}/${hash}.png`
-  if (await $.fs.exists(png)) {
-    done.set(hash, { path: png })
-    return { path: png }
-  }
+  // Only the PNG on disk counts as cached: a failure is often the environment, fixed by the next try.
+  if (await $.fs.exists(png)) return { path: png }
 
   const input = `${dir}/${hash}.mmd`
   await $.fs.write(input, source)
@@ -46,10 +40,7 @@ export async function render(
     return { error: `mmdc did not finish: ${firstLine(String(error))}` }
   }
 
-  const diagram: Diagram =
-    run.exitCode === 0 && (await $.fs.exists(png))
-      ? { path: png }
-      : { error: firstLine(run.stderr || run.stdout) }
-  done.set(hash, diagram)
-  return diagram
+  return run.exitCode === 0 && (await $.fs.exists(png))
+    ? { path: png }
+    : { error: firstLine(run.stderr || run.stdout) }
 }
