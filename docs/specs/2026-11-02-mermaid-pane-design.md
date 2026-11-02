@@ -14,80 +14,114 @@ hand.
 
 ## What it is
 
-A hooks module (a mod) inside the `clankit-dev` plugin. When Claude's reply
-contains Mermaid blocks, a pane beside the chat opens with them rendered as
-real images.
+A plugin of its own in this marketplace, `mermaid-pane` (beside `tomito`;
+opt-in, not part of `clankit-dev`). It is a hooks module (a mod). When
+Claude's reply contains Mermaid blocks, they are rendered to PNG and shown as
+real images, by one of two viewers:
+
+| Environment | Viewer |
+|---|---|
+| Inside Zellij (`ZELLIJ` set) | a Zellij floating pane that draws the PNG itself |
+| Anywhere else | a Claude Code pane beside the chat, drawing with `Image` |
+
+Why two: Claude Code's `Image` draws through kitty, Ghostty, iTerm2 and tmux
+(with passthrough), and draws its `alt` everywhere else — including Zellij,
+with no override (confirmed by a spike). A program in a Zellij pane writing
+kitty graphics itself (`chafa -f kitty`) renders crisp there.
 
 Scope: Claude's chat replies only. Not files written or edited, not a command
-to render an arbitrary file — both can be added later on the same renderer.
+to render an arbitrary file — both can come later on the same renderer.
 
-## Step 1 — feasibility check, before anything else
+## Behaviour — shared
 
-A kitty-graphics image drawn directly inside a terminal multiplexer pane can
-render crisp. Claude Code's `Image` element documents kitty, Ghostty, iTerm2
-and tmux, not other multiplexers, so under one it may decide the terminal
-can't draw and show `alt`.
+- **Trigger:** a main-loop turn ends (`turn.complete`, no `agentId`) and its
+  `answer` holds at least one Mermaid block. `answer` is the turn's *final
+  visible text* only — a diagram in text before a tool call is not seen. A
+  reply without Mermaid changes nothing.
+- **Several diagrams:** shown one at a time with an `n/m` counter and paging.
+- **Render failure:** the first line of the renderer's error in place of that
+  diagram — visible, never silently missing.
+- **Theme:** white background, matching GitHub's light theme.
+- **`/mermaid`:** reopens the last reply's diagrams in the active viewer; in
+  the Claude Code pane, closes it when open.
+- **Requirements missing:** `mmdc` not found → toast "mermaid-pane: mmdc not
+  found — install @mermaid-js/mermaid-cli". Under Zellij with `chafa` not
+  found → toast naming `chafa`, and the PNG opens in the OS viewer instead.
 
-1. A throwaway pane draws one known PNG with `Image`, run in the multiplexer.
-2. Confirm `clankit-dev/hooks/hooks.json` can carry the `modules` entry next to
-   its existing classic `hooks` and that both still run.
+## Behaviour — Zellij floating pane
 
-If either fails, **stop and ask the user.** Fallbacks on the table: text art
-(e.g. `mermaid-ascii`) in the pane, or opening a multiplexer floating pane
-that draws the PNG itself. Neither is built speculatively.
+```
+┌─ chat (Claude Code) ─────────────────────────────────────────┐
+│   ┌─ mermaid 1/2 ─────────────── ← → page · o open · q quit ─┐│
+│   │                                                          ││
+│   │              [ crisp rendered diagram ]                  ││
+│   │                                                          ││
+│   └──────────────────────────────────────────────────────────┘│
+│ > _                                                          │
+└──────────────────────────────────────────────────────────────┘
+```
 
-## Behaviour
+- Opened with `zellij run --floating --close-on-exit` in **the tab that holds
+  the Claude Code session's pane** (`--tab-id`, found from `ZELLIJ_PANE_ID`),
+  not whichever tab has focus. Sized 90% × 90%.
+- It runs a small viewer script shipped in the plugin, given the PNG paths
+  (and error texts) for the reply. Keys: `←`/`→` page, `o` opens the current
+  PNG in the OS viewer, `q` or `Esc` closes. The image is drawn to fit the
+  pane and redrawn on resize.
+- A new reply with diagrams while a viewer is open replaces it (close the old
+  floating pane, open the new one), so there is never more than one.
+- It takes focus when it opens — that is the auto-open trade-off accepted.
+
+## Behaviour — Claude Code pane
 
 ```
 ┌─ chat ───────────────────────────────┬─ Diagrams ──────────── ◀ 1/2 ▶ ─┐
-│ …reply with a ```mermaid block…      │                                  │
-│                                      │   [ rendered diagram ]           │
-│ > _                                  │  flowchart · open full size ↗    │
+│ …reply with a ```mermaid block…      │   [ rendered diagram ]           │
+│ > _                                  │  open full size ↗                │
 └──────────────────────────────────────┴──────────────────────────────────┘
 ```
 
-- **Trigger:** a turn ends (`turn.complete`) and the reply holds at least one
-  Mermaid block → the pane opens, or updates if open, with that reply's
-  diagrams. A reply without Mermaid leaves the pane as it is.
-- **Several diagrams:** one at a time, ◀ ▶ and an `n/m` counter.
-- **Size:** fits the pane width, aspect kept. "Open full size ↗" opens the PNG
-  in the OS viewer (`open` on macOS, `xdg-open` elsewhere).
-- **Rendering:** the pane shows "Rendering…" until the image arrives.
-- **Render failure:** the first line of the renderer's error in place of that
-  diagram's image — a broken diagram is visible, never silently missing.
+- The pane opens, or updates if open. "Rendering…" until the image arrives.
+- The image fits the pane width, aspect kept; ◀ ▶ page; "open full size ↗"
+  opens the PNG in the OS viewer (`open` on macOS, `xdg-open` elsewhere).
+- `alt`, for terminals that can't draw: "This terminal can't draw images —
+  open full size ↗".
 - **Narrow terminal:** a pane opened unasked only seats above a width
   threshold. When it doesn't seat, a toast: "1 diagram — /mermaid to view".
-- **`/mermaid`:** reopens the last diagrams, or closes the pane when open. A
-  pane the person opens seats at any width.
-- **Theme:** white background, matching how GitHub's light theme shows it.
+  A pane the person opens seats at any width.
 
 ## Components
 
 | Unit | In → out | Depends on |
 |---|---|---|
-| Extract | reply text → ordered Mermaid sources | nothing (pure) |
-| Render | one source → `{ png }` or `{ error }` | `mmdc`, source on stdin, PNG to a temp dir |
-| State | current reply's diagrams + shown index | `$.state` (survives reloads) |
+| Extract | answer text → ordered Mermaid sources | nothing (pure) |
+| Render | one source → PNG path or error text | `mmdc`; temp dir |
+| State | last reply's diagrams (path or error each) + shown index | `$.state` |
+| Viewer choice | environment → `zellij` or `pane` | `ZELLIJ`, `chafa` presence |
+| Zellij launcher | diagrams → `zellij run …` argv; runs it, closes the previous one | `zellij`, `ZELLIJ_PANE_ID` |
+| Viewer script | PNG paths / errors → interactive floating viewer | `chafa`, a POSIX shell |
 | Pane + command | draws state; ◀ ▶, full size, `/mermaid` | state; OS `open` |
 
-Flow: `turn.complete` → extract → none: stop · some: open pane, state =
-rendering → render each in order, writing state as each finishes → pane
-redraws on each write.
+Flow: `turn.complete` → extract → none: stop · some: render each (cached by
+source hash) → state → Zellij launcher, or open/redraw the pane.
 
-- **Finding `mmdc`:** a CLI installed under a Node version manager may not be
-  on Claude Code's own `PATH`. At `session.start` resolve it through the
-  user's login shell (`$SHELL -lc 'command -v mmdc'`) and keep the absolute
-  path; a `userConfig` option overrides it. Not found → the pane says
-  "mmdc not found — install @mermaid-js/mermaid-cli".
-- **Cache:** results keyed by source hash, so `/mermaid` and paging never
-  re-render.
+- **Finding tools:** CLIs installed under a Node version manager may not be on
+  Claude Code's own `PATH`, and `mmdc` needs `node` on `PATH` to start. At
+  `session.start` read `PATH` from the user's login shell
+  (`$SHELL -lc 'printf %s "$PATH"'`), resolve `mmdc`, `chafa` and `zellij`
+  against it, and run every child with that `PATH`. A `userConfig` option
+  overrides the `mmdc` path.
+- **Files:** `$.fs.read(…, { as: 'bytes' })` resolves `{ base64 }`, which is
+  what `Image`'s `{ png }` takes.
 
 ## Testing
 
 | Seam | How | Catches |
 |---|---|---|
-| Extract | unit test on reply text | order; non-Mermaid fences ignored; unclosed fence doesn't throw |
-| Pane | `claude plugin test`, state seeded | counter and paging, error line, mmdc-not-found message |
-| Render + live pane | verification run in a real session, no mocks | a reply with two diagrams, one broken: pane opens, pages, shows the error, full size opens the viewer |
+| Extract | unit test on answer text | order; non-Mermaid fences ignored; unclosed fence doesn't throw |
+| Zellij launcher argv | unit test on the pure argv builder | right tab id, floating flags, paths passed in order |
+| Pane | `claude plugin test`, state seeded | counter and paging, error line, alt text |
+| Live, both viewers | verification run in a real session, no mocks | a reply with two diagrams, one broken: under Zellij the floating viewer opens in the session's tab, pages, shows the error, `o` opens the OS viewer; outside Zellij the pane does the same |
 
-The renderer is not mocked: a fake `mmdc` tests only the fake.
+The renderer is not mocked: a fake `mmdc` tests only the fake. The live
+Zellij run needs the user's eyes — a subagent can't see the screen.
