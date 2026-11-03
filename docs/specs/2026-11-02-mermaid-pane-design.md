@@ -85,7 +85,16 @@ to render an arbitrary file — both can come later on the same renderer.
 - The image fits the pane width, aspect kept; ◀ ▶ page; "open full size ↗"
   opens the PNG in the OS viewer (`open` on macOS, `xdg-open` elsewhere).
 - `alt`, for terminals that can't draw: "This terminal can't draw images —
-  open full size ↗".
+  switch to text view, or open full size ↗".
+- **text ⇄ image toggle:** a button in the pane switches the view. Text view
+  draws the diagram as box-drawing art from `mermaid-ascii` (run with the
+  login `PATH`, cached by source hash like the PNG); its error's first line
+  shows in place when it can't draw that diagram. "open full size ↗" stays in
+  both views. The choice is kept across sessions (`$.store`). The engine
+  doesn't tell a mod whether a terminal draws images, so the person switches —
+  the mod never guesses.
+- `mermaid-ascii` is optional: not found → text view says "Text view needs
+  mermaid-ascii — see the README" instead of the art.
 - **Narrow terminal:** a pane opened unasked only seats above a width
   threshold. When it doesn't seat, a toast: "1 diagram — /mermaid to view".
   A pane the person opens seats at any width.
@@ -100,7 +109,8 @@ to render an arbitrary file — both can come later on the same renderer.
 | Viewer choice | environment → `zellij` or `pane` | `ZELLIJ`, `chafa` presence |
 | Zellij launcher | diagrams → `zellij run …` argv; runs it, closes the previous one | `zellij`, `ZELLIJ_PANE_ID` |
 | Viewer script | PNG paths / errors → interactive floating viewer | `chafa`, a POSIX shell |
-| Pane + command | draws state; ◀ ▶, full size, `/mermaid` | state; OS `open` |
+| Text render | one source → box-drawing text or error text | `mermaid-ascii` (optional) |
+| Pane + command | draws state; ◀ ▶, text ⇄ image, full size, `/mermaid` | state; `$.store` for the view; OS `open` |
 
 Flow: `turn.complete` → extract → none: stop · some: render each (cached by
 source hash) → state → Zellij launcher, or open/redraw the pane.
