@@ -1,6 +1,13 @@
 import type { EngineInterface } from 'claude-code'
 
-export type Tools = { path: string; opener: string; mmdc?: string; chafa?: string; zellij?: string }
+export type Tools = {
+  path: string
+  opener: string
+  mmdc?: string
+  chafa?: string
+  zellij?: string
+  mermaidAscii?: string
+}
 
 const SENTINEL = '__mermaid_pane_path__'
 
@@ -36,11 +43,12 @@ async function isMacOs($: EngineInterface, path: string): Promise<boolean> {
 export async function resolveTools($: EngineInterface, mmdcOverride: string): Promise<Tools> {
   const path = await loginPath($)
   const openerName = (await isMacOs($, path)) ? 'open' : 'xdg-open'
-  const [mmdc, chafa, zellij, opener] = await Promise.all([
+  const [mmdc, chafa, zellij, opener, mermaidAscii] = await Promise.all([
     mmdcOverride !== '' ? mmdcOverride : find($, path, 'mmdc'),
     find($, path, 'chafa'),
     find($, path, 'zellij'),
     find($, path, openerName),
+    find($, path, 'mermaid-ascii'),
   ])
-  return { path, opener: opener ?? openerName, mmdc, chafa, zellij }
+  return { path, opener: opener ?? openerName, mmdc, chafa, zellij, mermaidAscii }
 }

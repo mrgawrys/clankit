@@ -5,13 +5,13 @@ import type { Tools } from './tools'
 
 const MMDC_TIMEOUT_MS = 60_000
 
-async function sha256(text: string): Promise<string> {
+export async function sha256(text: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
   return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
-export function firstLine(text: string): string {
-  return text.split('\n').map(l => l.trim()).find(l => l !== '') ?? 'mmdc failed with no message'
+export function firstLine(text: string, fallback = 'mmdc failed with no message'): string {
+  return text.split('\n').map(l => l.trim()).find(l => l !== '') ?? fallback
 }
 
 export async function renderDir($: EngineInterface): Promise<string> {
