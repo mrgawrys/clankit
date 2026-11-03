@@ -1,8 +1,9 @@
 import type { EngineInterface, RenderElement, RenderInput } from 'claude-code'
 
-import type { Diagram } from '../types'
+import type { Diagram, PaneMode, TextRender } from '../types'
 
-export const ALT = "This terminal can't draw images — open full size ↗"
+export const ALT = "This terminal can't draw images — switch to text view, or open full size ↗"
+export const NO_ASCII = 'Text view needs mermaid-ascii — see the README'
 export const GONE = 'The rendered PNG is gone from the temp directory — ask for the diagram again.'
 const MAX_INLINE_BYTES = 2 * 1024 * 1024
 // A terminal cell is about twice as tall as it is wide.
@@ -13,8 +14,10 @@ export type PaneView = {
   list: readonly Diagram[]
   shown: number
   isRendering: boolean
+  mode: PaneMode
   onPage: (step: number) => Promise<unknown>
   onOpen: (path: string) => Promise<unknown>
+  onToggle: () => Promise<unknown>
 }
 
 export function pngSize(base64: string): { width: number; height: number } | undefined {
@@ -55,7 +58,7 @@ export async function drawPane(
   view: PaneView,
 ): Promise<RenderElement> {
   const { Box, Button, Text } = $.ui.resolve(e)
-  const { list, shown } = view
+  const { list, shown, mode } = view
 
   if (view.isRendering) return <Text dimColor>Rendering…</Text>
   if (list.length === 0) return <Text dimColor>No diagrams yet.</Text>
@@ -65,30 +68,45 @@ export async function drawPane(
       <Button key="prev" label="◀" plain onPress={() => view.onPage(-1)} />
       <Text> {shown + 1}/{list.length} </Text>
       <Button key="next" label="▶" plain onPress={() => view.onPage(1)} />
-    </Box>
-  )
-
-  const errorLine = (text: string) => (
-    <Box flexDirection="column">
-      {pager}
-      <Text color="red">{text}</Text>
+      <Text> · </Text>
+      <Button key="mode" label={mode === 'text' ? 'image view' : 'text view'} plain onPress={view.onToggle} />
     </Box>
   )
   const diagram = list[shown]
-  if (!diagram || 'error' in diagram) return errorLine(diagram?.error ?? 'Diagram missing.')
-
-  const full = <Button key="open" label="open full size ↗" plain onPress={() => view.onOpen(diagram.path)} />
-  if (e.surface !== 'terminal') {
+  const full =
+    diagram && 'path' in diagram ? (
+      <Button key="open" label="open full size ↗" plain onPress={() => view.onOpen(diagram.path)} />
+    ) : undefined
+  const column = (body?: RenderElement, tail?: RenderElement) => (
+    <Box flexDirection="column">
+      {pager}
+      {body}
+      {tail}
+    </Box>
+  )
+  const errorLine = (text: string) => <Text color="red">{text}</Text>
+  // One Text a line, each cut at the pane's edge: wrapped box-drawing art is unreadable.
+  const art = (text: TextRender | undefined) => {
+    if (!text) return <Text dimColor>{NO_ASCII}</Text>
+    if ('error' in text) return errorLine(text.error)
     return (
       <Box flexDirection="column">
-        {pager}
-        {full}
+        {text.art.replace(/\n+$/, '').split('\n').map(line => (
+          <Text mono wrap="truncate-end">
+            {line === '' ? ' ' : line}
+          </Text>
+        ))}
       </Box>
     )
   }
 
+  if (!diagram) return column(errorLine('Diagram missing.'))
+  if (mode === 'text') return column(art(diagram.text), full)
+  if ('error' in diagram) return column(errorLine(diagram.error))
+  if (e.surface !== 'terminal') return column(full)
+
   const stat = await $.fs.stat(diagram.path).catch(() => undefined)
-  if (stat?.kind !== 'file') return errorLine(GONE)
+  if (stat?.kind !== 'file') return column(errorLine(GONE))
 
   const { Image } = $.ui.resolve(e)
   let source: { png: string } | { file: string; format: 'png' }
@@ -104,11 +122,8 @@ export async function drawPane(
   const room = { columns: e.props.bodyColumns, rows: Math.max(1, e.props.scroll.bodyRows - 3) }
   const cells = fitCells(size ?? { width: 4, height: 3 }, room)
 
-  return (
-    <Box flexDirection="column">
-      {pager}
-      <Image key="diagram" source={source} columns={cells.columns} rows={cells.rows} alt={ALT} />
-      {full}
-    </Box>
+  return column(
+    <Image key="diagram" source={source} columns={cells.columns} rows={cells.rows} alt={ALT} />,
+    full,
   )
 }

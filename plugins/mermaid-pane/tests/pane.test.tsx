@@ -3,6 +3,7 @@ import type { On } from 'claude-code'
 
 import type { Diagram } from '../types'
 import { fitCells, pngSize } from '../hooks/pane'
+import { textError } from '../hooks/text'
 
 // A real 400 x 100 PNG, so the pane's aspect maths reads a real header.
 const PNG_400x100 =
@@ -24,15 +25,22 @@ const PANE = {
 
 const TWO: Diagram[] = [{ path: '/tmp/mermaid-pane/a.png' }, { error: 'Error: Parse error on line 2:' }]
 
-function seed(on: On, values: { diagrams?: Diagram[]; isRendering?: boolean }) {
+function seed(on: On, values: { diagrams?: Diagram[]; isRendering?: boolean; mode?: 'image' | 'text' }) {
   on('state.get', ($, e, next) => {
-    if (e.key === 'diagrams' && values.diagrams) return { value: { value: { shape: 'diagrams-1', value: values.diagrams }, version: 1 } }
+    if (e.key === 'diagrams' && values.diagrams) return { value: { value: { shape: 'diagrams-2', value: values.diagrams }, version: 1 } }
     if (e.key === 'isRendering' && values.isRendering !== undefined) {
       return { value: { value: values.isRendering, version: 1 } }
     }
+    if (e.key === 'mode' && values.mode) return { value: { value: values.mode, version: 1 } }
     return next(e)
   })
 }
+
+const ART = '┌───┐     ┌───┐\n│ A ├────►│ B │\n└───┘     └───┘\n'
+const WITH_TEXT: Diagram[] = [
+  { path: '/tmp/mermaid-pane/a.png', text: { art: ART } },
+  { error: 'Error: Parse error on line 2:', text: { error: 'failed to parse graph diagram: bad edge' } },
+]
 
 function fakeHost(on: On, opened: string[][], disk: { size?: number; reads?: string[] } = {}) {
   mock.env(on, { SHELL: '/bin/sh', PATH: '/usr/bin' })
@@ -89,7 +97,7 @@ test('the image fills the pane width with its aspect kept, and carries the alt t
   expect(image?.props).toMatchObject({
     columns: 40,
     rows: 5,
-    alt: "This terminal can't draw images — open full size ↗",
+    alt: "This terminal can't draw images — switch to text view, or open full size ↗",
     source: { png: PNG_400x100 },
   })
   await ui.unmount()
@@ -139,6 +147,79 @@ test('a surface without Image still offers the full-size view', async ($, on) =>
   const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   expect(await ui.find({ type: 'Button', key: 'open' })).toBeDefined()
   await ui.unmount()
+})
+
+test('text view draws the art a line at a time, cut at the edge, with full size still offered', async ($, on) => {
+  seed(on, { diagrams: WITH_TEXT, mode: 'text' })
+  fakeHost(on, [], { size: 300 })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+
+  const lines = await ui.findAll({ type: 'Text', text: /[┌│└]/ })
+  expect(lines.map(l => l.text)).toEqual(['┌───┐     ┌───┐', '│ A ├────►│ B │', '└───┘     └───┘'])
+  expect(lines.map(l => l.props)).toEqual(lines.map(() => expect.objectContaining({ wrap: 'truncate-end' })))
+  expect(await ui.find({ type: 'Image' })).toBeUndefined()
+  expect(await ui.find({ type: 'Button', key: 'open' })).toBeDefined()
+  expect((await ui.find({ type: 'Button', key: 'mode' }))?.props).toMatchObject({ label: 'image view' })
+  await ui.unmount()
+})
+
+test('text view pages too, showing the text renderer\'s error in place of art it could not draw', async ($, on) => {
+  seed(on, { diagrams: WITH_TEXT, mode: 'text' })
+  fakeHost(on, [], { size: 300 })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+
+  await ui.press({ key: 'next' })
+  expect(await ui.find({ type: 'Text', text: /2\/2/ })).toBeDefined()
+  expect((await ui.find({ type: 'Text', text: /failed to parse/ }))?.props).toMatchObject({ color: 'red' })
+  expect(await ui.find({ type: 'Text', text: /Parse error on line 2/ })).toBeUndefined()
+  expect(await ui.find({ type: 'Button', key: 'open' })).toBeUndefined()
+
+  await ui.press({ key: 'prev' })
+  expect(await ui.find({ type: 'Text', text: /│ A ├/ })).toBeDefined()
+  await ui.unmount()
+})
+
+test('text view without mermaid-ascii points at the README', async ($, on) => {
+  seed(on, { diagrams: TWO, mode: 'text' })
+  fakeHost(on, [], { size: 300 })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+
+  expect((await ui.find({ type: 'Text', text: /mermaid-ascii/ }))?.text).toBe(
+    'Text view needs mermaid-ascii — see the README',
+  )
+  expect(await ui.find({ type: 'Button', key: 'open' })).toBeDefined()
+  await ui.unmount()
+})
+
+test('the toggle switches image to text and back, keeping the choice in the store', async ($, on) => {
+  const stored: Record<string, unknown> = {}
+  seed(on, { diagrams: WITH_TEXT })
+  fakeHost(on, [], { size: 300 })
+  on('store.set', ($, e) => {
+    stored[e.key] = e.value
+    return { value: undefined }
+  })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await ui.find({ type: 'Image' })).toBeDefined()
+
+  await ui.press({ key: 'mode' })
+  expect(await ui.find({ type: 'Image' })).toBeUndefined()
+  expect(await ui.find({ type: 'Text', text: /│ A ├/ })).toBeDefined()
+  expect(stored.mode).toBe('text')
+
+  await ui.press({ key: 'mode' })
+  expect(await ui.find({ type: 'Image' })).toBeDefined()
+  expect(stored.mode).toBe('image')
+  await ui.unmount()
+})
+
+test("mermaid-ascii's fatal log line comes down to its message", () => {
+  expect(
+    textError('time="2026-11-03T10:00:00+01:00" level=fatal msg="failed to parse graph diagram: \\"x\\" unknown"\n'),
+  ).toBe('failed to parse graph diagram: "x" unknown')
+  expect(textError('level=fatal msg=boom')).toBe('boom')
+  expect(textError('\npanic: Unknown direction\n\ngoroutine 1')).toBe('panic: Unknown direction')
+  expect(textError('')).toBe('mermaid-ascii failed with no message')
 })
 
 test('PNG header and cell fitting', async () => {

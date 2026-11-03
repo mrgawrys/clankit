@@ -1,10 +1,11 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { Diagram } from '../types'
+import type { Diagram, PaneMode } from '../types'
 import { extractMermaid } from './extract'
 import { drawPane } from './pane'
 import { render, renderDir } from './render'
+import { renderText } from './text'
 import { resolveTools } from './tools'
 import type { Tools } from './tools'
 import { chooseViewer, openInOs } from './viewer'
@@ -22,10 +23,12 @@ const diagramCount = (n: number) => `${n} diagram${n === 1 ? '' : 's'}`
 export const narrowToast = (n: number) => `${diagramCount(n)} — /mermaid to view`
 
 const diagrams = atom({ plugin: 'mermaid-pane', key: 'diagrams' } as const, [] as Diagram[], {
-  shape: 'diagrams-1',
+  shape: 'diagrams-2',
 })
 const index = atom({ plugin: 'mermaid-pane', key: 'index' } as const, 0)
 const isRendering = atom({ plugin: 'mermaid-pane', key: 'isRendering' } as const, false)
+const mode = atom({ plugin: 'mermaid-pane', key: 'mode' } as const, 'image' as PaneMode)
+const MODE_KEY = 'mode'
 const zellijPane = atom({ plugin: 'mermaid-pane', key: 'zellijPane' } as const, '')
 const zellijSession = atom({ plugin: 'mermaid-pane', key: 'zellijSession' } as const, '')
 
@@ -45,6 +48,18 @@ async function activeViewer($: EngineInterface): Promise<Viewer> {
 
 async function openFull($: EngineInterface, path: string) {
   await openInOs($, await getTools($), [path])
+}
+
+// $.store keeps the choice across sessions; the state atom is what redraws the pane.
+async function loadMode($: EngineInterface) {
+  const saved: PaneMode = (await $.store.get(MODE_KEY)) === 'text' ? 'text' : 'image'
+  await update($, mode, () => saved)
+}
+
+async function toggleMode($: EngineInterface) {
+  const next: PaneMode = (await read($, mode)) === 'text' ? 'image' : 'text'
+  await update($, mode, () => next)
+  await $.store.set(MODE_KEY, next)
 }
 
 function failure($: EngineInterface, error: unknown): string {
@@ -93,7 +108,12 @@ async function onReply($: EngineInterface, sources: string[]) {
   const rendered: Diagram[] = []
   try {
     const dir = await renderDir($)
-    for (const source of sources) rendered.push(await render($, { ...t, mmdc }, source, dir))
+    const mermaidAscii = viewer === 'pane' ? t.mermaidAscii : undefined
+    for (const source of sources) {
+      const image = await render($, { ...t, mmdc }, source, dir)
+      const text = mermaidAscii ? await renderText($, { path: t.path, mermaidAscii }, source, dir) : undefined
+      rendered.push(text ? { ...image, text } : image)
+    }
     if (mine !== generation) return
     await update($, diagrams, () => rendered)
     await update($, index, () => 0)
@@ -134,6 +154,7 @@ export const register: Register = (on, options) => {
 
   on('session.start', async ($, e, next) => {
     warned.clear()
+    await loadMode($)
     await $.command.register({
       name: 'mermaid',
       description: "Show the last reply's Mermaid diagrams again (in the pane, closes it when open)",
@@ -161,8 +182,10 @@ export const register: Register = (on, options) => {
       list,
       shown: Math.min(await read($, index), Math.max(0, length - 1)),
       isRendering: await read($, isRendering),
+      mode: await read($, mode),
       onPage: step => update($, index, i => (((i + step) % length) + length) % length),
       onOpen: path => openFull($, path),
+      onToggle: () => toggleMode($),
     })
   })
 }
