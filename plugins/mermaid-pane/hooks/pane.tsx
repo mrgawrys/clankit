@@ -101,12 +101,13 @@ export async function drawPane(
   }
 
   if (!diagram) return column(errorLine('Diagram missing.'))
-  if (mode === 'text') return column(art(diagram.text), full)
   if ('error' in diagram) return column(errorLine(diagram.error))
-  if (e.surface !== 'terminal') return column(full)
+  if (mode !== 'text' && e.surface !== 'terminal') return column(full)
 
   const stat = await $.fs.stat(diagram.path).catch(() => undefined)
   if (stat?.kind !== 'file') return column(errorLine(GONE))
+  if (mode === 'text') return column(art(diagram.text), full)
+  if (e.surface !== 'terminal') return column(full)
 
   const { Image } = $.ui.resolve(e)
   let source: { png: string } | { file: string; format: 'png' }

@@ -27,7 +27,7 @@ const TWO: Diagram[] = [{ path: '/tmp/mermaid-pane/a.png' }, { error: 'Error: Pa
 
 function seed(on: On, values: { diagrams?: Diagram[]; isRendering?: boolean; mode?: 'image' | 'text' }) {
   on('state.get', ($, e, next) => {
-    if (e.key === 'diagrams' && values.diagrams) return { value: { value: { shape: 'diagrams-2', value: values.diagrams }, version: 1 } }
+    if (e.key === 'diagrams' && values.diagrams) return { value: { value: { shape: 'diagrams-1', value: values.diagrams }, version: 1 } }
     if (e.key === 'isRendering' && values.isRendering !== undefined) {
       return { value: { value: values.isRendering, version: 1 } }
     }
@@ -39,7 +39,7 @@ function seed(on: On, values: { diagrams?: Diagram[]; isRendering?: boolean; mod
 const ART = '┌───┐     ┌───┐\n│ A ├────►│ B │\n└───┘     └───┘\n'
 const WITH_TEXT: Diagram[] = [
   { path: '/tmp/mermaid-pane/a.png', text: { art: ART } },
-  { error: 'Error: Parse error on line 2:', text: { error: 'failed to parse graph diagram: bad edge' } },
+  { path: '/tmp/mermaid-pane/a.png', text: { error: 'failed to parse graph diagram: bad edge' } },
 ]
 
 function fakeHost(on: On, opened: string[][], disk: { size?: number; reads?: string[] } = {}) {
@@ -171,11 +171,33 @@ test('text view pages too, showing the text renderer\'s error in place of art it
   await ui.press({ key: 'next' })
   expect(await ui.find({ type: 'Text', text: /2\/2/ })).toBeDefined()
   expect((await ui.find({ type: 'Text', text: /failed to parse/ }))?.props).toMatchObject({ color: 'red' })
-  expect(await ui.find({ type: 'Text', text: /Parse error on line 2/ })).toBeUndefined()
-  expect(await ui.find({ type: 'Button', key: 'open' })).toBeUndefined()
+  expect(await ui.find({ type: 'Button', key: 'open' })).toBeDefined()
 
   await ui.press({ key: 'prev' })
   expect(await ui.find({ type: 'Text', text: /│ A ├/ })).toBeDefined()
+  await ui.unmount()
+})
+
+test('text view shows the mmdc error, never the art, for a diagram mmdc rejected', async ($, on) => {
+  seed(on, {
+    diagrams: [{ error: 'Error: Parse error on line 2:', text: { art: ART } }],
+    mode: 'text',
+  })
+  fakeHost(on, [], { size: 300 })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+
+  expect((await ui.find({ type: 'Text', text: /Parse error/ }))?.props).toMatchObject({ color: 'red' })
+  expect(await ui.find({ type: 'Text', text: /│ A ├/ })).toBeUndefined()
+  await ui.unmount()
+})
+
+test('text view says the PNG is gone and offers no full size when it is', async ($, on) => {
+  seed(on, { diagrams: WITH_TEXT, mode: 'text' })
+  fakeHost(on, [])
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+
+  expect(await ui.find({ type: 'Text', text: /PNG is gone/ })).toBeDefined()
+  expect(await ui.find({ type: 'Button', key: 'open' })).toBeUndefined()
   await ui.unmount()
 })
 

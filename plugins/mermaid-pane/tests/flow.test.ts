@@ -128,7 +128,7 @@ async function settle() {
 
 function seed(on: On, list: Diagram[], more: Record<string, string> = {}) {
   on('state.get', ($, e, next) => {
-    if (e.key === 'diagrams') return { value: { value: { shape: 'diagrams-2', value: list }, version: 1 } }
+    if (e.key === 'diagrams') return { value: { value: { shape: 'diagrams-1', value: list }, version: 1 } }
     const value = more[e.key]
     return value === undefined ? next(e) : { value: { value, version: 1 } }
   })
@@ -262,7 +262,7 @@ test('a reply opens the pane as Rendering…, toasts when it cannot seat, then l
     'set isRendering true',
     'open mermaid',
     'toast 1 diagram — /mermaid to view',
-    `set diagrams ${JSON.stringify({ shape: 'diagrams-2', value: [{ path: png }] })}`,
+    `set diagrams ${JSON.stringify({ shape: 'diagrams-1', value: [{ path: png }] })}`,
     'set index 0',
     'set isRendering false',
   ])
@@ -288,7 +288,7 @@ test('a slower earlier reply never overwrites the diagrams of the one after it',
   await settle()
 
   const landed = host.timeline.filter(line => line.startsWith('set diagrams'))
-  expect(landed).toEqual([`set diagrams ${JSON.stringify({ shape: 'diagrams-2', value: [{ path: second }] })}`])
+  expect(landed).toEqual([`set diagrams ${JSON.stringify({ shape: 'diagrams-1', value: [{ path: second }] })}`])
   expect(host.toasts).toEqual(['1 diagram — /mermaid to view', '1 diagram — /mermaid to view'])
   expect(host.timeline.at(-1)).toBe('set isRendering false')
 })
@@ -384,19 +384,18 @@ test('a reply under the pane carries each diagram\'s text render beside its PNG'
 
   const landed = host.timeline.filter(line => line.startsWith('set diagrams'))
   const value = [{ path: png, text: { art: '┌───┐\n│ A │\n└───┘\n' } }]
-  expect(landed).toEqual([`set diagrams ${JSON.stringify({ shape: 'diagrams-2', value })}`])
+  expect(landed).toEqual([`set diagrams ${JSON.stringify({ shape: 'diagrams-1', value })}`])
 })
 
 test('text view chosen in an earlier session is the view a new session opens in', async ($, on) => {
-  const host = fakeHost(on, { stored: { mode: 'text' } })
-  seed(on, [{ error: 'Error: Parse error on line 2:', text: { art: '│ A │' } }])
+  const host = fakeHost(on, { stored: { mode: 'text' }, files: ['/t/a.png'] })
+  seed(on, [{ path: '/t/a.png', text: { art: '│ A │' } }])
   await $.session.start(START)
 
   const ui = await $.ui.mount(PANE)
   expect(await ui.find({ type: 'Text', text: '│ A │' })).toBeDefined()
 
   await ui.press({ key: 'mode' })
-  expect(await ui.find({ type: 'Text', text: /Parse error/ })).toBeDefined()
   expect(host.stored.mode).toBe('image')
   await ui.unmount()
   expect(host.toasts).toEqual([])

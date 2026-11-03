@@ -23,7 +23,7 @@ const diagramCount = (n: number) => `${n} diagram${n === 1 ? '' : 's'}`
 export const narrowToast = (n: number) => `${diagramCount(n)} — /mermaid to view`
 
 const diagrams = atom({ plugin: 'mermaid-pane', key: 'diagrams' } as const, [] as Diagram[], {
-  shape: 'diagrams-2',
+  shape: 'diagrams-1',
 })
 const index = atom({ plugin: 'mermaid-pane', key: 'index' } as const, 0)
 const isRendering = atom({ plugin: 'mermaid-pane', key: 'isRendering' } as const, false)
@@ -111,7 +111,7 @@ async function onReply($: EngineInterface, sources: string[]) {
     const mermaidAscii = viewer === 'pane' ? t.mermaidAscii : undefined
     for (const source of sources) {
       const image = await render($, { ...t, mmdc }, source, dir)
-      const text = mermaidAscii ? await renderText($, { path: t.path, mermaidAscii }, source, dir) : undefined
+      const text = mermaidAscii && 'path' in image ? await renderText($, { path: t.path, mermaidAscii }, source, dir) : undefined
       rendered.push(text ? { ...image, text } : image)
     }
     if (mine !== generation) return
