@@ -7,12 +7,17 @@ as soon as the reply ends.
 | Where you run Claude Code | What opens |
 |---|---|
 | Inside Zellij | A floating pane, 90% × 90%, in the tab that holds the session. `←` / `→` page, `o` opens the PNG in the OS viewer, `q` or `Esc` closes. |
-| Anywhere else | A **Diagrams** pane beside the chat. `◀` / `▶` page, **open full size ↗** opens the PNG in the OS viewer. |
+| Anywhere else | A **Diagrams** pane beside the chat. `◀` / `▶` page, **text view** / **image view** switches how the diagram is drawn, **open full size ↗** opens the PNG in the OS viewer. |
 
 Several diagrams in one reply are shown one at a time with an `n/m` counter. A
 diagram that fails to render shows the first line of the renderer's error in
 its place. `/mermaid` shows the last reply's diagrams again; in the pane it
 closes the pane when it is open.
+
+Text view draws the diagram as box-drawing characters, for a terminal that
+can't show images. Claude Code doesn't tell a mod whether the terminal draws
+images, so the pane opens in image view and you switch; the choice is kept
+for later sessions.
 
 Only the reply's final text is read: a diagram written before a tool call, in a
 file, or by a subagent is not shown.
@@ -26,10 +31,15 @@ file, or by a subagent is not shown.
   diagrams open in the OS viewer instead.
 - Outside Zellij, a terminal Claude Code draws images in: kitty, Ghostty,
   iTerm2, or tmux with passthrough. Elsewhere the pane says it can't draw and
-  offers the full-size view.
+  offers text view and the full-size view.
+- Optional, for text view:
+  [`mermaid-ascii`](https://github.com/AlexanderGrooff/mermaid-ascii)
+  (`go install github.com/AlexanderGrooff/mermaid-ascii@latest`, then make
+  sure Go's bin directory is on your `PATH`). Without it text view says so. It
+  draws flowcharts, sequence and ER diagrams; other kinds show its error line.
 
 Tools are looked up on your login shell's `PATH`, so a CLI installed under a
-Node version manager is found even when Claude Code's own `PATH` lacks it. If
+version manager is found even when Claude Code's own `PATH` lacks it. If
 `mmdc` still isn't found, set its absolute path in `/config` under
 **mermaid-pane → mmdc path**.
 
