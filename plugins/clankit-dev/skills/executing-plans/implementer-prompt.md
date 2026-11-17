@@ -35,22 +35,15 @@ Subagent (general-purpose):
 
     Work from: [directory]
 
-    - Work the tasks in plan order. Each task ends with its acceptance bar
-      met and a commit — commit each working step, don't batch the plan into
-      one commit at the end.
-    - Test as you go, at the seams the plan or spec names — the public interfaces
-      the tests exercise. Tests where the work admits them, a named
-      verification run where it doesn't; don't substitute one for the other.
-    - While iterating, run the focused test for what you're changing; run the
-      full suite once at the end of the build, and make it pass before your
-      final report.
-    - If you encounter something unexpected or unclear, **ask questions**.
-      It's always OK to pause and clarify. Don't guess or make assumptions.
-    - Do the work yourself. Never spawn a subagent to build part of the plan,
-      and never spawn a reviewer to check it: independent reviewers are
-      dispatched after you report, so one you spawn duplicates that seat at
-      full cost and its approval counts for nothing. The advisor call below
-      is the only dispatch you make.
+    - Work the tasks in plan order; from a spec, break the work into tasks
+      yourself. Commit each working step.
+    - Test at the seams the plan or spec names: tests where the work admits
+      them, a named verification run where it doesn't. Focused tests while
+      iterating; the full suite once at the end, passing before your final
+      report.
+    - Something unexpected or unclear: ask rather than guess.
+    - No subagents except the advisor. Independent reviewers are dispatched
+      after you report, so one you spawn counts for nothing.
 
     ## Hard decisions
 
