@@ -13,9 +13,9 @@ Route before you build.
 Sizing is not a design conversation. If the ask is small, say so and do the
 work; don't open a brainstorm to decide whether to brainstorm.
 
-## Routing — when a design is approved, or a spec is opened
+## Routing — when a spec is written, or opened
 
-Two entrances, one junction: `brainstorming` just got a design approved, or the
+Two entrances, one junction: `brainstorming` just wrote a spec, or the
 user opened a spec and asked to work on it. Both land here, and both get the
 same question. An overview is not a spec: opening one, or starting a part of
 one, takes the next section's route, never this one.
@@ -49,7 +49,8 @@ and what the user sees, roughly:
 - *Plan first (adds a reviewable plan file)* — "a plan file gets written first,
   then the same choice about how it gets built"
 
-The question line is just "Which mode?"
+The question line is just "Which mode?" — after a brainstorm it also names the
+spec's path, because that answer approves the spec too.
 
 **Nothing to build** — an essay, a decision, a document — means the spec *is*
 the deliverable. Skip the menu and suggest what could come next.

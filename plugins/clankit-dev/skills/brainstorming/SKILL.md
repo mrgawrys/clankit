@@ -36,10 +36,10 @@ You MUST complete these in order.
 1. **Explore project context** — check files, docs, recent commits
 2. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 3. **Propose 2-3 approaches** — with trade-offs and your recommendation
-4. **Write the spec** — to `docs/specs/`, by default always. The spec is how the design gets presented: write it once the approach is settled, self-review it, then ask the user to review it (see below). If the user chose an overview, write that instead (see Overviews below)
-5. **Ask which mode** — one `AskUserQuestion` call, the four modes from the session bootstrap. Not a yes/no on a mode you already picked. After an overview, ask the starting-a-part question instead
+4. **Write the spec** — to `docs/specs/`, by default always. The spec is how the design gets presented: write it once the approach is settled and self-review it. If the user chose an overview, write that instead (see Overviews below)
+5. **Ask for review and mode, in one turn** — one `AskUserQuestion` call that names the spec's path and offers the four modes from the session bootstrap. Picking a mode approves the spec. Not a yes/no on a mode you already picked. After an overview, ask the starting-a-part question instead
 
-**Every gate here is a question you ask.** Steps 2, 3, 4 and 5 each end with the
+**Every gate here is a question you ask.** Steps 2, 3 and 5 each end with the
 user answering something. The failure mode is converting one into an
 announcement with a window to object, which reads as decisive and skips the step:
 
@@ -47,8 +47,7 @@ announcement with a window to object, which reads as decisive and skips the step
 |---|---|
 | 2 · clarifying questions | "No clarifying questions needed — the ticket settles it." |
 | 3 · two or three approaches | "Decisions I'm making (flag if you disagree): …" |
-| 4 · spec review | building on a spec the user was never asked to read |
-| 5 · which mode | "Shall I proceed?" — a yes/no on the mode you already chose |
+| 5 · review and mode | "Shall I proceed?" — a yes/no on the mode you already chose, or a build started on a spec the user was never asked to read |
 
 If you have written one of these, the step did not happen. Go back and ask.
 
@@ -141,16 +140,15 @@ After writing the spec document, look at it with fresh eyes:
 
 Fix any issues inline. No need to re-review — just fix and move on.
 
-**User Review Gate:**
-After the spec review loop passes, ask the user to review the written spec before proceeding:
+**Review and mode — one question:**
 
-> "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we go further."
+After the self-review, ask once. One `AskUserQuestion` call, four named answers
+taken from the session bootstrap, and a question line that names the spec:
 
-Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
+> "Spec is at `<path>` — which mode? Type changes instead if it needs any."
 
-**Ask which mode:**
-
-One `AskUserQuestion` call, four named answers, taken from the session bootstrap:
+Picking a mode approves the spec. Changes come back as the typed answer: make
+them, re-run the self-review, and ask again.
 
 | Mode | What it does |
 |---|---|
@@ -171,7 +169,8 @@ The choice is the user's, and it is a choice — a tool call with four options, 
 a sentence ending in "shall I proceed?".
 
 If there is nothing to build — the design was an essay, a decision, a document —
-the spec is the deliverable. Skip the menu and suggest what could come next.
+the spec is the deliverable. Skip the menu: ask the user to review it, and
+suggest what could come next.
 
 ## Overviews
 
@@ -204,12 +203,12 @@ Then four sections:
 | **Deferred** | Questions left for a part's own brainstorm, each tagged with its part number. |
 
 Self-review as for a spec, plus one check: each part is small enough for a
-single spec. One that isn't becomes two parts. Commit, and ask the user to
-review it.
+single spec. One that isn't becomes two parts. Commit.
 
 **The terminal state is the session bootstrap's starting-a-part question** for
 the first part in order — *Brainstorm it / Build it / Stop here* — not the mode
-menu. There is nothing to build from an overview.
+menu, asked in the same turn as the review and naming the overview's path, as
+for a spec. There is nothing to build from an overview.
 
 **Brainstorming a part** takes the overview's cross-part decisions as given and
 its Deferred items for that part as the first questions. The part's spec carries
