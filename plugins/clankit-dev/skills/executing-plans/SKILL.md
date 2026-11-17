@@ -285,15 +285,3 @@ directories belong to other plans.
 Then report: what was built, the verification status, the advisor's rulings
 with `unclear` first, anything deferred with its ruling, and the branch. Integration is your human partner's decision —
 present the options and wait.
-
-## Common Rationalizations
-
-| Excuse | Reality |
-|--------|---------|
-| "Close enough on spec compliance" | The spec axis found gaps = not done. Fix, or adjudicate after the re-review — on the record. |
-| "I'll fix it myself, dispatching is overhead" | Controller fixes pollute your context and skip review. Dispatch the fix subagent. |
-| "A second fix wave will converge" | Residuals after the re-review get adjudicated, not re-dispatched — the failure is structural, not effort-shaped. |
-| "This finding is obviously wrong, I'll drop it" | You adjudicate only after the re-review, and every ruling is recorded. |
-| "The fix was small, skip the re-review" | Unreviewed fixes are how regressions land. |
-| "The plan has the code, so a cheap model can do it" | These plans don't have the code. See Model Selection. |
-| "This plan is big, I'll chunk it up front" | You don't know a plan doesn't fit until a builder says so. One dispatch first; chunk only on a BLOCKED-for-context return. |
