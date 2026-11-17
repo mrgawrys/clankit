@@ -36,11 +36,10 @@ You MUST complete these in order.
 1. **Explore project context** — check files, docs, recent commits
 2. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 3. **Propose 2-3 approaches** — with trade-offs and your recommendation
-4. **Present design** — in sections scaled to their complexity, get user approval after each section
-5. **Write the spec** — to `docs/specs/`, by default always. Self-review it, then ask the user to review it (see below). If the user chose an overview, write that instead (see Overviews below)
-6. **Ask which mode** — one `AskUserQuestion` call, the four modes from the session bootstrap. Not a yes/no on a mode you already picked. After an overview, ask the starting-a-part question instead
+4. **Write the spec** — to `docs/specs/`, by default always. The spec is how the design gets presented: write it once the approach is settled, self-review it, then ask the user to review it (see below). If the user chose an overview, write that instead (see Overviews below)
+5. **Ask which mode** — one `AskUserQuestion` call, the four modes from the session bootstrap. Not a yes/no on a mode you already picked. After an overview, ask the starting-a-part question instead
 
-**Every gate here is a question you ask.** Steps 2, 3, 4 and 6 each end with the
+**Every gate here is a question you ask.** Steps 2, 3, 4 and 5 each end with the
 user answering something. The failure mode is converting one into an
 announcement with a window to object, which reads as decisive and skips the step:
 
@@ -48,8 +47,8 @@ announcement with a window to object, which reads as decisive and skips the step
 |---|---|
 | 2 · clarifying questions | "No clarifying questions needed — the ticket settles it." |
 | 3 · two or three approaches | "Decisions I'm making (flag if you disagree): …" |
-| 4 · design, section by section | the whole design in one block, ending "does this look right?" |
-| 6 · which mode | "Shall I proceed?" — a yes/no on the mode you already chose |
+| 4 · spec review | building on a spec the user was never asked to read |
+| 5 · which mode | "Shall I proceed?" — a yes/no on the mode you already chose |
 
 If you have written one of these, the step did not happen. Go back and ask.
 
@@ -79,9 +78,8 @@ If the user already said where the work happens — a worktree, a branch, a repo
 
 **Presenting the design:**
 
-- Once you believe you understand what you're building, present the design
+- Once the approach is settled, write the spec. It is the design presentation: the user approves the design once, by reading it, not in chat first and again as a file
 - Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced
-- Ask after each section whether it looks right so far — in plain text, ending the turn; a dialog would hide the section it asks about
 - Cover what the thing actually has. For software: architecture, components, data flow, error handling, testing — including the test seams, the public interfaces the tests will exercise. For anything else, the equivalent — the parts, how they fit together, what happens when it goes wrong
 - Be ready to go back and clarify if something doesn't make sense
 
@@ -105,9 +103,10 @@ If the user already said where the work happens — a worktree, a branch, a repo
 The spec is the durable record of what was decided and the input every mode
 consumes: *vibe*, *review each task* and *review at the end* build from it,
 *plan first* turns it into a plan, `/autopilot` takes it away and runs it.
-Skip it only when the user says to.
+Skip it only when the user says to — then present the design in chat and get
+approval there.
 
-- Write the validated design (spec) to `docs/specs/YYYY-MM-DD-<topic>-design.md`
+- Write the design (spec) to `docs/specs/YYYY-MM-DD-<topic>-design.md`
   - A design document goes in `docs/specs/` even when the repo keeps other
     documents elsewhere. `docs/plans/` means "carries the executing-plans
     header" — a spec filed there will be read as a plan and found to be missing
