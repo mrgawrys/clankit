@@ -15,13 +15,15 @@ What you hold depends on the route that sent you here:
   carries tasks, Global Constraints, and an acceptance bar per task. Use them as
   written.
 - **A spec** (*review at the end* or *review each task* — built directly, no
-  plan file) → it
-  carries the design, not a task breakdown. **Derive the task list first:**
-  right-size the tasks per the rules in `writing-plans`, give each one an
-  acceptance bar ("done when…"), and **show the list for approval before
-  Task 1.** The full bodies go to the workspace task file once the workspace
-  exists (Setup, below); the approval message itself is **one line per task** —
-  `<ID>  <verb phrase>` — and nothing else. No tables, no box-drawing, no
+  plan file) → it carries the design, not a task breakdown.
+  **Review at the end:** hand the spec to the builder as it is. The builder
+  breaks the work down itself; nothing is derived or shown for approval first.
+  **Review each task:** the tasks are the user's gates, so **derive the task
+  list first:** right-size the tasks per the rules in `writing-plans`, give
+  each one an acceptance bar ("done when…"), and **show the list for approval
+  before Task 1.** The full bodies go to the workspace task file once the
+  workspace exists (Setup, below); the approval message itself is **one line
+  per task** — `<ID>  <verb phrase>` — and nothing else. No tables, no box-drawing, no
   acceptance bars, no per-task prose. A gate the reviewer has to wade through
   is a gate they rubber-stamp; they approve off something scannable and read
   the task file when they want the detail. That approved list is your task
@@ -75,9 +77,10 @@ consent.
   this plan's git-ignored directory
   (`<repo-root>/.clankit/plans/<plan-basename>/`), the file home for every
   artifact of THIS plan: the build report, the chunk log on oversized plans,
-  review packages, and on the spec path the task file. Another plan's directory
+  review packages, and for a spec built task by task, the task file. Another plan's directory
   is never yours to read or write.
-- On the spec path, the derived task bodies go to `<workspace>/tasks.md` —
+- For a spec built task by task, the derived task bodies go to
+  `<workspace>/tasks.md` —
   `## <ID>` with its task and its "done when…", one section each. This is the
   home for the detail the approval message deliberately leaves out. Writing
   them here is not writing a plan document: the ban is on `docs/plans/`, and
@@ -139,8 +142,7 @@ pre-chunking:
 - Dispatch ONE implementer. Its brief is the plan or spec itself — pass the
   path, introduced as "read this first — it is your requirements, with the
   exact values to use verbatim" — plus the Global Constraints copied verbatim,
-  your resolution of anything the pre-flight scan surfaced, and on the spec
-  path the task file.
+  and your resolution of anything the pre-flight scan surfaced.
 - Standing orders in the dispatch: work the tasks in plan order; test at the
   seams the plan or spec names as you go and run the full suite at the end;
   commit at each working step; write the full report to

@@ -90,8 +90,7 @@ Subagent (general-purpose):
 ```
 
 **Placeholders:**
-- `[PLAN_FILE]` — the plan or spec path (plus the task file on the spec path,
-  if one was derived)
+- `[PLAN_FILE]` — the plan or spec path
 - `[GLOBAL_CONSTRAINTS]` — copied verbatim from the plan's Global Constraints
   or the spec: values, formats, stated relationships — not process rules
 - `[REPORT_FILE]` — `<workspace>/build-report.md`

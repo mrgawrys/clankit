@@ -14,8 +14,6 @@ Subagent (general-purpose):
 
     Read this first — it is your requirements, with the exact values to use
     verbatim: [PLAN_FILE]
-    [Spec path only: the approved task breakdown is in [TASK_FILE] — work
-    those tasks, in that order.]
 
     ## Global Constraints
 
@@ -98,8 +96,6 @@ Subagent (general-purpose):
 **Placeholders:**
 - `[PLAN_FILE]` — REQUIRED: the plan or spec path — the requirements, exact
   values verbatim
-- `[TASK_FILE]` — spec path only: `<workspace>/tasks.md`, the approved task
-  breakdown with acceptance bars
 - `[GLOBAL_CONSTRAINTS]` — the binding requirements copied verbatim from the
   plan's Global Constraints section or the spec
 - `[REPORT_FILE]` — REQUIRED: `<workspace>/build-report.md`
