@@ -34,60 +34,22 @@ present it and get approval.
 You MUST complete these in order.
 
 1. **Explore project context** — check files, docs, recent commits
-2. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval, start the companion and the user's browser opens to it. If no visual question ever arises, never offer it. See the Visual Companion section below.
-3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
-4. **Propose 2-3 approaches** — with trade-offs and your recommendation
-5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write the spec** — to `docs/specs/`, by default always. Self-review it, then ask the user to review it (see below). If the user chose an overview, write that instead (see Overviews below)
-7. **Ask which mode** — one `AskUserQuestion` call, the four modes from the session bootstrap. Not a yes/no on a mode you already picked. After an overview, ask the starting-a-part question instead
+2. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
+3. **Propose 2-3 approaches** — with trade-offs and your recommendation
+4. **Write the spec** — to `docs/specs/`, by default always. The spec is how the design gets presented: write it once the approach is settled and self-review it. If the user chose an overview, write that instead (see Overviews below)
+5. **Ask for review and mode, in one turn** — one `AskUserQuestion` call that names the spec's path and offers the four modes from the session bootstrap. Picking a mode approves the spec. Not a yes/no on a mode you already picked. After an overview, ask the starting-a-part question instead
 
-**Every gate here is a question you ask.** Steps 3, 4, 5 and 7 each end with the
+**Every gate here is a question you ask.** Steps 2, 3 and 5 each end with the
 user answering something. The failure mode is converting one into an
 announcement with a window to object, which reads as decisive and skips the step:
 
 | Step | What the skipped version looks like |
 |---|---|
-| 3 · clarifying questions | "No clarifying questions needed — the ticket settles it." |
-| 4 · two or three approaches | "Decisions I'm making (flag if you disagree): …" |
-| 5 · design, section by section | the whole design in one block, ending "does this look right?" |
-| 7 · which mode | "Shall I proceed?" — a yes/no on the mode you already chose |
+| 2 · clarifying questions | "No clarifying questions needed — the ticket settles it." |
+| 3 · two or three approaches | "Decisions I'm making (flag if you disagree): …" |
+| 5 · review and mode | "Shall I proceed?" — a yes/no on the mode you already chose, or a build started on a spec the user was never asked to read |
 
 If you have written one of these, the step did not happen. Go back and ask.
-
-## Process Flow
-
-```dot
-digraph brainstorming {
-    "Explore project context" [shape=box];
-    "Ask clarifying questions" [shape=box];
-    "Propose 2-3 approaches" [shape=box];
-    "Present design sections" [shape=box];
-    "User approves design?" [shape=diamond];
-    "Write spec doc" [shape=box];
-    "Spec self-review\n(fix inline)" [shape=box];
-    "User reviews spec?" [shape=diamond];
-    "An overview?" [shape=diamond];
-    "Anything to build?" [shape=diamond];
-    "Ask which mode\n(four named answers)" [shape=doublecircle];
-    "Ask about the first part\n(brainstorm / build / stop)" [shape=doublecircle];
-    "Suggest next steps, stop" [shape=doublecircle];
-
-    "Explore project context" -> "Ask clarifying questions";
-    "Ask clarifying questions" -> "Propose 2-3 approaches";
-    "Propose 2-3 approaches" -> "Present design sections";
-    "Present design sections" -> "User approves design?";
-    "User approves design?" -> "Present design sections" [label="no, revise"];
-    "User approves design?" -> "Write spec doc" [label="yes"];
-    "Write spec doc" -> "Spec self-review\n(fix inline)";
-    "Spec self-review\n(fix inline)" -> "User reviews spec?";
-    "User reviews spec?" -> "Write spec doc" [label="changes requested"];
-    "User reviews spec?" -> "An overview?" [label="approved"];
-    "An overview?" -> "Ask about the first part\n(brainstorm / build / stop)" [label="yes"];
-    "An overview?" -> "Anything to build?" [label="no"];
-    "Anything to build?" -> "Ask which mode\n(four named answers)" [label="yes"];
-    "Anything to build?" -> "Suggest next steps, stop" [label="no — the spec was the deliverable"];
-}
-```
 
 **The terminal state is a question you ask out loud.** The spec gets written, and then the user picks a mode. Reading the mode table is not the step — asking is. Do NOT invoke an implementation skill, and do not start building, before the user has answered.
 
@@ -104,6 +66,7 @@ If the user already said where the work happens — a worktree, a branch, a repo
 - A question that needs explaining first is asked in plain text at the end of the explanation, never as a dialog under it — prose before a tool call can reach the user only as a summary (see the session bootstrap)
 - Only one question per message - if a topic needs more exploration, break it into multiple questions
 - Focus on understanding: purpose, constraints, success criteria
+- When a question is about how something looks — a layout, a mockup, a diagram — show it rather than describe it, with whatever the session has for rendering a page or an image
 
 **Exploring approaches:**
 
@@ -114,9 +77,8 @@ If the user already said where the work happens — a worktree, a branch, a repo
 
 **Presenting the design:**
 
-- Once you believe you understand what you're building, present the design
+- Once the approach is settled, write the spec. It is the design presentation: the user approves the design once, by reading it, not in chat first and again as a file
 - Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced
-- Ask after each section whether it looks right so far — in plain text, ending the turn; a dialog would hide the section it asks about
 - Cover what the thing actually has. For software: architecture, components, data flow, error handling, testing — including the test seams, the public interfaces the tests will exercise. For anything else, the equivalent — the parts, how they fit together, what happens when it goes wrong
 - Be ready to go back and clarify if something doesn't make sense
 
@@ -140,9 +102,10 @@ If the user already said where the work happens — a worktree, a branch, a repo
 The spec is the durable record of what was decided and the input every mode
 consumes: *vibe*, *review each task* and *review at the end* build from it,
 *plan first* turns it into a plan, `/autopilot` takes it away and runs it.
-Skip it only when the user says to.
+Skip it only when the user says to — then present the design in chat and get
+approval there.
 
-- Write the validated design (spec) to `docs/specs/YYYY-MM-DD-<topic>-design.md`
+- Write the design (spec) to `docs/specs/YYYY-MM-DD-<topic>-design.md`
   - A design document goes in `docs/specs/` even when the repo keeps other
     documents elsewhere. `docs/plans/` means "carries the executing-plans
     header" — a spec filed there will be read as a plan and found to be missing
@@ -151,8 +114,7 @@ Skip it only when the user says to.
     convention you inferred from the repo does not.)
 - When the work is software, the spec carries a short **Testing** section
   naming the test seams — the public interfaces the tests exercise — as agreed
-  during design. The builder tests at those seams; test quality is
-  `writing-good-tests`' job, and there is no TDD mandate.
+  during design. The builder tests at those seams; there is no TDD mandate.
 - Use a writing-clearly-and-concisely skill if available
 - Commit the design document to git
 
@@ -162,7 +124,7 @@ choice is owed rather than assuming one:
 ```markdown
 # [Topic] — Design
 
-> **To act on this design:** pick a mode — *vibe* (inline, no machinery),
+> **To act on this design:** pick a mode — *vibe* (right now, no machinery),
 > *review each task* (per-task diffs), *review at the end* (one subagent
 > builds, one review at the end), or *plan first* (`writing-plans`, then how it gets built).
 > Ask the user which; don't pick for them.
@@ -178,20 +140,19 @@ After writing the spec document, look at it with fresh eyes:
 
 Fix any issues inline. No need to re-review — just fix and move on.
 
-**User Review Gate:**
-After the spec review loop passes, ask the user to review the written spec before proceeding:
+**Review and mode — one question:**
 
-> "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we go further."
+After the self-review, ask once. One `AskUserQuestion` call, four named answers
+taken from the session bootstrap, and a question line that names the spec:
 
-Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
+> "Spec is at `<path>` — which mode? Type changes instead if it needs any."
 
-**Ask which mode:**
-
-One `AskUserQuestion` call, four named answers, taken from the session bootstrap:
+Picking a mode approves the spec. Changes come back as the typed answer: make
+them, re-run the self-review, and ask again.
 
 | Mode | What it does |
 |---|---|
-| **Vibe** | inline, right now — no subagents, no machinery, no review; the user eyeballs the result |
+| **Vibe** | right now, here or in one subagent — no machinery, no review; the user eyeballs the result |
 | **Review each task** | `executing-plans` inline — one task at a time in this session; the user approves each diff and is the reviewer. The only machine review is one `code-review` pass at the end of the whole plan |
 | **Review at the end** | `executing-plans` delegated from the spec — one subagent builds it all, an independent review at the end; the user sees the finished branch |
 | **Plan first** | `writing-plans` produces a reviewable plan file, then asks how it gets built |
@@ -208,7 +169,8 @@ The choice is the user's, and it is a choice — a tool call with four options, 
 a sentence ending in "shall I proceed?".
 
 If there is nothing to build — the design was an essay, a decision, a document —
-the spec is the deliverable. Skip the menu and suggest what could come next.
+the spec is the deliverable. Skip the menu: ask the user to review it, and
+suggest what could come next.
 
 ## Overviews
 
@@ -241,33 +203,14 @@ Then four sections:
 | **Deferred** | Questions left for a part's own brainstorm, each tagged with its part number. |
 
 Self-review as for a spec, plus one check: each part is small enough for a
-single spec. One that isn't becomes two parts. Commit, and ask the user to
-review it.
+single spec. One that isn't becomes two parts. Commit.
 
 **The terminal state is the session bootstrap's starting-a-part question** for
 the first part in order — *Brainstorm it / Build it / Stop here* — not the mode
-menu. There is nothing to build from an overview.
+menu, asked in the same turn as the review and naming the overview's path, as
+for a spec. There is nothing to build from an overview.
 
 **Brainstorming a part** takes the overview's cross-part decisions as given and
 its Deferred items for that part as the first questions. The part's spec carries
 the normal spec header plus a line `Part N of [overview](path)`, and gets linked
 in the overview's Parts table when it is committed.
-
-## Visual Companion
-
-A browser-based companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool — not a mode. Accepting the companion means it's available for questions that benefit from visual treatment; it does NOT mean every question goes through the browser.
-
-**Offering the companion (just-in-time):** Do NOT offer it upfront. Wait until a question would genuinely be clearer shown than told — a real mockup / layout / diagram question, not merely a UI *topic*. The first time that happens, offer it then, as its own message:
-> "This next part might be easier if I show you — I can put together mockups, diagrams, and comparisons in a browser tab as we go. It's still new and can be token-intensive. Want me to? I'll open it for you."
-
-**This offer MUST be its own message.** Only the offer — no clarifying question, summary, or other content. Wait for the user's response. If they accept, start the server with `--open` so their browser opens to the first screen automatically. If they decline, continue text-only and don't offer again unless they raise it.
-
-**Per-question decision:** Even after the user accepts, decide FOR EACH QUESTION whether to use the browser or the terminal. The test: **would the user understand this better by seeing it than reading it?**
-
-- **Use the browser** for content that IS visual — mockups, wireframes, layout comparisons, architecture diagrams, side-by-side visual designs
-- **Use the terminal** for content that is text — requirements questions, conceptual choices, tradeoff lists, A/B/C/D text options, scope decisions
-
-A question about a UI topic is not automatically a visual question. "What does personality mean in this context?" is a conceptual question — use the terminal. "Which wizard layout works better?" is a visual question — use the browser.
-
-If they agree to the companion, read the detailed guide before proceeding:
-`skills/brainstorming/visual-companion.md`

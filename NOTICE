@@ -7,18 +7,15 @@ plugin (https://github.com/obra/superpowers), used under the MIT License.
 
 Vendored verbatim:
 
-- `dispatching-parallel-agents`
 - `receiving-code-review`
-- `verification-before-completion`
 
 Vendored with modifications:
 
-- `brainstorming` — terminal state, trigger, domain scoping, companion branding
+- `brainstorming` — terminal state, trigger, domain scoping; the visual
+  companion and its server removed
 - `systematic-debugging` — skill references rewired; skill-development
   artifacts (creation log, pressure tests) dropped
 - `writing-skills` — skill references rewired; other-harness paths removed
-- `writing-good-tests` — promoted from a reference document inside
-  `test-driven-development` to a skill of its own, with frontmatter added
 - `writing-plans` — rewritten around a reduced task format
 - `executing-plans` — merged with `subagent-driven-development`; its prompt
   templates and the `review-package` / workspace scripts are vendored with it

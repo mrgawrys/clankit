@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Resolve and ensure the working-tree directory executing-plans uses for one
-# plan's short-lived artifacts: the build report, the chunk log, review
+# plan's short-lived artifacts: the build report, review
 # packages, and the derived task file. Print the plan directory's absolute path.
 #
 # One directory per plan (.clankit/plans/<plan-basename>/) so a follow-up

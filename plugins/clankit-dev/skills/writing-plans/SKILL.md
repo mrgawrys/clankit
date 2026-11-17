@@ -13,8 +13,6 @@ They can write good code and design good tests. What they cannot do is guess
 the decisions already made, the names their neighbours will call, or the exact
 values the spec pinned down. Give them those. Leave the implementation to them.
 
-**Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
-
 **Save plans to:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
 - (User preferences for plan location override this default)
 
@@ -84,8 +82,8 @@ This structure informs the task decomposition.
 
 ## Task Right-Sizing
 
-A task is the smallest unit that carries its own test cycle and is worth a fresh
-reviewer's gate. When drawing task boundaries: fold setup, configuration,
+A task is the smallest unit that carries its own test cycle and could be
+reviewed on its own. When drawing task boundaries: fold setup, configuration,
 scaffolding, and documentation steps into the task whose deliverable needs them;
 split only where a reviewer could meaningfully reject one task while approving
 its neighbor.
@@ -152,9 +150,8 @@ context, a class, a single function, a hook.
 **Interacts** — how those units talk to each other and to existing code. What
 crosses each boundary.
 
-**Signatures** — exact names and types later tasks depend on, verbatim. A task's
-implementer sees only their own task; this is how they learn the names their
-neighbours use.
+**Signatures** — exact names and types later tasks depend on, verbatim. Pinned
+here, every task uses the same names.
 
 **Constraints** — exact values, design decisions that are easy to get wrong,
 and traps: the assumption a reasonable implementer would make, and why it's
@@ -219,7 +216,6 @@ Brevity is not vagueness. The plan must not hide decisions behind words:
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases" —
   say which errors, which validations, which edges, or say nothing at all
-- "Similar to Task N" — state the constraint again; tasks get read out of order
 - References to types, functions, or methods that no task defines
 
 "Sliding window, not fixed" is complete. "Handle the window correctly" is not.
@@ -234,8 +230,7 @@ that implements it? Add tasks for any gaps.
 
 **2. Type consistency:** Do the signatures and property names in later tasks
 match what earlier tasks declared? A function called `clearLayers()` in Task 3
-but `clearFullLayers()` in Task 7 is a bug you are shipping to an implementer
-who cannot see both.
+but `clearFullLayers()` in Task 7 is a bug you are shipping to the implementer.
 
 **3. Derivability:** For each task, ask what the implementer could not work out
 alone. If everything in it is derivable from the codebase and the signatures,

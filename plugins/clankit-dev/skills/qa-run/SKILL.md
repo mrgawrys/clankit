@@ -13,7 +13,7 @@ driving the real app, spot-check what comes back, publish an illustrated report.
 didn't run the tests can read and act on. Your closing message summarizes what
 was found and stops there — no tracker writes, no fix commits.
 
-**Not this skill.** *Did my own change work* is `verification-before-completion`.
+**Not this skill.** *Did my own change work* is a check you run yourself.
 *Show me this page* is `screenshot`. Both are cheap; this is not. If nobody
 outside the session will read the result, you want one of those.
 

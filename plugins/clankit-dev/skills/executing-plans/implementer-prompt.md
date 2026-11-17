@@ -1,15 +1,12 @@
 # Builder Prompt Template
 
 Use this template when dispatching the implementer that builds the whole plan
-(or, on an oversized plan, one chunk of it — adjust the task range and point
-at the prior chunks' reports).
+(or, on an oversized plan, the rest of it — name the task to resume from and
+point at the build report so far).
 
 ```
 Subagent (general-purpose):
   description: "Build [plan name]"
-  model: [MODEL — REQUIRED: choose per SKILL.md Model Selection; the capable
-         tier is the default for a whole plan. An omitted model silently
-         inherits the session's]
   prompt: |
     You are implementing an approved plan end to end.
 
@@ -17,8 +14,6 @@ Subagent (general-purpose):
 
     Read this first — it is your requirements, with the exact values to use
     verbatim: [PLAN_FILE]
-    [Spec path only: the approved task breakdown is in [TASK_FILE] — work
-    those tasks, in that order.]
 
     ## Global Constraints
 
@@ -40,86 +35,28 @@ Subagent (general-purpose):
 
     Work from: [directory]
 
-    - Work the tasks in plan order. Each task ends with its acceptance bar
-      met and a commit — commit each working step, don't batch the plan into
-      one commit at the end.
-    - Test as you go, at the seams the plan or spec names — the public interfaces
-      the tests exercise. Tests where the work admits them, a named
-      verification run where it doesn't; don't substitute one for the other.
-    - While iterating, run the focused test for what you're changing; run the
-      full suite once at the end of the build, and make it pass before your
-      final report.
-    - If you encounter something unexpected or unclear, **ask questions**.
-      It's always OK to pause and clarify. Don't guess or make assumptions.
-    - Do the work yourself. Never spawn a subagent to build part of the plan,
-      and never spawn a reviewer to check it: independent reviewers are
-      dispatched after you report, so one you spawn duplicates that seat at
-      full cost and its approval counts for nothing. The advisor call below
-      is the only dispatch you make.
+    - Work the tasks in plan order; from a spec, break the work into tasks
+      yourself. Commit each working step.
+    - Test at the seams the plan or spec names: tests where the work admits
+      them, a named verification run where it doesn't. Focused tests while
+      iterating; the full suite once at the end, passing before your final
+      report.
+    - Something unexpected or unclear: ask rather than guess.
+    - No subagents except the advisor. Independent reviewers are dispatched
+      after you report, so one you spawn counts for nothing.
 
-    ## Code Organization
+    ## Hard decisions
 
-    You reason best about code you can hold in context at once, and your edits are more
-    reliable when files are focused. Keep this in mind:
-    - Follow the file structure defined in the plan
-    - Each file should have one clear responsibility with a well-defined interface
-    - If a file you're creating is growing beyond the plan's intent, stop and report
-      it as DONE_WITH_CONCERNS — don't split files on your own without plan guidance
-    - If an existing file you're modifying is already large or tangled, work carefully
-      and note it as a concern in your report
-    - In existing codebases, follow established patterns. Improve code you're touching
-      the way a good developer would, but don't restructure things outside your task.
+    When a task needs an architectural decision with several valid
+    approaches the plan doesn't settle, or you are unsure your approach is
+    correct, ask the advisor: invoke the `advisor` skill for the rules, then
+    follow its builder section — dispatch the advisor agent, wait for the
+    ruling, record it in your report, carry on.
 
-    ## When You're in Over Your Head
-
-    It is always OK to stop and say "this is too hard for me." Bad work is worse than
-    no work. You will not be penalized for escalating.
-
-    **Ask the advisor first when** a task requires an architectural decision
-    with multiple valid approaches the plan doesn't settle, or you are blocked
-    on a reasoning problem — unsure whether your approach is correct. Invoke the
-    `advisor` skill for the rules, then follow its builder section: dispatch
-    the advisor agent, wait for the ruling, record it in your report, carry
-    on. If the call fails, or the question was the user's to answer, return
-    BLOCKED or NEEDS_CONTEXT as below.
-
-    **STOP and escalate when:**
-    - You need to understand code beyond what was provided and can't find clarity
-    - The work involves restructuring existing code in ways the plan didn't anticipate
-    - You've been reading file after file trying to understand the system without progress
-
-    **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT. Describe
-    specifically what you're stuck on, what you've tried, and what kind of help you
-    need. Commit the working steps you completed first — a partial build that
-    stops cleanly at a task boundary is a good outcome; guessed work is not.
-
-    ## Before Reporting Back: Self-Review
-
-    Review your work with fresh eyes. Ask yourself:
-
-    **Completeness:**
-    - Did I fully implement every task in the plan?
-    - Did I miss any requirements?
-    - Are there edge cases I didn't handle?
-
-    **Quality:**
-    - Is this my best work?
-    - Are names clear and accurate (match what things do, not how they work)?
-    - Is the code clean and maintainable?
-
-    **Discipline:**
-    - Did I avoid overbuilding (YAGNI)?
-    - Did I only build what was requested?
-    - Did I follow existing patterns in the codebase?
-
-    **Acceptance — whichever each task asked for:**
-    - Tests: do they verify behavior (not just mock behavior)? Do they
-      exercise the seams the plan or spec names? Is the output pristine?
-    - A verification run: did I actually run it and look, or am I asserting it
-      works? A test that only asserts a file contains a string is not a
-      substitute for looking.
-
-    If you find issues during self-review, fix them now before reporting.
+    If the call fails, or the question was the user's to answer, return
+    BLOCKED or NEEDS_CONTEXT: commit the working steps you completed, then
+    say what you are stuck on and what you tried. A build that stops cleanly
+    at a task boundary is a good outcome; guessed work is not.
 
     ## Report Format
 
@@ -127,7 +64,6 @@ Subagent (general-purpose):
     - What you implemented, task by task (or what you attempted, if blocked)
     - What you tested and test results, including the full-suite run at the end
     - Files changed
-    - Self-review findings (if any)
     - Any issues or concerns
     - `## Advisor rulings` — one line per advisor call: question, ruling,
       confidence. Omit the section if you made none.
@@ -151,11 +87,8 @@ Subagent (general-purpose):
 ```
 
 **Placeholders:**
-- `[MODEL]` — REQUIRED: builder model per SKILL.md Model Selection
 - `[PLAN_FILE]` — REQUIRED: the plan or spec path — the requirements, exact
   values verbatim
-- `[TASK_FILE]` — spec path only: `<workspace>/tasks.md`, the approved task
-  breakdown with acceptance bars
 - `[GLOBAL_CONSTRAINTS]` — the binding requirements copied verbatim from the
   plan's Global Constraints section or the spec
 - `[REPORT_FILE]` — REQUIRED: `<workspace>/build-report.md`

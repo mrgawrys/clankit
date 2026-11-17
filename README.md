@@ -81,10 +81,10 @@ when work on it starts.
 
 | Skill | Purpose |
 |-------|---------|
-| `brainstorming` | Required before building anything with more than one reasonable shape. One question at a time, then a design for approval |
+| `brainstorming` | Required before building anything with more than one reasonable shape. One question at a time, then a spec to review |
 | `writing-plans` | Turns an approved design into right-sized tasks that survive a context boundary — a fresh session, a subagent, another person |
 | `handoff` | The mid-flight exit: `/handoff` freezes what this session knows — decided, done, in progress, next — to a file any agent resumes from |
-| `executing-plans` | Builds from a plan or an approved spec; a fresh subagent per task with a review-and-fix loop between them |
+| `executing-plans` | Builds from a plan or an approved spec: one subagent builds it all and two independent reviewers check the finished branch — or inline, a diff per task |
 | `vibe` | The other end of the dial: build it now, no plan, no gates — here or handed to one subagent |
 | `autopilot` | The whole route unsupervised, in a git worktree → draft PR |
 | `advisor` | A second opinion where a planner or builder would decide alone: when to ask, who answers while the user is away, what a ruling does and does not license |
@@ -95,8 +95,6 @@ when work on it starts.
 | Skill | Purpose |
 |-------|---------|
 | `systematic-debugging` | For any bug or test failure, before proposing a fix |
-| `verification-before-completion` | Evidence before assertions — run the command before claiming it passes |
-| `writing-good-tests` | Six rules for tests that can actually fail |
 | `receiving-code-review` | Verify review feedback on its merits instead of implementing it on reflex |
 | `why` | "Why didn't you follow my rule?" gets an evidence-ranked causal analysis instead of an apology |
 | `writing-skills` | Creating, editing, and verifying skills |
@@ -109,7 +107,6 @@ when work on it starts.
 | `my-prs` | All open PRs you authored with real status (CI, reviews, conflicts, recent comments) → what-to-tackle-first recommendation |
 | `visualize-code` | Modules and their dependencies as an interactive diagram — a PR, a plan, or a named subsystem |
 | `screenshot` | Capture web pages via Playwright MCP, interactively driven |
-| `dispatching-parallel-agents` | Two or more independent tasks with no shared state |
 
 The plugin also ships Bash observability hooks (slow-call reporting, a watchdog
 for calls that hang, context-usage reporting). Their dependencies and tunables

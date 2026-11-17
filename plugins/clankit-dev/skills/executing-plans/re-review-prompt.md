@@ -12,8 +12,8 @@ that the fix itself broke nothing.
 ```
 Subagent (general-purpose):
   description: "Re-review the fix wave"
-  model: [MODEL — REQUIRED: choose per SKILL.md Model Selection; an omitted
-         model silently inherits the session's most expensive one]
+  model: [MODEL — optional: a lower tier suits a small fix diff; omitted, it
+         inherits the session's]
   prompt: |
     You are re-reviewing a fix wave. A two-axis review of a finished branch
     produced findings; a fix subagent has attempted to address them. Your
@@ -35,8 +35,9 @@ Subagent (general-purpose):
     **Head:** [HEAD_SHA]
     **Diff file:** [DIFF_FILE]
 
-    Read the diff file once — it contains the fix commits, a stat summary,
-    and the fix diff with surrounding context. Do not re-run git commands.
+    Start from the diff file — it contains the fix commits, a stat summary,
+    and the fix diff with surrounding context. Read the surrounding code
+    when a verdict needs it.
     If the diff file is missing, fetch the diff yourself:
     `git diff --stat [FIX_BASE_SHA]..[HEAD_SHA]` and
     `git diff [FIX_BASE_SHA]..[HEAD_SHA]`.
@@ -62,10 +63,8 @@ Subagent (general-purpose):
     The fix subagent re-ran the tests covering the amended code and appended
     the results to the report file. Treat the report as unverified claims:
     confirm the fix report names the covering tests and shows their output,
-    and verify the claims against the diff. Do not re-run the suite to
-    confirm their report. Run a test only when reading the code raises a
-    specific doubt that no existing run answers — and then a focused test,
-    never a package-wide suite.
+    and verify the claims against the diff. Run a test yourself when a run
+    would answer a doubt — the narrowest run that does.
 
     ## Output Format
 
@@ -97,8 +96,7 @@ Subagent (general-purpose):
 ```
 
 **Placeholders:**
-- `[MODEL]` — REQUIRED: reviewer model per SKILL.md Model Selection; scoped
-  re-reviews of small fix diffs take a cheap-to-mid tier
+- `[MODEL]` — optional: a lower tier for a small fix diff
 - `[PLAN_FILE]` — the plan or spec path the branch was built from
 - `[FINDINGS]` — the Critical/Important findings and spec gaps from both axis
   reviews, copied verbatim, one per bullet
