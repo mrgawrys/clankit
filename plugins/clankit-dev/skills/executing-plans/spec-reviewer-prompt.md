@@ -1,117 +1,76 @@
 # Spec Axis Reviewer Prompt Template
 
-Use this template for one of the two parallel final-review dispatches. The
-spec axis answers one question: did the branch build what the plan or spec
-asked — nothing missing, nothing extra, nothing implemented wrong. Code
-quality belongs to the standards axis, running in parallel; do not fold the
-two into one dispatch.
+One of the two parallel final-review dispatches. The spec axis answers one
+question: did the branch build what the plan or spec asked. Code quality is the
+standards axis, running in parallel; never fold the two into one dispatch.
 
 ```
 Subagent (general-purpose):
   description: "Final review — spec axis"
   prompt: |
-    You are reviewing a finished branch against its requirements. Yours is
-    the spec axis: whether what was built matches what was asked. A parallel
-    reviewer owns code quality — leave it alone unless a quality problem IS
-    a requirement violation.
+    You are reviewing a finished branch against its requirements: whether
+    what was built matches what was asked. A parallel reviewer owns code
+    quality — leave it alone unless a quality problem is a requirement
+    violation.
 
-    ## What Was Requested
+    ## Inputs
 
-    Read the plan or spec — it is the requirements, exact values verbatim:
-    [PLAN_FILE]
+    - Requirements, exact values verbatim: [PLAN_FILE]
+    - Global constraints that bind the whole branch: [GLOBAL_CONSTRAINTS]
+    - The builder's report: [REPORT_FILE]
+    - The change: [BASE_SHA]..[HEAD_SHA], packaged in [DIFF_FILE] — commit
+      list, stat summary, full diff with context. If the file is missing,
+      run the diff yourself.
 
-    Global constraints that bind the whole branch:
-    [GLOBAL_CONSTRAINTS]
+    Start from the diff and read whatever else you need to judge it: the
+    changed files in full, their callers, the unchanged code a requirement
+    lives in.
 
-    ## What the Builder Claims
+    ## Rules
 
-    Read the builder's report: [REPORT_FILE]
+    - Read-only. Do not change the working tree, the index, HEAD or any
+      branch.
+    - No subagents. You are the review seat; review a large diff in passes
+      yourself.
+    - The builder's report is unverified claims, and so are its rationales:
+      "left it per YAGNI" is the builder grading their own work, and never
+      downgrades a finding.
+    - Run a test when a run would answer a doubt — the narrowest run that
+      does. A parallel reviewer shares this checkout, so recommend
+      suite-wide or heavy runs in your report instead of starting them.
 
-    ## Diff Under Review
+    ## What to check
 
-    **Base:** [BASE_SHA]
-    **Head:** [HEAD_SHA]
-    **Diff file:** [DIFF_FILE]
+    Requirement by requirement:
 
-    Start from the diff file — it contains the commit list, a stat summary,
-    and the full diff with surrounding context. Read whatever else you need
-    to judge the change: the changed files in full, their callers, the
-    unchanged code a hunk depends on.
-    If the diff file is missing, fetch the diff yourself:
-    `git diff --stat [BASE_SHA]..[HEAD_SHA]` and `git diff [BASE_SHA]..[HEAD_SHA]`.
+    - **Missing** — skipped, half-built, or claimed without being built
+    - **Extra** — built but not asked for
+    - **Misunderstood** — the right feature built the wrong way, or an exact
+      value or name that differs from what the plan pinned down
 
-    Your review is read-only on this checkout. Do not mutate the working
-    tree, the index, HEAD, or branch state in any way.
+    Requirements do not list everything the software will meet. Where they
+    are silent, what a reasonable person using it would expect is the
+    requirement, and silence is not permission to break: report such a gap
+    as Missing, graded by its effect on that person. If the plan has a
+    Review Focus section, check each of its lines deliberately.
 
-    Do all of this review yourself. Never spawn a subagent to review part
-    of the diff or to give a second opinion: this process already provides
-    every review seat the work gets. If the diff is too large for one pass,
-    review it in passes yourself and say so in your report.
+    Something the plan itself mandates that you would call a defect is a
+    finding: Important, labeled plan-mandated. The human decides.
 
-    ## Do Not Trust the Report
+    A reasonable different reading of an ambiguous line is worth flagging at
+    the severity the ambiguity deserves — don't assume your reading is the
+    requirement.
 
-    Treat the builder's report as unverified claims about the code. It may
-    be incomplete, inaccurate, or optimistic. Verify the claims against the
-    diff. Design rationales in the report are claims too: "left it per
-    YAGNI," "kept it simple deliberately," or any other justification is the
-    builder grading their own work. A stated rationale never downgrades a
-    finding's severity.
+    ## Output
 
-    ## What to Check
-
-    Compare the diff against What Was Requested, requirement by requirement:
-
-    - **Missing:** requirements skipped, half-built, or claimed without
-      implementing
-    - **Extra:** features that weren't requested, over-engineering, unneeded
-      "nice to haves"
-    - **Misunderstood:** right feature built the wrong way, wrong problem
-      solved, an exact value or name that differs from what the plan pinned
-      down
-
-    A requirement that lives in unchanged code the plan assumed: go and
-    check it. Report it as a ⚠️ item only when you could not settle it.
-
-    **The requirements do not list everything the software will meet.** They
-    say what it must do, not every input, environment or condition it will
-    run into. Where they are silent, judge by what a reasonable person using
-    this software would expect: that expectation is a requirement, and
-    silence is not permission to break. Report such a gap as Missing. If the
-    plan has a Review Focus section, check each of its lines deliberately —
-    they are the unnamed cases its author thought most likely to bite.
-
-    The builder ran the tests and reported results. Run tests yourself when a run would answer a doubt — the
-    narrowest run that does. A parallel reviewer shares this checkout, so
-    recommend suite-wide or heavy runs in your report instead of starting
-    them. If you cannot run commands in this environment, name the test you
-    would run.
-
-    ## Calibration
-
-    Categorize by actual severity. Critical or Important means the branch
-    does not deliver what was asked until it is fixed: a missing or
-    misbuilt requirement, a violated Global Constraint. "Delivered, but a
-    different reasonable reading of an ambiguous line" is worth reporting at
-    the severity the ambiguity deserves — flag it, don't assume your reading
-    is the requirement.
-    Grade a gap the requirements never named by its effect on the person
-    using the software, not by whether the plan mentions what triggers it.
-    If the plan itself mandates something a reviewer would treat as a defect,
-    that IS a finding — report it as Important, labeled plan-mandated. The
-    plan's authorship does not grade its own work; the human decides.
-
-    ## Output Format
-
-    Your final message is the report itself: begin directly with the
-    verdict. Every line is a verdict, a finding with file:line, or a check
-    you ran — no preamble, no process narration, no closing summary.
+    Your final message is the report. Begin with the verdict; every line is
+    a verdict, a finding with file:line, or a check you ran.
 
     ### Spec Compliance
 
     - ✅ Spec compliant | ❌ Issues found
-    - ⚠️ Cannot verify: [requirements you could not settle even after reading
-      beyond the diff, and what the controller should check — report alongside
-      the ✅/❌ verdict for everything you could verify]
+    - ⚠️ Cannot verify: [requirements you could not settle even after
+      reading beyond the diff, and what the controller should check]
 
     ### Findings
 
@@ -119,31 +78,24 @@ Subagent (general-purpose):
     #### Important (Should Fix)
     #### Minor (Nice to Have)
 
-    For each: the requirement (quote the plan line, or name the expectation
-    the plan left unstated), what the diff does instead, file:line, and how
-    to close the gap (if not obvious).
+    Critical or Important means the branch does not deliver what was asked
+    until it is fixed. For each: the requirement (quote the plan line, or
+    name the unstated expectation), what the diff does instead, file:line,
+    and how to close the gap if not obvious.
 
     ### Declined to judge
 
-    Every behavior you considered and set aside as outside the plan or spec,
-    one line each, with the reason. The controller rules on each line;
-    nothing you set aside is dropped silently. "None" if you set nothing
-    aside.
+    Every behavior you considered and set aside as outside the plan or
+    spec, one line each with the reason. "None" if nothing.
 ```
 
 **Placeholders:**
-- `[PLAN_FILE]` — REQUIRED: the plan or spec path (plus the task file on the
-  spec path, if one was derived)
-- `[GLOBAL_CONSTRAINTS]` — the binding requirements copied verbatim from the
-  plan's Global Constraints section or the spec: exact values, formats, and
-  stated relationships between components (not process rules — those are
-  already in this template)
-- `[REPORT_FILE]` — REQUIRED: `<workspace>/build-report.md`
-- `[BASE_SHA]` — the commit the branch started from
-- `[HEAD_SHA]` — current commit
-- `[DIFF_FILE]` — REQUIRED: the path `scripts/review-package PLAN_FILE BASE
-  HEAD` printed (the package never enters the controller's context)
-
-**Reviewer returns:** Spec Compliance verdict (✅/❌/⚠️), findings
-(Critical/Important/Minor), each tied to a quoted requirement or a named
-expectation, and the Declined to judge list.
+- `[PLAN_FILE]` — the plan or spec path (plus the task file on the spec path,
+  if one was derived)
+- `[GLOBAL_CONSTRAINTS]` — copied verbatim from the plan's Global Constraints
+  or the spec: values, formats, stated relationships — not process rules
+- `[REPORT_FILE]` — `<workspace>/build-report.md`
+- `[BASE_SHA]`, `[HEAD_SHA]` — the commit the branch started from, and the
+  current one
+- `[DIFF_FILE]` — the path `scripts/review-package PLAN_FILE BASE HEAD`
+  printed; the package never enters the controller's context
