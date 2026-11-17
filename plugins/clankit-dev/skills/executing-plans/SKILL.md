@@ -50,7 +50,7 @@ first (see below) — its answer settles this one too.
 **Delegated is single-builder.** One implementer subagent builds the entire
 plan, then the final review is the review: quality comes from the plan it was
 handed and the independent review at the end. A plan too large for one
-builder's context runs as sequential chunks of the same shape (see Oversized
+builder's context runs as sequential builders of the same shape (see Oversized
 plans) — never as a different process.
 
 **Inline** is right for short plans and tightly coupled tasks, where handing
@@ -76,7 +76,7 @@ consent.
   either way it is a file on disk and the workspace is named after it. It prints
   this plan's git-ignored directory
   (`<repo-root>/.clankit/plans/<plan-basename>/`), the file home for every
-  artifact of THIS plan: the build report, the chunk log on oversized plans,
+  artifact of THIS plan: the build report,
   review packages, and for a spec built task by task, the task file. Another plan's directory
   is never yours to read or write.
 - For a spec built task by task, the derived task bodies go to
@@ -161,7 +161,7 @@ Template: [implementer-prompt.md](implementer-prompt.md)
 - **BLOCKED** → assess. A context problem gets more context. A reasoning
   problem gets an advisor ruling before any re-dispatch — invoke the `advisor`
   skill — and the new brief carries the ruling. A plan too
-  large for one context gets the chunking below. A wrong plan is your human
+  large for one context gets a second builder (see Oversized plans). A wrong plan is your human
   partner's call: the `advisor` skill's tiers say who answers it, them or
   the advisor in their place. Never ignore an escalation or re-dispatch the same
   brief unchanged, and never let an implementer guess through
@@ -172,20 +172,14 @@ Template: [implementer-prompt.md](implementer-prompt.md)
 **Chunking is a reaction, never a forecast.** Always dispatch the whole plan to
 one builder first. Chunk only after a builder has actually returned `BLOCKED`
 for context, or `DONE_WITH_CONCERNS` naming tasks it did not reach — never on
-your own estimate that the plan looks big. A plan from `writing-plans` is sized
-for one builder; a scraper, an app and a verification run in one plan is
-normal, not oversized.
+your own estimate that the plan looks big.
 
-When chunking is earned, the rest runs as sequential chunk dispatches split at
-task boundaries, resuming at the first task without a commit. Each brief
-carries the plan path, its chunk's tasks, and the prior builders' reports (each
-chunk appends to the same `build-report.md`); after each dispatch, append one
-`chunk N done` line to
-`<workspace>/chunk-log.md` — the only bookkeeping. Read that log before every
-dispatch and resume at the first chunk without a line: your context can compact
-between chunks, and re-dispatching finished work is the most expensive mistake
-this skill has made. Zero interim reviews at any scale: the final review still
-reviews the whole branch once.
+Then dispatch another builder from the first task without a commit, handing it
+the plan path and the build report so far, and repeat until the plan is built.
+Git log says what is finished: read it before every dispatch, because your
+context can compact in between and re-dispatching finished work is the most
+expensive mistake this skill has made. The final review still reviews the whole
+branch once.
 
 ## Running inline
 

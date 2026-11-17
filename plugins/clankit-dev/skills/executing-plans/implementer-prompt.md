@@ -1,8 +1,8 @@
 # Builder Prompt Template
 
 Use this template when dispatching the implementer that builds the whole plan
-(or, on an oversized plan, one chunk of it — adjust the task range and point
-at the prior chunks' reports).
+(or, on an oversized plan, the rest of it — name the task to resume from and
+point at the build report so far).
 
 ```
 Subagent (general-purpose):
