@@ -7,8 +7,6 @@ description: "Use when a design is ready to build - either a written implementat
 
 Take an approved design and turn it into committed, reviewed work.
 
-**Announce at start:** "I'm using the executing-plans skill to implement this."
-
 ## What you were handed
 
 What you hold depends on the route that sent you here:

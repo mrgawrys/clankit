@@ -13,8 +13,6 @@ They can write good code and design good tests. What they cannot do is guess
 the decisions already made, the names their neighbours will call, or the exact
 values the spec pinned down. Give them those. Leave the implementation to them.
 
-**Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
-
 **Save plans to:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
 - (User preferences for plan location override this default)
 

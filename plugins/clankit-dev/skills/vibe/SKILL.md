@@ -13,7 +13,7 @@ Build it now and stop when it works.
 The context budget decides whether to ask: the turn carries a
 `Context: X tokens used` line.
 
-- **Below ~100K** — build here. No question; announce and start.
+- **Below ~100K** — build here. No question; start.
 - **Past ~100K** — ask, with one `AskUserQuestion`, and recommend a handoff: the
   alternative is spending a degrading window on file reading.
 
@@ -26,9 +26,6 @@ The context budget decides whether to ask: the turn carries a
 A user who already said where — "hand it off", "do it here" — has answered;
 follow that at any budget. This holds for every route into vibe — typed
 `/vibe`, "just build it", or the menu's vibe answer.
-
-**Announce before starting:** "Vibing it — inline, no machinery" if building
-here, "Vibing it — handed to a subagent, no machinery" if not.
 
 ## What this means
 
