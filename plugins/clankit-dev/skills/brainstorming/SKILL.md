@@ -124,7 +124,7 @@ choice is owed rather than assuming one:
 ```markdown
 # [Topic] — Design
 
-> **To act on this design:** pick a mode — *vibe* (inline, no machinery),
+> **To act on this design:** pick a mode — *vibe* (right now, no machinery),
 > *review each task* (per-task diffs), *review at the end* (one subagent
 > builds, one review at the end), or *plan first* (`writing-plans`, then how it gets built).
 > Ask the user which; don't pick for them.
@@ -152,7 +152,7 @@ them, re-run the self-review, and ask again.
 
 | Mode | What it does |
 |---|---|
-| **Vibe** | inline, right now — no subagents, no machinery, no review; the user eyeballs the result |
+| **Vibe** | right now, here or in one subagent — no machinery, no review; the user eyeballs the result |
 | **Review each task** | `executing-plans` inline — one task at a time in this session; the user approves each diff and is the reviewer. The only machine review is one `code-review` pass at the end of the whole plan |
 | **Review at the end** | `executing-plans` delegated from the spec — one subagent builds it all, an independent review at the end; the user sees the finished branch |
 | **Plan first** | `writing-plans` produces a reviewable plan file, then asks how it gets built |
