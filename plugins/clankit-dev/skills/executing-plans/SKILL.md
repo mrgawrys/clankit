@@ -239,26 +239,26 @@ a reasonable person using the software gets if it ships as it is. A line that
 would bite them joins the findings; the rest go in your final report with the
 reason. The plan's silence on an input is not permission for it to break.
 
-**One fix wave.** If the reviews return findings, dispatch **ONE** fix
-subagent with the complete combined list — not one fixer per finding.
-Per-finding fixers each rebuild context and re-run suites; a real session's
-fix wave cost more than all its build work combined. Two rules before
-dispatching:
+**One fix wave.** Small findings — a few lines each, nothing to design — you
+fix yourself: commit them and re-run the tests that cover them. Anything larger
+goes to **ONE** fix subagent with the complete combined list — not one fixer
+per finding. Per-finding fixers each rebuild context and re-run suites; a real
+session's fix wave cost more than all its build work combined. One rule before
+any fix:
 
 - **Plan-mandated findings** — anything conflicting with what the plan
   requires — are your human partner's call. Put the finding beside the plan
   text and ask which governs; the `advisor` skill's tiers say who that
   question goes to. Do not dismiss the finding, and do not dispatch a fix
   that contradicts the plan without an answer.
-- **Never fix findings yourself.** Controller fixes pollute your context and
-  skip review.
 
-Then exactly one scoped re-review of the fix diff: run
+A fix subagent's work gets exactly one scoped re-review of the fix diff: run
 `scripts/review-package PLAN_FILE FIX_BASE HEAD` (FIX_BASE = the head the
 axis reviewers saw) and dispatch
 [re-review-prompt.md](re-review-prompt.md). It verdicts each finding ADDRESSED
-or NOT ADDRESSED and flags new breakage in the fix diff only. There is no
-second wave: whatever remains open gets adjudicated.
+or NOT ADDRESSED and flags new breakage in the fix diff only. Fixes you made
+yourself take no re-review; name each in your final report. There is no second
+wave: whatever remains open gets adjudicated.
 
 **Adjudication.** Rule on each residual finding yourself, once, and record
 every ruling in your final report — silent discards are forbidden:
@@ -271,8 +271,8 @@ every ruling in your final report — silent discards are forbidden:
   what the fix wave tried. Shipping past a structural failure defeats the
   review.
 
-Adjudicate only after the re-review. Adjudicating earlier is pre-judging with
-a different name.
+Adjudicate only after the fixes are in — and after the re-review, when there
+was one. Adjudicating earlier is pre-judging with a different name.
 
 ## Finish
 
