@@ -81,10 +81,10 @@ when work on it starts.
 
 | Skill | Purpose |
 |-------|---------|
-| `brainstorming` | Required before building anything with more than one reasonable shape. One question at a time, then a design for approval |
+| `brainstorming` | Required before building anything with more than one reasonable shape. One question at a time, then a spec to review |
 | `writing-plans` | Turns an approved design into right-sized tasks that survive a context boundary — a fresh session, a subagent, another person |
 | `handoff` | The mid-flight exit: `/handoff` freezes what this session knows — decided, done, in progress, next — to a file any agent resumes from |
-| `executing-plans` | Builds from a plan or an approved spec; a fresh subagent per task with a review-and-fix loop between them |
+| `executing-plans` | Builds from a plan or an approved spec: one subagent builds it all and two independent reviewers check the finished branch — or inline, a diff per task |
 | `vibe` | The other end of the dial: build it now, no plan, no gates — here or handed to one subagent |
 | `autopilot` | The whole route unsupervised, in a git worktree → draft PR |
 | `advisor` | A second opinion where a planner or builder would decide alone: when to ask, who answers while the user is away, what a ruling does and does not license |
