@@ -8,20 +8,16 @@ user_invocable: true
 
 Build it now and stop when it works.
 
-## First — here or elsewhere?
+## First — here or in a subagent?
 
-The context budget decides whether to ask: the turn carries a
+The context budget decides, and nobody is asked: the turn carries a
 `Context: X tokens used` line.
 
-- **Below ~100K** — build here. No question; start.
-- **Past ~100K** — ask, with one `AskUserQuestion`, and recommend a handoff: the
-  alternative is spending a degrading window on file reading.
-
-| Answer | What happens |
-|---|---|
-| **Build it here** | you build it, in this session |
-| **Hand off — capable** | one subagent, most capable model, high effort |
-| **Hand off — cheap** | one subagent, mid-tier model, standard effort |
+- **Below ~150K** — build here.
+- **Past ~150K** — hand the build to one subagent. A window that full is
+  better spent steering than reading files. Say in one line that it went to a
+  subagent, and why.
+- **No such line in the turn** — build here.
 
 A user who already said where — "hand it off", "do it here" — has answered;
 follow that at any budget. This holds for every route into vibe — typed
@@ -51,7 +47,8 @@ follow that at any budget. This holds for every route into vibe — typed
 
 ## If it was handed off
 
-One subagent, dispatched once, at the tier the user picked. Its brief carries:
+One subagent, dispatched once, on the session's model unless the user named
+another. Its brief carries:
 
 - the spec or plan path if one exists — otherwise the ask, written out in full,
   since the subagent cannot see this conversation
