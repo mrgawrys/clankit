@@ -142,7 +142,7 @@ run is what's wanted.
 
 ## Skills
 
-Invoke a skill when one covers the task; announce it and follow it. CLAUDE.md
+Invoke a skill when one covers the task, and follow it. CLAUDE.md
 and direct requests outrank skills; skills outrank your defaults.
 
 Every artifact written for a later context — spec or plan — opens by naming the
