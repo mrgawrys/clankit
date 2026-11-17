@@ -98,28 +98,12 @@ everything you find as one batched question — each finding beside the plan tex
 that mandates it, asking which governs — before execution begins, not one
 interrupt per discovery mid-plan. If the scan is clean, proceed without comment.
 
-## Model Selection
+## Models
 
-Use the least powerful model that can do the job — but read the next paragraph
-before assuming that means cheap.
-
-**These plans do not contain the implementation.** A task carries units,
-interactions, signatures, constraints and an acceptance bar; the implementer
-writes the code and designs the tests. That is creative work, not transcription.
-
-- **The builder** → the most capable tier by default; a whole plan nearly
-  always carries design judgment. Mid-tier only for a genuinely mechanical
-  plan with nothing to decide.
-- **The final-review axis reviewers** → the most capable model available.
-- **The fix subagent** → scale to the findings: mechanical fixes take
-  mid-tier, anything with design judgment takes standard or above.
-- **The scoped re-review** → a lower tier for small fix diffs.
-
-**Always specify the model explicitly when dispatching.** An omitted model
-inherits your session's, which silently defeats this section.
-
-Turn count beats token price: the cheapest models routinely take 2–3× the turns
-on multi-step work, costing more overall.
+Subagents inherit the session's model: dispatch the builder and the two axis
+reviewers without naming one. A lower tier suits only a mechanical fix wave and
+the re-review of a small fix diff. The advisor's model comes from its agent
+definition.
 
 ## Gates
 
@@ -162,8 +146,6 @@ pre-chunking:
   commit at each working step; write the full report to
   `<workspace>/build-report.md`;
   return only status, commits, a one-line test summary, and concerns.
-- Model per Model Selection — a whole plan nearly always carries design
-  judgment, so the capable tier is the default, not the exception.
 
 Template: [implementer-prompt.md](implementer-prompt.md)
 
@@ -174,14 +156,13 @@ Template: [implementer-prompt.md](implementer-prompt.md)
   correctness or scope, address them before review. If they are observations,
   note them and carry them into the final review.
 - **NEEDS_CONTEXT** → provide what was missing and re-dispatch.
-- **BLOCKED** → assess. A context problem gets more context and the same
-  model. A reasoning problem gets an advisor ruling before any re-dispatch —
-  invoke the `advisor` skill — and the new brief carries the ruling; a more
-  capable model as well if the builder's tier was the problem. A plan too
+- **BLOCKED** → assess. A context problem gets more context. A reasoning
+  problem gets an advisor ruling before any re-dispatch — invoke the `advisor`
+  skill — and the new brief carries the ruling. A plan too
   large for one context gets the chunking below. A wrong plan is your human
   partner's call: the `advisor` skill's tiers say who answers it, them or
-  the advisor in their place. Never ignore an escalation or force the same
-  model to retry without changes, and never let an implementer guess through
+  the advisor in their place. Never ignore an escalation or re-dispatch the same
+  brief unchanged, and never let an implementer guess through
   a plan defect.
 
 ### Oversized plans
@@ -223,8 +204,7 @@ you build on the choice.
 ## Final review
 
 Run `scripts/review-package PLAN_FILE BASE HEAD` (BASE = the commit the branch
-started from) and dispatch **two reviewers in parallel** over the same package,
-on the most capable model available:
+started from) and dispatch **two reviewers in parallel** over the same package:
 
 - **The spec axis** — did the branch build what the plan or spec asked:
   nothing missing, nothing extra, nothing implemented wrong.

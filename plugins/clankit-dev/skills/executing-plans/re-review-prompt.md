@@ -12,8 +12,8 @@ that the fix itself broke nothing.
 ```
 Subagent (general-purpose):
   description: "Re-review the fix wave"
-  model: [MODEL — REQUIRED: choose per SKILL.md Model Selection; an omitted
-         model silently inherits the session's most expensive one]
+  model: [MODEL — optional: a lower tier suits a small fix diff; omitted, it
+         inherits the session's]
   prompt: |
     You are re-reviewing a fix wave. A two-axis review of a finished branch
     produced findings; a fix subagent has attempted to address them. Your
@@ -96,8 +96,7 @@ Subagent (general-purpose):
 ```
 
 **Placeholders:**
-- `[MODEL]` — REQUIRED: reviewer model per SKILL.md Model Selection; scoped
-  re-reviews of small fix diffs take a cheap-to-mid tier
+- `[MODEL]` — optional: a lower tier for a small fix diff
 - `[PLAN_FILE]` — the plan or spec path the branch was built from
 - `[FINDINGS]` — the Critical/Important findings and spec gaps from both axis
   reviews, copied verbatim, one per bullet

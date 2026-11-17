@@ -68,8 +68,7 @@ Invoking this skill loaded the rules; it rules on nothing. The ruling comes
 from the agent, and the agent is dispatched with the `Agent` tool — not the
 Skill tool — with `subagent_type: clankit-dev:advisor` and the brief as its
 prompt. Pass no `model`: the agent's definition sets its model and effort, and
-a model given per call would override it — this holds even inside a skill that
-tells you to name a model on every dispatch. One question per call.
+a model given per call would override it. One question per call.
 
 Write:
 

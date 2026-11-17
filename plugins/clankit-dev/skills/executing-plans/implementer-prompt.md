@@ -7,9 +7,6 @@ at the prior chunks' reports).
 ```
 Subagent (general-purpose):
   description: "Build [plan name]"
-  model: [MODEL — REQUIRED: choose per SKILL.md Model Selection; the capable
-         tier is the default for a whole plan. An omitted model silently
-         inherits the session's]
   prompt: |
     You are implementing an approved plan end to end.
 
@@ -151,7 +148,6 @@ Subagent (general-purpose):
 ```
 
 **Placeholders:**
-- `[MODEL]` — REQUIRED: builder model per SKILL.md Model Selection
 - `[PLAN_FILE]` — REQUIRED: the plan or spec path — the requirements, exact
   values verbatim
 - `[TASK_FILE]` — spec path only: `<workspace>/tasks.md`, the approved task

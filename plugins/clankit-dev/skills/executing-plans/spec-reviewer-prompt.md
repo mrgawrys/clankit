@@ -9,8 +9,6 @@ two into one dispatch.
 ```
 Subagent (general-purpose):
   description: "Final review — spec axis"
-  model: [MODEL — REQUIRED: the most capable model available; an omitted
-         model silently inherits the session's]
   prompt: |
     You are reviewing a finished branch against its requirements. Yours is
     the spec axis: whether what was built matches what was asked. A parallel
@@ -134,7 +132,6 @@ Subagent (general-purpose):
 ```
 
 **Placeholders:**
-- `[MODEL]` — REQUIRED: the most capable model available
 - `[PLAN_FILE]` — REQUIRED: the plan or spec path (plus the task file on the
   spec path, if one was derived)
 - `[GLOBAL_CONSTRAINTS]` — the binding requirements copied verbatim from the

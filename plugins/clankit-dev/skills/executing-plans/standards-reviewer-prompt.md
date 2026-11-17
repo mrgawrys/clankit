@@ -8,8 +8,6 @@ parallel; do not fold the two into one dispatch.
 ```
 Subagent (general-purpose):
   description: "Final review — standards axis"
-  model: [MODEL — REQUIRED: the most capable model available; an omitted
-         model silently inherits the session's]
   prompt: |
     You are reviewing a finished branch for how well it is built. Yours is
     the standards axis: quality, design, and tests. A parallel reviewer owns
@@ -148,7 +146,6 @@ Subagent (general-purpose):
 ```
 
 **Placeholders:**
-- `[MODEL]` — REQUIRED: the most capable model available
 - `[PLAN_FILE]` — REQUIRED: the plan or spec path (plus the task file on the
   spec path, if one was derived)
 - `[GLOBAL_CONSTRAINTS]` — the binding requirements copied verbatim from the
