@@ -34,23 +34,22 @@ present it and get approval.
 You MUST complete these in order.
 
 1. **Explore project context** — check files, docs, recent commits
-2. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval, start the companion and the user's browser opens to it. If no visual question ever arises, never offer it. See the Visual Companion section below.
-3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
-4. **Propose 2-3 approaches** — with trade-offs and your recommendation
-5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write the spec** — to `docs/specs/`, by default always. Self-review it, then ask the user to review it (see below). If the user chose an overview, write that instead (see Overviews below)
-7. **Ask which mode** — one `AskUserQuestion` call, the four modes from the session bootstrap. Not a yes/no on a mode you already picked. After an overview, ask the starting-a-part question instead
+2. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
+3. **Propose 2-3 approaches** — with trade-offs and your recommendation
+4. **Present design** — in sections scaled to their complexity, get user approval after each section
+5. **Write the spec** — to `docs/specs/`, by default always. Self-review it, then ask the user to review it (see below). If the user chose an overview, write that instead (see Overviews below)
+6. **Ask which mode** — one `AskUserQuestion` call, the four modes from the session bootstrap. Not a yes/no on a mode you already picked. After an overview, ask the starting-a-part question instead
 
-**Every gate here is a question you ask.** Steps 3, 4, 5 and 7 each end with the
+**Every gate here is a question you ask.** Steps 2, 3, 4 and 6 each end with the
 user answering something. The failure mode is converting one into an
 announcement with a window to object, which reads as decisive and skips the step:
 
 | Step | What the skipped version looks like |
 |---|---|
-| 3 · clarifying questions | "No clarifying questions needed — the ticket settles it." |
-| 4 · two or three approaches | "Decisions I'm making (flag if you disagree): …" |
-| 5 · design, section by section | the whole design in one block, ending "does this look right?" |
-| 7 · which mode | "Shall I proceed?" — a yes/no on the mode you already chose |
+| 2 · clarifying questions | "No clarifying questions needed — the ticket settles it." |
+| 3 · two or three approaches | "Decisions I'm making (flag if you disagree): …" |
+| 4 · design, section by section | the whole design in one block, ending "does this look right?" |
+| 6 · which mode | "Shall I proceed?" — a yes/no on the mode you already chose |
 
 If you have written one of these, the step did not happen. Go back and ask.
 
@@ -104,6 +103,7 @@ If the user already said where the work happens — a worktree, a branch, a repo
 - A question that needs explaining first is asked in plain text at the end of the explanation, never as a dialog under it — prose before a tool call can reach the user only as a summary (see the session bootstrap)
 - Only one question per message - if a topic needs more exploration, break it into multiple questions
 - Focus on understanding: purpose, constraints, success criteria
+- When a question is about how something looks — a layout, a mockup, a diagram — show it rather than describe it, with whatever the session has for rendering a page or an image
 
 **Exploring approaches:**
 
@@ -251,22 +251,3 @@ menu. There is nothing to build from an overview.
 its Deferred items for that part as the first questions. The part's spec carries
 the normal spec header plus a line `Part N of [overview](path)`, and gets linked
 in the overview's Parts table when it is committed.
-
-## Visual Companion
-
-A browser-based companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool — not a mode. Accepting the companion means it's available for questions that benefit from visual treatment; it does NOT mean every question goes through the browser.
-
-**Offering the companion (just-in-time):** Do NOT offer it upfront. Wait until a question would genuinely be clearer shown than told — a real mockup / layout / diagram question, not merely a UI *topic*. The first time that happens, offer it then, as its own message:
-> "This next part might be easier if I show you — I can put together mockups, diagrams, and comparisons in a browser tab as we go. It's still new and can be token-intensive. Want me to? I'll open it for you."
-
-**This offer MUST be its own message.** Only the offer — no clarifying question, summary, or other content. Wait for the user's response. If they accept, start the server with `--open` so their browser opens to the first screen automatically. If they decline, continue text-only and don't offer again unless they raise it.
-
-**Per-question decision:** Even after the user accepts, decide FOR EACH QUESTION whether to use the browser or the terminal. The test: **would the user understand this better by seeing it than reading it?**
-
-- **Use the browser** for content that IS visual — mockups, wireframes, layout comparisons, architecture diagrams, side-by-side visual designs
-- **Use the terminal** for content that is text — requirements questions, conceptual choices, tradeoff lists, A/B/C/D text options, scope decisions
-
-A question about a UI topic is not automatically a visual question. "What does personality mean in this context?" is a conceptual question — use the terminal. "Which wizard layout works better?" is a visual question — use the browser.
-
-If they agree to the companion, read the detailed guide before proceeding:
-`skills/brainstorming/visual-companion.md`

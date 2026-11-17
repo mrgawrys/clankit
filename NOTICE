@@ -11,7 +11,8 @@ Vendored verbatim:
 
 Vendored with modifications:
 
-- `brainstorming` — terminal state, trigger, domain scoping, companion branding
+- `brainstorming` — terminal state, trigger, domain scoping; the visual
+  companion and its server removed
 - `systematic-debugging` — skill references rewired; skill-development
   artifacts (creation log, pressure tests) dropped
 - `writing-skills` — skill references rewired; other-harness paths removed
