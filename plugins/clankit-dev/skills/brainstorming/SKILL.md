@@ -53,41 +53,6 @@ announcement with a window to object, which reads as decisive and skips the step
 
 If you have written one of these, the step did not happen. Go back and ask.
 
-## Process Flow
-
-```dot
-digraph brainstorming {
-    "Explore project context" [shape=box];
-    "Ask clarifying questions" [shape=box];
-    "Propose 2-3 approaches" [shape=box];
-    "Present design sections" [shape=box];
-    "User approves design?" [shape=diamond];
-    "Write spec doc" [shape=box];
-    "Spec self-review\n(fix inline)" [shape=box];
-    "User reviews spec?" [shape=diamond];
-    "An overview?" [shape=diamond];
-    "Anything to build?" [shape=diamond];
-    "Ask which mode\n(four named answers)" [shape=doublecircle];
-    "Ask about the first part\n(brainstorm / build / stop)" [shape=doublecircle];
-    "Suggest next steps, stop" [shape=doublecircle];
-
-    "Explore project context" -> "Ask clarifying questions";
-    "Ask clarifying questions" -> "Propose 2-3 approaches";
-    "Propose 2-3 approaches" -> "Present design sections";
-    "Present design sections" -> "User approves design?";
-    "User approves design?" -> "Present design sections" [label="no, revise"];
-    "User approves design?" -> "Write spec doc" [label="yes"];
-    "Write spec doc" -> "Spec self-review\n(fix inline)";
-    "Spec self-review\n(fix inline)" -> "User reviews spec?";
-    "User reviews spec?" -> "Write spec doc" [label="changes requested"];
-    "User reviews spec?" -> "An overview?" [label="approved"];
-    "An overview?" -> "Ask about the first part\n(brainstorm / build / stop)" [label="yes"];
-    "An overview?" -> "Anything to build?" [label="no"];
-    "Anything to build?" -> "Ask which mode\n(four named answers)" [label="yes"];
-    "Anything to build?" -> "Suggest next steps, stop" [label="no — the spec was the deliverable"];
-}
-```
-
 **The terminal state is a question you ask out loud.** The spec gets written, and then the user picks a mode. Reading the mode table is not the step — asking is. Do NOT invoke an implementation skill, and do not start building, before the user has answered.
 
 If the user already said where the work happens — a worktree, a branch, a repo — that is not an answer to this question. It settles *where*, not *which mode*, and not the gates.
