@@ -280,10 +280,10 @@ wc -w skills/path/SKILL.md
 **When writing documentation that references other skills:**
 
 Use skill name only, with explicit requirement markers:
-- ✅ Good: `**REQUIRED SUB-SKILL:** Use clankit-dev:writing-good-tests`
+- ✅ Good: `**REQUIRED SUB-SKILL:** Use clankit-dev:receiving-code-review`
 - ✅ Good: `**REQUIRED BACKGROUND:** You MUST understand clankit-dev:systematic-debugging`
-- ❌ Bad: `See skills/writing-good-tests` (unclear if required)
-- ❌ Bad: `@skills/writing-good-tests/SKILL.md` (force-loads, burns context)
+- ❌ Bad: `See skills/receiving-code-review` (unclear if required)
+- ❌ Bad: `@skills/receiving-code-review/SKILL.md` (force-loads, burns context)
 
 **Why no @ links:** `@` syntax force-loads files immediately, consuming 200k+ context before you need them.
 

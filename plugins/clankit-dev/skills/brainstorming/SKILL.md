@@ -151,8 +151,7 @@ Skip it only when the user says to.
     convention you inferred from the repo does not.)
 - When the work is software, the spec carries a short **Testing** section
   naming the test seams — the public interfaces the tests exercise — as agreed
-  during design. The builder tests at those seams; test quality is
-  `writing-good-tests`' job, and there is no TDD mandate.
+  during design. The builder tests at those seams; there is no TDD mandate.
 - Use a writing-clearly-and-concisely skill if available
 - Commit the design document to git
 

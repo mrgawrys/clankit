@@ -95,7 +95,6 @@ when work on it starts.
 | Skill | Purpose |
 |-------|---------|
 | `systematic-debugging` | For any bug or test failure, before proposing a fix |
-| `writing-good-tests` | Six rules for tests that can actually fail |
 | `receiving-code-review` | Verify review feedback on its merits instead of implementing it on reflex |
 | `why` | "Why didn't you follow my rule?" gets an evidence-ranked causal analysis instead of an apology |
 | `writing-skills` | Creating, editing, and verifying skills |
