@@ -67,13 +67,12 @@ Subagent (general-purpose):
     when the plan asked for them. A test that asserts a file contains a
     string, standing in for a verification nobody ran, is a finding.
 
-    The builder already ran the tests and reported results for exactly this
-    code. Do not re-run the suite to confirm their report. Run a test only
-    when reading the code raises a specific doubt that no existing run
-    answers — and then a focused test, never a package-wide suite, race
-    detector run, or repeated/high-count loop. If heavy validation seems
-    warranted, recommend it in your report instead of running it. If you
-    cannot run commands in this environment, name the test you would run.
+    The builder ran the tests and reported results for exactly this code.
+    Run tests yourself when a run would answer a doubt — the
+    narrowest run that does. A parallel reviewer shares this checkout, so
+    recommend suite-wide or heavy runs in your report instead of starting
+    them. If you cannot run commands in this environment, name the test you
+    would run.
 
     Warnings or other noise in the builder's reported test output are
     findings — test output should be pristine.

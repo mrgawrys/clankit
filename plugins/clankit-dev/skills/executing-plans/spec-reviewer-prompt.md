@@ -82,11 +82,11 @@ Subagent (general-purpose):
     plan has a Review Focus section, check each of its lines deliberately —
     they are the unnamed cases its author thought most likely to bite.
 
-    The builder already ran the tests and reported results. Do not re-run
-    the suite to confirm their report. Run a test only when reading the code
-    raises a specific doubt that no existing run answers — and then a focused
-    test, never a package-wide suite. If you cannot run commands in this
-    environment, name the test you would run.
+    The builder ran the tests and reported results. Run tests yourself when a run would answer a doubt — the
+    narrowest run that does. A parallel reviewer shares this checkout, so
+    recommend suite-wide or heavy runs in your report instead of starting
+    them. If you cannot run commands in this environment, name the test you
+    would run.
 
     ## Calibration
 
