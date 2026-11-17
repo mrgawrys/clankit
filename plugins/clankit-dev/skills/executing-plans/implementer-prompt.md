@@ -54,69 +54,18 @@ Subagent (general-purpose):
       full cost and its approval counts for nothing. The advisor call below
       is the only dispatch you make.
 
-    ## Code Organization
+    ## Hard decisions
 
-    You reason best about code you can hold in context at once, and your edits are more
-    reliable when files are focused. Keep this in mind:
-    - Follow the file structure defined in the plan
-    - Each file should have one clear responsibility with a well-defined interface
-    - If a file you're creating is growing beyond the plan's intent, stop and report
-      it as DONE_WITH_CONCERNS — don't split files on your own without plan guidance
-    - If an existing file you're modifying is already large or tangled, work carefully
-      and note it as a concern in your report
-    - In existing codebases, follow established patterns. Improve code you're touching
-      the way a good developer would, but don't restructure things outside your task.
+    When a task needs an architectural decision with several valid
+    approaches the plan doesn't settle, or you are unsure your approach is
+    correct, ask the advisor: invoke the `advisor` skill for the rules, then
+    follow its builder section — dispatch the advisor agent, wait for the
+    ruling, record it in your report, carry on.
 
-    ## When You're in Over Your Head
-
-    It is always OK to stop and say "this is too hard for me." Bad work is worse than
-    no work. You will not be penalized for escalating.
-
-    **Ask the advisor first when** a task requires an architectural decision
-    with multiple valid approaches the plan doesn't settle, or you are blocked
-    on a reasoning problem — unsure whether your approach is correct. Invoke the
-    `advisor` skill for the rules, then follow its builder section: dispatch
-    the advisor agent, wait for the ruling, record it in your report, carry
-    on. If the call fails, or the question was the user's to answer, return
-    BLOCKED or NEEDS_CONTEXT as below.
-
-    **STOP and escalate when:**
-    - You need to understand code beyond what was provided and can't find clarity
-    - The work involves restructuring existing code in ways the plan didn't anticipate
-    - You've been reading file after file trying to understand the system without progress
-
-    **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT. Describe
-    specifically what you're stuck on, what you've tried, and what kind of help you
-    need. Commit the working steps you completed first — a partial build that
-    stops cleanly at a task boundary is a good outcome; guessed work is not.
-
-    ## Before Reporting Back: Self-Review
-
-    Review your work with fresh eyes. Ask yourself:
-
-    **Completeness:**
-    - Did I fully implement every task in the plan?
-    - Did I miss any requirements?
-    - Are there edge cases I didn't handle?
-
-    **Quality:**
-    - Is this my best work?
-    - Are names clear and accurate (match what things do, not how they work)?
-    - Is the code clean and maintainable?
-
-    **Discipline:**
-    - Did I avoid overbuilding (YAGNI)?
-    - Did I only build what was requested?
-    - Did I follow existing patterns in the codebase?
-
-    **Acceptance — whichever each task asked for:**
-    - Tests: do they verify behavior (not just mock behavior)? Do they
-      exercise the seams the plan or spec names? Is the output pristine?
-    - A verification run: did I actually run it and look, or am I asserting it
-      works? A test that only asserts a file contains a string is not a
-      substitute for looking.
-
-    If you find issues during self-review, fix them now before reporting.
+    If the call fails, or the question was the user's to answer, return
+    BLOCKED or NEEDS_CONTEXT: commit the working steps you completed, then
+    say what you are stuck on and what you tried. A build that stops cleanly
+    at a task boundary is a good outcome; guessed work is not.
 
     ## Report Format
 
@@ -124,7 +73,6 @@ Subagent (general-purpose):
     - What you implemented, task by task (or what you attempted, if blocked)
     - What you tested and test results, including the full-suite run at the end
     - Files changed
-    - Self-review findings (if any)
     - Any issues or concerns
     - `## Advisor rulings` — one line per advisor call: question, ruling,
       confidence. Omit the section if you made none.
