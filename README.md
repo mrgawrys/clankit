@@ -108,7 +108,6 @@ when work on it starts.
 | `my-prs` | All open PRs you authored with real status (CI, reviews, conflicts, recent comments) → what-to-tackle-first recommendation |
 | `visualize-code` | Modules and their dependencies as an interactive diagram — a PR, a plan, or a named subsystem |
 | `screenshot` | Capture web pages via Playwright MCP, interactively driven |
-| `dispatching-parallel-agents` | Two or more independent tasks with no shared state |
 
 The plugin also ships Bash observability hooks (slow-call reporting, a watchdog
 for calls that hang, context-usage reporting). Their dependencies and tunables
