@@ -35,16 +35,12 @@ Subagent (general-purpose):
     **Head:** [HEAD_SHA]
     **Diff file:** [DIFF_FILE]
 
-    Read the diff file once — it contains the commit list, a stat summary,
-    and the full diff with surrounding context, and it is your view of the
-    change. The diff's context lines ARE the changed files: do not Read a
-    changed file separately unless a hunk you must judge is cut off
-    mid-function — and say so in your report. Do not re-run git commands.
+    Start from the diff file — it contains the commit list, a stat summary,
+    and the full diff with surrounding context. Read whatever else you need
+    to judge the change: the changed files in full, their callers, the
+    unchanged code a hunk depends on.
     If the diff file is missing, fetch the diff yourself:
     `git diff --stat [BASE_SHA]..[HEAD_SHA]` and `git diff [BASE_SHA]..[HEAD_SHA]`.
-    Do not crawl the broader codebase. Inspect code outside the diff only
-    to evaluate a concrete risk you can name — one focused check per named
-    risk, and name both the risk and what you checked in your report.
 
     Your review is read-only on this checkout. Do not mutate the working
     tree, the index, HEAD, or branch state in any way.
@@ -75,9 +71,8 @@ Subagent (general-purpose):
       solved, an exact value or name that differs from what the plan pinned
       down
 
-    If a requirement cannot be verified from this diff alone (it lives in
-    unchanged code the plan assumed), report it as a ⚠️ item instead of
-    broadening your search.
+    A requirement that lives in unchanged code the plan assumed: go and
+    check it. Report it as a ⚠️ item only when you could not settle it.
 
     **The requirements do not list everything the software will meet.** They
     say what it must do, not every input, environment or condition it will
@@ -116,9 +111,9 @@ Subagent (general-purpose):
     ### Spec Compliance
 
     - ✅ Spec compliant | ❌ Issues found
-    - ⚠️ Cannot verify from diff: [requirements you could not verify from the
-      diff alone, and what the controller should check — report alongside the
-      ✅/❌ verdict for everything you could verify]
+    - ⚠️ Cannot verify: [requirements you could not settle even after reading
+      beyond the diff, and what the controller should check — report alongside
+      the ✅/❌ verdict for everything you could verify]
 
     ### Findings
 

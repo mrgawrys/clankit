@@ -247,9 +247,9 @@ you are sparing yourself a fix wave.
 Report the two axes' findings side by side, never merged or reranked — one
 axis must not mask the other.
 
-A reviewer may report "⚠️ Cannot verify from diff" items — requirements living
-in unchanged code. Resolve each yourself before the fix wave; you hold context
-the reviewer lacks. A confirmed gap joins the findings.
+A reviewer may report "⚠️ Cannot verify" items — requirements it could not
+settle even after reading beyond the diff. Resolve each yourself before the fix
+wave; you hold context the reviewer lacks. A confirmed gap joins the findings.
 
 The spec axis also returns a "Declined to judge" list: behavior it noticed and
 set aside as outside the plan. Rule on each line before the fix wave, by what
