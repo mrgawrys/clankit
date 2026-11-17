@@ -34,8 +34,7 @@ This keeps autopilot portable across repos.
 
 You (the main loop) are the orchestrator. You own the worktree lifecycle and pass each
 phase's output forward as the next phase's input, so YOU dispatch every phase as a
-separate `Agent` call. Per the global rule, say "clank, clank" before launching each
-subagent.
+separate `Agent` call.
 
 ## The plan file is not optional
 
